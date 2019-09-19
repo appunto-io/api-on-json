@@ -1,0 +1,24 @@
+{
+  "name": "@appunto/api-on-json",
+  "version": "0.0.1",
+  "description": "API generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appunto-io/api-on-json.git"
+  },
+  "keywords": [
+    "API",
+    "REST",
+    "JSON"
+  ],
+  "author": "Appunto <contact@appunto.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/appunto-io/api-on-json/issues"
+  },
+  "homepage": "https://github.com/appunto-io/api-on-json#readme"
+}
