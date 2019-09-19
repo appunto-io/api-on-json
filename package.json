@@ -22,6 +22,10 @@
   },
   "homepage": "https://github.com/appunto-io/api-on-json#readme",
   "dependencies": {
-    "jest": "^24.9.0"
+    "jest": "^24.9.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash.kebabcase": "^4.1.1",
+    "mongoose": "^5.7.1",
+    "restify": "^8.4.0"
   }
 }
