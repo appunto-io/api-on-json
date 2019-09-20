@@ -1,4 +1,3 @@
-const mongoose                                  = require('mongoose');
 const { createServer }                          = require('./backend/index.js')
 const { dataModelToMongoose, compileDataModel } = require('./dataModel/index.node.js');
 const {
@@ -10,13 +9,16 @@ const {
 
 
 class API {
-  constructor(dataModel, db)
+  constructor(dataModel)
   {
     this.dataModels = [];
     this.apiModels  = [];
-    this.db = db;
+    this.jwtSecret  = '--default-jwt-secret--';
+    this.server;
 
-    this.addDataModel(dataModel);
+    if (dataModel) {
+      this.addDataModel(dataModel);
+    }
 
     return this;
   }
@@ -30,23 +32,26 @@ class API {
   }
 
   addApiModel(model) {
-    const apiModel = compileApiModel(model);
+    this.apiModels.push(model);
+    return this;
+  }
+
+  setJwtSecret(secret) {
+    this.jwtSecret = secret;
 
     return this;
   }
 
-  listen(port) {
+  listen(port, mongoose) {
     const mergedDataModel = this.dataModels.reduce(
       (reduced, model) => mergeModels(reduced, model),
       {}
     );
 
-
-    mongoose.connect(this.db.url, this.db.options);
     mongoose.connection;
 
-    const dbModel          = dataModelToMongoose(mergedDataModel, mongoose);
-    const library          = createLibraryFromDataModel(dbModel);
+    const dbModel          = dataModelToMongoose(mergedDataModel, mongoose); //////db
+    const library          = createLibraryFromDataModel(dbModel);   //////DB
     const apiModel         = createApiFromDataModel(mergedDataModel);
     const compiledApiModel = compileApiModel(apiModel);
     const api              = hydrate(compiledApiModel, library);
@@ -58,10 +63,15 @@ class API {
       {}
     );
 
-    const server = createServer(mergedApiModel);
-    server.listen(port);
+    const server = createServer(mergedApiModel, {
+      jwtSecret : this.jwtSecret
+    });
+    this.server = server;
+    this.server.listen(port);
+  }
 
-    return this;
+  close() {
+    this.server.close();
   }
 }
 

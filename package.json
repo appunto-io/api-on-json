@@ -4,7 +4,8 @@
   "description": "API generator",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "mocha": "mocha"
   },
   "repository": {
     "type": "git",
@@ -22,10 +23,16 @@
   },
   "homepage": "https://github.com/appunto-io/api-on-json#readme",
   "dependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "jest": "^24.9.0",
     "jsonwebtoken": "^8.5.1",
     "lodash.kebabcase": "^4.1.1",
     "mongoose": "^5.7.1",
     "restify": "^8.4.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.0",
+    "mongodb-memory-server": "^5.2.3"
   }
 }
