@@ -1,4 +1,4 @@
-const { API } = require('./index.js');
+const { API, DB } = require('./index.js');
 
 const dataModel1 = {
     'users': {
@@ -36,7 +36,12 @@ const dataModel3 = {
     }
 };
 
-const api = new API(dataModel1);
+const options = { useNewUrlParser : true ,
+                  useUnifiedTopology: true,
+                  useFindAndModify: false};
+
+const db = new DB("mongo", "mongodb://localhost:27017/database", options);
+const api = new API(dataModel1, db);
 api
   .addDataModel(dataModel2)
   .addDataModel(dataModel3)

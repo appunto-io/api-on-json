@@ -10,10 +10,11 @@ const {
 
 
 class API {
-  constructor(dataModel)
+  constructor(dataModel, db)
   {
     this.dataModels = [];
     this.apiModels  = [];
+    this.db = db;
 
     this.addDataModel(dataModel);
 
@@ -40,9 +41,9 @@ class API {
       {}
     );
 
-    const options = { useNewUrlParser : true , useUnifiedTopology: true, useFindAndModify: false};
-    mongoose.connect("mongodb://localhost:27017/database", options);
-    var db = mongoose.connection;
+
+    mongoose.connect(this.db.url, this.db.options);
+    mongoose.connection;
 
     const dbModel          = dataModelToMongoose(mergedDataModel, mongoose);
     const library          = createLibraryFromDataModel(dbModel);
