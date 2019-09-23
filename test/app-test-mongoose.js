@@ -148,7 +148,6 @@ describe('Testsuite on set database', () => {
 
   let api = new API(letterDataModel);
   api.createApi(mongoose);
-
   let letterModel = mongoose.model('letters');
 
   let letter1 = new letterModel({
@@ -170,7 +169,6 @@ describe('Testsuite on set database', () => {
   letter1.save();
   letter2.save();
   letter3.save();
-
 
   describe('Test that should work:', () => {
 
@@ -205,6 +203,49 @@ describe('Testsuite on set database', () => {
               expect(err).to.be.null;
               expect(res).to.have.status(200);
               done();
+        });
+      });
+    });
+
+    describe('/PUT/:id letters', () => {
+      it('it should update the letter1', (done) => {
+        chai.request('http://localhost:3000')
+          .put('/letters/' + letter1.id)
+          .set('Authorization', token)
+          .send({ Author: 'Nicolas T.', Message: 'Hello', Destination: 'Oslo'})
+          .end(function(err, res) {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+    });
+
+    describe('/GET/:id letters', () => {
+      it('it should GET the new letter', (done) => {
+        let letter = new letterModel({ Author: 'Freddy B.', Message: 'See you soon', Destination: 'London'});
+        letter.save((err, letter) => {
+          chai.request('http://localhost:3000')
+            .get('/letters/' + letter.id)
+            .set('Authorization', token)
+            .end(function(err, res) {
+                expect(res).to.have.status(200);
+                done();
+          });
+        });
+      });
+    });
+
+    describe('/DELETE/:id letters', () => {
+      it('it should DELETE letter', (done) => {
+        let letter = new letterModel({ Message: 'Please burn this letter', Destination: 'Unknown'});
+        letter.save((err, letter) => {
+          chai.request('http://localhost:3000')
+            .delete('/letters/' + letter.id)
+            .set('Authorization', token)
+            .end(function(err, res) {
+                expect(res).to.have.status(200);
+                done();
+          });
         });
       });
     });
