@@ -42,7 +42,7 @@ class API {
     return this;
   }
 
-  listen(port, mongoose) {
+  createApi(mongoose) {
     const mergedDataModel = this.dataModels.reduce(
       (reduced, model) => mergeModels(reduced, model),
       {}
@@ -67,6 +67,10 @@ class API {
       jwtSecret : this.jwtSecret
     });
     this.server = server;
+    return this;
+  }
+
+  listen(port) {
     this.server.listen(port);
   }
 
