@@ -33,7 +33,7 @@ Create POST callback
 Add a new document in the collection. Document validation
 is performed by mongoose.
  */
-const createPostCallback = (name, Model) => async (data, flow, meta) => {
+const createPostCallback = (name, Model) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const document = new Model();
 
@@ -62,7 +62,7 @@ const createPostCallback = (name, Model) => async (data, flow, meta) => {
 /*
 Create PUT callback
  */
-const createPutCallback = (name, Model) => async (data, flow, meta) => {
+const createPutCallback = (name, Model) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const id  = meta.request.params['id'];
   const obj = {};
@@ -98,7 +98,7 @@ const createPutCallback = (name, Model) => async (data, flow, meta) => {
 /*
 Create PATCH callback
  */
-const createPatchCallback = (name, Model) => async (data, flow, meta) => {
+const createPatchCallback = (name, Model) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const id   = meta.request.params['id'];
   const obj  = {};
@@ -282,12 +282,12 @@ const createApiFromDataModel = (dataModel) => {
   return apiModel;
 };
 
-const createLibraryFromDataModel = (mongooseModels) => {
+const createLibraryFromDataModel = (mongooseModels, db) => {
   const library = {};
 
   Object.entries(mongooseModels).forEach(([name, model]) => {
     library[`get-many-${name}`]    = createGetManyCallback(name, model);
-    library[`post-${name}`]        = createPostCallback(name, model);
+    library[`post-${name}`]        = db.create(name);
     library[`get-one-${name}`]     = createGetCallback(name, model);
     library[`put-${name}`]         = createPutCallback(name, model);
     library[`delete-${name}`]      = createDeleteCallback(name, model);
