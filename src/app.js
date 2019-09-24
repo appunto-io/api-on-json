@@ -2,6 +2,7 @@ const { API, DB } = require('./index.js');
 
 
 const mongoose                                  = require('mongoose');
+const r                                         = require('rethinkdb');
 const { createServer }                          = require('./backend/index.js')
 const { dataModelToMongoose, compileDataModel } = require('./dataModel/index.node.js');
 const {
@@ -55,13 +56,37 @@ const apiModel2_3 = {
   }
 }
 
+const dataModel = {
+    '/cars': {
+        schema: {
+            'brand' : {type : 'String', 'required' : true},
+            'model' : {type: 'String', 'default' : 'None'}
+        }
+    }
+};
+
+/*
+var connection = null;
+r.connect(function(err, conn) {
+  connection = conn;
+  r.dbCreate('appunto').run(connection);
+  r.db('appunto').tableCreate('cars');
+});
+
+function createPostCallback(db, table, elem, conn)
+{
+  r.db(db).table(table).insert(elem).run(conn);
+}
+
+createPostCallback('appunto', 'cars', dataModel, connection);
+*/
 const options = { useNewUrlParser : true, useUnifiedTopology: true, useFindAndModify: false};
 mongoose.connect("mongodb://localhost:27017/database", options);
 
-const api = new API();
-api
-  .addApiModel(apiModel2_1)
-  .addApiModel(apiModel2_2)
-  .addApiModel(apiModel2_3)
+
+
+const api = new API(dataModel);
+api.addApiModel(dataModel)
+  //.addApiModel(apiModel2_3)
   .createApi(mongoose)
   .listen(3000);

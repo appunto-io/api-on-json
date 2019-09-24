@@ -4,26 +4,23 @@ const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
-const { API, DB } = require('../src/index.js');
-const { createServer }                          = require('../src/backend/index.js')
-const { dataModelToMongoose, compileDataModel } = require('../src/dataModel/index.node.js');
-const {
-        createLibraryFromDataModel,
-        createApiFromDataModel,
-        compileApiModel,
-        mergeModels,
-        hydrate }                               = require('../src/apiModel/index.node.js');
+const { API } = require('../src/index.js');
 
+const expect = chai.expect;
+chai.use(chaiHTTP);
+
+
+/**********************************************
+  Initialization of an in-memory MongoDB server
+  that backs the API to be tested
+*/
 let mongoServer;
 
 const options = { useNewUrlParser : true ,
                   useUnifiedTopology: true,
                   useFindAndModify: false};
 
-var expect = chai.expect;
-chai.use(chaiHTTP);
-
-beforeEach((done) => {
+before((done) => {
   mongoServer = new MongoMemoryServer();
   mongoServer
     .getConnectionString()
@@ -35,242 +32,189 @@ beforeEach((done) => {
     .then(() => done());
 });
 
-afterEach(async () => {
+after(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
 });
 
+
+// TBD
 const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.1Yv6_KkkdfizAkirOLkPh_xnFGu8B_003xZvu_YxgFY';
 
-describe('Testsuite on empty database:', () => {
-  const dataModelCar = {
-      'cars': {
-          schema: {
-              'brand' : {type : 'String', 'required' : true},
-              'model' : {type: 'String', 'default' : 'None'}
-          }
-      }
-  };
 
-  let api = new API(dataModelCar);
-  api.createApi(mongoose);
+/**********************************************
+  Generic HTTP requests based on chai HTTP
+*/
+async function get(collection) {
+  return chai.request('http://localhost:3000')
+    .get(`/${collection}`)
+    .set('Authorization', token);
+}
 
-  describe('Test that should work:', () => {
+async function getId(collection, id) {
+  return chai.request('http://localhost:3000')
+    .get(`/${collection}/` + id)
+    .set('Authorization', token);
+}
 
-    beforeEach(() => {
-      api.listen(3000);
-    });
+async function post(collection, data) {
+  return chai.request('http://localhost:3000')
+    .post(`/${collection}`)
+    .set('Authorization', token)
+    .send(data);
+}
 
-    afterEach(function(done) {
-      api.close();
-      done();
-    });
+async function put(collection, id, data) {
+  return chai.request('http://localhost:3000')
+    .put(`/${collection}/` + id)
+    .set('Authorization', token)
+    .send(data);
+}
 
-    describe('/GET cars', () => {
-      it('it should GET all the cars thanks to the token', (done) => {
+async function erase(collection, id) {
+  return chai.request('http://localhost:3000')
+    .delete(`/${collection}/` + id)
+    .set('Authorization', token);
+}
 
-        chai.request('http://localhost:3000')
-          .get('/cars')
-          .set('Authorization', token)
-          .end(function(err, res) {
-              expect(err).to.be.null;
-              expect(res).to.have.status(200);
-              done();
-        });
-      });
-    });
 
-    describe('/POST cars', () => {
-      it('it should POST a new car', (done) => {
+/**********************************************
+  Testsuite
+*/
 
-        chai.request('http://localhost:3000')
-          .post('/cars')
-          .set('Authorization', token)
-          .send({ brand: "Tesla", model: "Model S"})
-          .end(function(err, res) {
-              expect(err).to.be.null;
-              expect(res).to.have.status(200);
-              done();
-        });
-      });
-    });
-  });
-
-  describe('Test that shouldn\'t work:', () => {
-
-    beforeEach(() => {
-      api.listen(3000);
-    });
-
-    afterEach(function(done) {
-      api.close();
-      done();
-    });
-
-    describe('/GET 2nd car', () => {
-      it('it should fail because there is no car with _id = 2', (done) => {
-
-        chai.request('http://localhost:3000')
-          .get('/cars/2')
-          .set('Authorization', token)
-          .end(function(err, res) {
-              expect(res).to.have.status(400);
-              done();
-        });
-      });
-    });
-
-    describe('/GET cars', () => {
-      it('it should fail, because no token in headers', (done) => {
-
-        chai.request('http://localhost:3000')
-          .get('/cars')
-          .end(function(err, res) {
-              expect(res).to.have.status(401);
-              done();
-        });
-      });
-    });
-  });
-});
-
-describe('Testsuite on set database', () => {
-
-  let letterDataModel = {
-    'letters': {
-      schema: {
-        'Author': {type: 'String'},
-        'Message': {type: 'String'},
-        'Destination': {type: 'String', 'required': true}
-      }
+const dataModelCar = {
+    'cars': {
+        schema: {
+            'brand' : {type : 'String', 'required' : true},
+            'model' : {type: 'String', 'default' : 'Default Model'}
+        }
     }
-  };
+};
 
-  let api = new API(letterDataModel);
-  api.createApi(mongoose);
-  let letterModel = mongoose.model('letters');
-
-  let letter1 = new letterModel({
-    Author: 'Arnold P.',
-    Message: 'Come visit me this friday',
-    Destination: '234 Baker Street, London'
+describe('api-on-json test suite', async function() {
+  var id;
+  before(async function() {
+    this.id = 1;
+    this.api = new API(dataModelCar);
+    this.api.createApi(mongoose);
+    await this.api.listen(3000);
   });
 
-  let letter2 = new letterModel({
-    Author: 'Camille W.',
-    Message: 'Let us have a dinner next week',
-    Destination: '54 Holoah Avenue, Caraholia'
+  after(async function() {
+    await this.api.close();
   });
 
-  let letter3 = new letterModel({
-    Destination: 'Nowhere'
-  });
+  describe('Read in an empty database', async function() {
+    it('Should return a 200 status code, and have an JSON body with informations', async function() {
+      const response = await get('cars');
 
-  letter1.save();
-  letter2.save();
-  letter3.save();
-
-  describe('Test that should work:', () => {
-
-    beforeEach(() => {
-      api.listen(3000);
-    });
-
-    afterEach(function(done) {
-      api.close();
-      done();
-    });
-
-    describe('/GET letters', () => {
-      it('it should GET all the letters thanks to the token', (done) => {
-        chai.request('http://localhost:3000')
-          .get('/letters')
-          .set('Authorization', token)
-          .end(function(err, res) {
-              expect(res).to.have.status(200);
-              done();
-        });
-      });
-    });
-
-    describe('/POST letters', () => {
-      it('it should POST a new letter from Nicolas Tesla', (done) => {
-        chai.request('http://localhost:3000')
-          .post('/letters')
-          .set('Authorization', token)
-          .send({ Author: "Nicolas T.", Destination: "Oslo" })
-          .end(function(err, res) {
-              expect(err).to.be.null;
-              expect(res).to.have.status(200);
-              done();
-        });
-      });
-    });
-
-    describe('/PUT/:id letters', () => {
-      it('it should update the letter1', (done) => {
-        chai.request('http://localhost:3000')
-          .put('/letters/' + letter1.id)
-          .set('Authorization', token)
-          .send({ Author: 'Nicolas T.', Message: 'Hello', Destination: 'Oslo'})
-          .end(function(err, res) {
-            expect(res).to.have.status(200);
-            done();
-          });
-      });
-    });
-
-    describe('/GET/:id letters', () => {
-      it('it should GET the new letter', (done) => {
-        let letter = new letterModel({ Author: 'Freddy B.', Message: 'See you soon', Destination: 'London'});
-        letter.save((err, letter) => {
-          chai.request('http://localhost:3000')
-            .get('/letters/' + letter.id)
-            .set('Authorization', token)
-            .end(function(err, res) {
-                expect(res).to.have.status(200);
-                done();
-          });
-        });
-      });
-    });
-
-    describe('/DELETE/:id letters', () => {
-      it('it should DELETE letter', (done) => {
-        let letter = new letterModel({ Message: 'Please burn this letter', Destination: 'Unknown'});
-        letter.save((err, letter) => {
-          chai.request('http://localhost:3000')
-            .delete('/letters/' + letter.id)
-            .set('Authorization', token)
-            .end(function(err, res) {
-                expect(res).to.have.status(200);
-                done();
-          });
-        });
-      });
+      expect(response).to.have.status(200);
+      expect(response.body.pagination.itemsCount).to.be.equal(0);
     });
   });
 
-  describe('Test that shouldn\'t work:', () => {
+  describe('Create with no data in body', async function() {
+    it('Should return a 500 status code, with nothing', async function() {
+      const response = await post('cars');
 
-    beforeEach(() => {
-      api.listen(3000);
+      expect(response).to.have.status(500);
     });
+  });
 
-    afterEach(function(done) {
-      api.close();
-      done();
+  describe('Add a first element in the database', async function() {
+    it('Should return a 200 status code, with a JSON body', async function() {
+      const response = await post('cars', {brand: 'Tesla'});
+
+      expect(response).to.have.status(200);
+      expect(response.body.brand).to.be.equal('Tesla');
+      expect(response.body.model).to.be.equal('Default Model');
+
+      id = response.body.id;
     });
+  });
 
-    describe('/GET letters', () => {
-      it('it should fail, because no token in headers', (done) => {
-        chai.request('http://localhost:3000')
-          .get('/letters')
-          .end(function(err, res) {
-              expect(res).to.have.status(401);
-              done();
-        });
-      });
+  describe('Read in the database', async function() {
+    it('Should return a 200 status code, and have an JSON body with an itemCount to 1', async function() {
+      const response = await get('cars');
+
+      expect(response).to.have.status(200);
+      expect(response.body.pagination.itemsCount).to.be.equal(1);
+    });
+  });
+
+  describe('Add a second element in the database', async function() {
+    it('Should return a 200 status code, with a JSON body', async function() {
+      const response = await post('cars', {brand: 'Renault', model: 'Megane'});
+
+      expect(response).to.have.status(200);
+      expect(response.body.brand).to.be.equal('Renault');
+      expect(response.body.model).to.be.equal('Megane');
+    });
+  });
+
+  describe('Add a third element in the database', async function() {
+    it('Should return a 200 status code, with a JSON body', async function() {
+      const response = await post('cars', {brand: 'Audi', model: 'A1'});
+
+      expect(response).to.have.status(200);
+      expect(response.body.brand).to.be.equal('Audi');
+      expect(response.body.model).to.be.equal('A1');
+    });
+  });
+
+  describe('Read in the database', async function() {
+    it('Should return a 200 status code, and have an JSON body with an itemCount to 3', async function() {
+      const response = await get('cars');
+
+      expect(response).to.have.status(200);
+      expect(response.body.pagination.itemsCount).to.be.equal(3);
+    });
+  });
+
+  describe('Update the element at id', async function() {
+    it('Should return a 200 status code, with a JSON body', async function() {
+      const response = await put('cars', id, { brand: 'Tesla', model: 'Model E' });
+
+      expect(response).to.have.status(200);
+      expect(response.body.brand).to.be.equal('Tesla');
+      expect(response.body.model).to.be.equal('Model E');
+    });
+  });
+
+  describe('Read the element at id', async function() {
+    it('Should return a 200 status code, with a JSON body', async function() {
+      const response = await getId('cars', id);
+
+      expect(response).to.have.status(200);
+      expect(response.body.brand).to.be.equal('Tesla');
+      expect(response.body.model).to.be.equal('Model E');
+    });
+  });
+
+  describe('Delete the element at id', async function() {
+    it('Should return a 200 status code and a deletion confirmation', async function() {
+      const response = await erase('cars', id);
+
+      expect(response).to.have.status(200);
+    });
+  });
+
+  describe('Read the element at id that has been deleted', async function() {
+    it('Should return a 404 status code, with a JSON body', async function() {
+      const response = await getId('cars', id);
+
+      expect(response).to.have.status(404);
+      expect(response.body.message).to.not.be.null;
+      expect(response.body.name).to.not.be.null;
+    });
+  });
+
+  describe('Read in the database after a delete', async function() {
+    it('Should return a 200 status code, and have an JSON body with an itemCount to 2', async function() {
+      const response = await get('cars');
+
+      expect(response).to.have.status(200);
+      expect(response.body.pagination.itemsCount).to.be.equal(2);
     });
   });
 });

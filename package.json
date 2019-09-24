@@ -29,7 +29,9 @@
     "jsonwebtoken": "^8.5.1",
     "lodash.kebabcase": "^4.1.1",
     "mongoose": "^5.7.1",
-    "restify": "^8.4.0"
+    "restify": "^8.4.0",
+    "rethinkdb": "^2.3.3",
+    "rethinkdbdash": "^2.3.31"
   },
   "devDependencies": {
     "mocha": "^6.2.0",

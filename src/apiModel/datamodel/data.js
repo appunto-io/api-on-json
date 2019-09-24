@@ -1,4 +1,5 @@
 var kebabCase = require('lodash.kebabcase');
+var r         = require('rethinkdb')
 
 /*
 Changes _id to id and removes __v from retrieved documents
