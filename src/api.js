@@ -50,17 +50,23 @@ class API {
   }
 
   async listen(port) {
+    /*
+      Database
+     */
+    await this.database.connect();
+
+    /*
+      Model
+     */
     const mergedDataModel = this.dataModels.reduce(
       (reduced, model) => mergeModels(reduced, model), {});
 
-    await this.database.connect();
-
-    const library          = await this.database.init(mergedDataModel);
+    const library = await this.database.init(mergedDataModel);
 
     const apiModel         = createApiFromDataModel(mergedDataModel);
     const compiledApiModel = compileApiModel(apiModel);
 
-    const api              = hydrate(compiledApiModel, library);
+    const api = hydrate(compiledApiModel, library);
 
     this.apiModels.unshift(api);
 

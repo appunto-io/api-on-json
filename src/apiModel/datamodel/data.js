@@ -1,30 +1,6 @@
 var kebabCase = require('lodash.kebabcase');
 var r         = require('rethinkdb')
 
-/*
-Changes _id to id and removes __v from retrieved documents
- */
-const convertDocumentToObject = (document) =>
-  document.toObject({
-    transform : (doc, ret, options) => {
-      ret.id = ret._id;
-      delete ret._id;
-      delete ret.__v;
-
-      return ret;
-    }
-  });
-
-const convertAPIFieldToMongo = field => {
-  switch (field) {
-    case 'id':
-      return '_id';
-    default:
-      return field;
-  }
-};
-
-
 const writeInputFilter = (data, flow, meta) => flow.continue(meta.request.body);
 
 
@@ -33,26 +9,18 @@ Create POST callback
 Add a new document in the collection. Document validation
 is performed by mongoose.
  */
-const createPostCallback = (name, Model) => async (data = {}, flow, meta) => {
+const createPostCallback = (name, db) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
-  const document = new Model();
-
-  Model.schema.eachPath(field => {
-    if (field in data) {
-      document.set(field, data[field]);
-    }
-  });
 
   try {
-    const saved     = await document.save();
-    const converted = convertDocumentToObject(saved);
+    const saved = await db.create(name, data);
 
     emit('created', {
       collection : name,
-      data       : [converted]
+      data       : [saved]
     });
 
-    return flow.continue(converted);
+    return flow.continue(saved);
   }
   catch (error) {
     return flow.stop(400, error);
@@ -62,33 +30,19 @@ const createPostCallback = (name, Model) => async (data = {}, flow, meta) => {
 /*
 Create PUT callback
  */
-const createPutCallback = (name, Model) => async (data = {}, flow, meta) => {
+const createPutCallback = (name, db) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const id  = meta.request.params['id'];
-  const obj = {};
-
-  Model.schema.eachPath(field => {
-    if (field in data) {
-      obj[field] = data[field];
-    }
-  });
 
   try {
-    await new Model(obj).validate();
-    const saved = await Model.findByIdAndUpdate(id, obj, {
-      new                 : true,
-      upsert              : true,
-      runValidators       : true,
-      setDefaultsOnInsert : true
-    });
-    const converted = convertDocumentToObject(saved);
+    const saved = await db.update(name, id, data);
 
     emit('replaced', {
       collection : name,
-      data       : [converted]
+      data       : [saved]
     });
 
-    return flow.continue(converted);
+    return flow.continue(saved);
   }
   catch (error) {
     return flow.stop(400, error);
@@ -98,39 +52,26 @@ const createPutCallback = (name, Model) => async (data = {}, flow, meta) => {
 /*
 Create PATCH callback
  */
-const createPatchCallback = (name, Model) => async (data = {}, flow, meta) => {
+const createPatchCallback = (name, db) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const id   = meta.request.params['id'];
-  const obj  = {};
-
-  Model.schema.eachPath(field => {
-    if (field in data) {
-      obj[field] = data[field];
-    }
-  });
 
   try {
-    const saved = await Model.findByIdAndUpdate(id, obj, {
-      new           : true,
-      upsert        : false,
-      runValidators : true
-    });
+    const saved = await db.patch(name, id, data);
 
     if (!saved) {
       /*
       TBD: Generate consistent error messaging
        */
       return flow.stop(404, {error : 'DocumentNotFound'});
-    }
-
-    const converted = convertDocumentToObject(saved);
+    };
 
     emit('updated', {
       collection : name,
-      data       : [converted]
+      data       : [saved]
     });
 
-    return flow.continue(converted);
+    return flow.continue(saved);
   }
   catch (error) {
     return flow.stop(400, error);
@@ -141,43 +82,26 @@ const createPatchCallback = (name, Model) => async (data = {}, flow, meta) => {
 /*
 Create GET callback retireving a paginated list of documents
  */
-const createGetManyCallback = (name, Model) => async (data, flow, meta) => {
+const createGetManyCallback = (name, db) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { request, response } = meta;
-  let { page, pageSize, sort, order, ...restOfQuery } = request.query;
+  let { page, pageSize } = request.query;
 
   page     = page * 1     || 0;
   pageSize = pageSize * 1 || 30;
-  sort     = convertAPIFieldToMongo(sort) || null;
-  order    = (order + '').toLowerCase() === 'asc' ? 'asc' : 'desc';
-
-  const mongoQuery = {};
-
-  Object.entries(restOfQuery).forEach(([field, values]) => {
-    const valuesArray = values.split(',').map(val => decodeURIComponent(val));
-    const mongoValue  = valuesArray.length > 1 ?
-      {'$in' : valuesArray} :
-      decodeURIComponent(values);
-
-    mongoQuery[convertAPIFieldToMongo(field)] = mongoValue;
-  });
 
   try {
-    const documents = await Model.find(mongoQuery)
-      .sort(sort ? {[sort] : order} : {})
-      .skip(page * pageSize)
-      .limit(pageSize);
-    const count     = await Model.countDocuments();
-    const converted = documents.map(document => convertDocumentToObject(document));
+
+    const { documents, count } = await db.readMany(name, request.query);
 
     emit('read', {
       collection : name,
-      data       : converted
+      data       : documents
     });
 
     response.headers['X-Total-Count'] = count;
     return flow.continue({
-      data       : converted,
+      data       : documents,
       pagination : {
         page,
         pageSize,
@@ -194,22 +118,21 @@ const createGetManyCallback = (name, Model) => async (data, flow, meta) => {
 /*
 Create GET callback that retrieves one object
  */
-const createGetCallback = (name, Model) => async (data, flow, meta) => {
+const createGetCallback = (name, db) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const id = meta.request.params['id'];
 
   try {
-    const document = await Model.findById(id);
+    const document = await db.readOne(name, id);
 
     if (document) {
-      const converted = convertDocumentToObject(document);
 
       emit('read', {
         collection : name,
-        data       : [converted]
+        data       : [document]
       });
 
-      return flow.continue(converted);
+      return flow.continue(document);
     }
 
     return flow.stop(404);
@@ -223,22 +146,21 @@ const createGetCallback = (name, Model) => async (data, flow, meta) => {
 /*
 Create DELETE callback
  */
-const createDeleteCallback = (name, Model) => async (data, flow, meta) => {
+const createDeleteCallback = (name, db) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const id = meta.request.params['id'];
 
   try {
-    const deletedDocument = await Model.findByIdAndDelete(id);
+    const deletedDocument = await db.remove(name, id);
 
     if (deletedDocument) {
-      const converted = convertDocumentToObject(deletedDocument);
 
       emit('deleted', {
         collection : name,
-        data       : [converted]
+        data       : [deletedDocument]
       });
 
-      return flow.continue(converted);
+      return flow.continue(deletedDocument);
     }
 
     return flow.stop(404);
@@ -282,16 +204,16 @@ const createApiFromDataModel = (dataModel) => {
   return apiModel;
 };
 
-const createLibraryFromDataModel = (mongooseModels, db) => {
+const createLibraryFromDataModel = (dbModels, db) => {
   const library = {};
 
-  Object.entries(mongooseModels).forEach(([name, model]) => {
-    library[`get-many-${name}`]    = createGetManyCallback(name, model);
-    library[`post-${name}`]        = createPostCallback(name, model);
-    library[`get-one-${name}`]     = createGetCallback(name, model);
-    library[`put-${name}`]         = createPutCallback(name, model);
-    library[`delete-${name}`]      = createDeleteCallback(name, model);
-    library[`patch-${name}`]       = createPatchCallback(name, model);
+  Object.entries(dbModels).forEach(([name, model]) => {
+    library[`get-many-${name}`]    = createGetManyCallback(name, db);
+    library[`post-${name}`]        = createPostCallback(name, db);
+    library[`get-one-${name}`]     = createGetCallback(name, db);
+    library[`put-${name}`]         = createPutCallback(name, db);
+    library[`delete-${name}`]      = createDeleteCallback(name, db);
+    library[`patch-${name}`]       = createPatchCallback(name, db);
     library[`post-${name}-input`]  = writeInputFilter;
     library[`put-${name}-input`]   = writeInputFilter;
     library[`patch-${name}-input`] = writeInputFilter;

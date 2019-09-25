@@ -58,12 +58,9 @@ async function getId(collection, id) {
 }
 
 async function query(collection, query) {
-  const queryString = Object.entries(query).map(
-      ([name, value]) => `${encodeURIComponent(name)}=${encodeURIComponent(value)}`
-    ).join('&');
-
-  return chai.request(`http://localhost:3000?${queryString}`)
+  return chai.request('http://localhost:3000')
     .get(`/${collection}`)
+    .query(query)
     .set('Authorization', token);
 }
 
@@ -128,7 +125,7 @@ const dataModels = {
   },
   'flowers' : {
     schema : {
-      name : 'String',
+      name : {type: 'String', 'unique' : true, 'required': true},
       age_in_days: 'Number'
     }
   }
@@ -240,12 +237,17 @@ describe('api-on-json test suite', async function() {
   /********
   READ
   */
-  let createdDocuments;
-  describe('Retrieve elements', async function() {
-    const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
 
+  let createdDocuments;
+  const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
+
+  describe('Retrieve elements', async function() {
     before(async function() {
-      const responses = await Promise.all(flowerNames.map(name => post('flowers', {name})));
+      const responses = [];
+
+      for (let index in flowerNames) {
+        responses[index] = await post('flowers', {name : flowerNames[index]});
+      }
       createdDocuments = responses.map(({body}) => body);
     });
 
@@ -263,19 +265,31 @@ describe('api-on-json test suite', async function() {
       const response = await get('flowers');
 
       expect(response).to.have.status(200);
-      expect(response.body.data[0].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[1].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[2].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[3].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[4].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[5].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[6].name).to.be.oneOf(flowerNames);
-      expect(response.body.data[7].name).to.be.oneOf(flowerNames);
-      expect(response.body.pagination.itemsCount).to.be.equal(8);
+
+      for(let index in flowerNames) {
+        expect(response.body.data[index].name).to.be.equal(flowerNames[index]);
+      }
+
+      expect(response.body.pagination.itemsCount).to.be.equal(flowerNames.length);
     });
 
     it('Should handle pagination', async function() {
-      await query('flowers', {pageSize : 2, page : 1})
+      let page = 0,
+          pageSize = 2;
+
+      const response = await query('flowers', {pageSize, page});
+
+      expect(response).to.have.status(200);
+      expect(response.body.data.map(({name}) => name)).to.deep.equal(flowerNames.slice(page*pageSize, page*pageSize+pageSize));
+      expect(response.body.data.length).to.be.equal(pageSize);
+
+      page = 3;
+      const response2 = await query('flowers', {pageSize, page});
+
+      expect(response2).to.have.status(200);
+      expect(response2.body.data.map(({name}) => name)).to.deep.equal(flowerNames.slice(page*pageSize, page*pageSize+pageSize));
+      expect(response2.body.data.length).to.be.equal(pageSize);
+
     });
   });
 
@@ -284,8 +298,11 @@ describe('api-on-json test suite', async function() {
   UPDATE
   */
   describe('Update elements', async function() {
+
     it('Should update the element at id', async function() {
-      const response = await put('flowers', createdDocuments[0].id, { name: 'Sunflower', age_in_days: 24} );
+      const response = await put('flowers', createdDocuments[0].id, {name: 'Sunflower',
+                                                                      age_in_days: 24}
+                                                                    );
 
       expect(response).to.have.status(200);
       expect(response.body.name).to.be.equal('Sunflower');
@@ -307,6 +324,23 @@ describe('api-on-json test suite', async function() {
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
     });
+
+    it('Should fail when required fields are missing', async function() {
+      const response = await put('flowers', createdDocuments[0].id, {age_in_days: 3});
+
+      expect(response).to.have.status(400);
+    });
+
+    it('Should fail on duplicated unique field', async function() {
+      const response = await put('flowers', createdDocuments[0].id, {name: 'Lily'});
+
+      expect(response).to.have.status(400);
+
+      const response2 = await getId('flowers', createdDocuments[0].id);
+
+      expect(response2).to.have.status(200);
+      expect(response2.body.name).to.be.equal(flowerNames[0]);
+    });
   });
 
 
@@ -314,6 +348,7 @@ describe('api-on-json test suite', async function() {
   DELETE
   */
   describe('Delete elements', async function() {
+
     it('Should delete the element at id', async function() {
       const response = await erase('flowers', createdDocuments[0].id);
 

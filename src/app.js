@@ -31,30 +31,6 @@ function removeID(data, flow, meta) {
   return flow.continue(filtered);
 }
 
-const apiModel2_1 = {
-  '/users' : {
-    'filters' : {
-      'GET' : [sendToConsole]
-    }
-  }
-}
-
-const apiModel2_2 = {
-  '/users' : {
-    'filters' : {
-      'GET' : removeID
-    }
-  }
-}
-
-const apiModel2_3 = {
-  '/users' : {
-    'filters' : {
-      'GET' : sendToConsole
-    }
-  }
-}
-
 const dataModel = {
     'cars': {
         schema: {
