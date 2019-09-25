@@ -57,6 +57,16 @@ async function getId(collection, id) {
     .set('Authorization', token);
 }
 
+async function query(collection, query) {
+  const queryString = Object.entries(query).map(
+      ([name, value]) => `${encodeURIComponent(name)}=${encodeURIComponent(value)}`
+    ).join('&');
+
+  return chai.request(`http://localhost:3000?${queryString}`)
+    .get(`/${collection}`)
+    .set('Authorization', token);
+}
+
 async function post(collection, data) {
   return chai.request('http://localhost:3000')
     .post(`/${collection}`)
@@ -65,6 +75,13 @@ async function post(collection, data) {
 }
 
 async function put(collection, id, data) {
+  return chai.request('http://localhost:3000')
+    .put(`/${collection}/` + id)
+    .set('Authorization', token)
+    .send(data);
+}
+
+async function patch(collection, id, data) {
   return chai.request('http://localhost:3000')
     .put(`/${collection}/` + id)
     .set('Authorization', token)
@@ -82,21 +99,45 @@ async function erase(collection, id) {
   Testsuite
 */
 
-const dataModelCar = {
-    'cars': {
-        schema: {
-            'brand' : {type : 'String', 'required' : true},
-            'model' : {type: 'String', 'default' : 'Default Model'},
-            'speed' : {type: 'Number', 'min': 0, 'max': 300},
-            'serie': {type: 'String', 'unique': true}
-        }
+const dataModels = {
+  'cars': {
+    schema: {
+      'brand' : {type : 'String', 'required' : true},
+      'model' : {type: 'String', 'default' : 'Default Model'},
+      'serial': {type: 'String', 'unique': true}
     }
+  },
+  'fruits' : {
+    options : {
+      timestamps : {
+        createdAt : 'creationDate',
+        updatedAt : 'modificationDate'
+      }
+    },
+    schema : {
+      name : 'String'
+    }
+  },
+  'users' : {
+    options : {
+      timestamps : false
+    },
+    schema : {
+      'name' : {type: 'String', 'unique': true}
+    }
+  },
+  'flowers' : {
+    schema : {
+      name : 'String',
+      age_in_days: 'Number'
+    }
+  }
 };
 
 describe('api-on-json test suite', async function() {
   var id;
   before(async function() {
-    this.api = new API(dataModelCar);
+    this.api = new API(dataModels);
     await this.api.setDatabase(db);
     await this.api.listen(3000);
   });
@@ -105,110 +146,233 @@ describe('api-on-json test suite', async function() {
     await this.api.close();
   });
 
-  describe('Adding an element', async function() {
+  describe('Empty database', async function() {
     it('Should return an empty list', async function() {
       const response = await get('cars');
 
-      expect(response).to.have.status(200);
-      expect(response.body.pagination.itemsCount).to.be.equal(0);
-    });
+      const { data, pagination } = response.body;
 
-    it('Should add the element to the database', async function() {
-      const response = await post('cars', {brand: 'Tesla', serie: 'AAABABAABABA'});
+      expect(response).to.have.status(200);
+      expect(data).to.be.an('array');
+      expect(data).to.be.empty;
+      expect(pagination.itemsCount).to.be.equal(0);
+    });
+  });
+
+
+  /********
+  CREATE
+  */
+  describe('Create elements', async function() {
+    it('Should add one element to the database', async function() {
+      const response = await post('cars', {
+        brand : 'Tesla',
+        model : 'Model S',
+        serial : 'AAAAA',
+      });
 
       expect(response).to.have.status(200);
       expect(response.body.brand).to.be.equal('Tesla');
+      expect(response.body.model).to.be.equal('Model S');
+      expect(response.body.serial).to.be.equal('AAAAA');
+      expect(response.body.createdAt).to.be.a('string');
+      expect(response.body.updatedAt).to.be.a('string');
+    });
+
+    it('Should use defaults on missing fields', async function() {
+      const response = await post('cars', {brand: 'Audi'});
+
+      expect(response).to.have.status(200);
+      expect(response.body.brand).to.be.equal('Audi');
       expect(response.body.model).to.be.equal('Default Model');
-      expect(response.body.serie).to.be.equal('AAABABAABABA');
-
-      id = response.body.id;
+      expect(response.body.serial).to.be.undefined;
+      expect(response.body.createdAt).to.be.a('string');
+      expect(response.body.updatedAt).to.be.a('string');
     });
 
-    it('Should verify if the element has been added', async function() {
-      const response = await get('cars');
+    it('Should be possible to change default timestamp names', async function() {
+      const response = await post('fruits', {name : 'Apple'});
 
       expect(response).to.have.status(200);
-      expect(response.body.pagination.itemsCount).to.be.equal(1);
-      expect(response.body.data[0].brand).to.be.equal('Tesla');
-      expect(response.body.data[0].model).to.be.equal('Default Model');
-      expect(response.body.data[0].serie).to.be.equal('AAABABAABABA');
+      expect(response.body.name).to.be.equal('Apple');
+      expect(response.body.id).to.be.a('string');
+      expect(response.body.createdAt).to.be.undefined;
+      expect(response.body.updatedAt).to.be.undefined;
+      expect(response.body.creationDate).to.be.a('string');
+      expect(response.body.modificationDate).to.be.a('string');
+    });
+
+    it('Should be possible to avoid default timestamps', async function() {
+      const response = await post('users', {name : 'Mario'});
+
+      expect(response).to.have.status(200);
+      expect(response.body.name).to.be.equal('Mario');
+      expect(response.body.id).to.be.a('string');
+      expect(response.body.createdAt).to.be.undefined;
+      expect(response.body.updatedAt).to.be.undefined;
+    });
+
+    it('Should ignore unknown fields', async function() {
+      const response = await post('users', {name: 'Luigi', job: 'plomber'});
+
+      expect(response).to.have.status(200);
+      expect(response.body.name).to.be.equal('Luigi');
+      expect(response.body.job).to.be.undefined;
+      expect(response.body.id).to.be.a('string');
+      expect(response.body.createdAt).to.be.undefined;
+      expect(response.body.updatedAt).to.be.undefined;
+    });
+
+    it('Should fail when required fields are missing', async function() {
+      const response = await post('cars', {model: 'A1', serial: 'BBBBB'});
+
+      expect(response).to.have.status(400);
+    });
+
+    it('Should fail on duplicated unique field', async function() {
+      const response = await post('users', {name: 'Mario'});
+
+      expect(response).to.have.status(400);
     });
   });
 
-  describe('Add multiple elements', async function() {
-    it('Should add 3 elements and verify if all went well', async function() {
-      const response = await post('cars', {brand: 'Renault', model: 'Megane', serie: 'XXXXX'});
-      await post('cars', {brand: 'Audi', model: 'A1', serie: 'RTRTTRTRRRTTR'});
-      await post('cars', {brand: 'Ford', model: 'Focus', serie: 'OPOPPPOOOO'});
 
-      expect(response).to.have.status(200);
-      expect(response.body.brand).to.be.equal('Renault');
-      expect(response.body.model).to.be.equal('Megane');
+  /********
+  READ
+  */
+  let createdDocuments;
+  describe('Retrieve elements', async function() {
+    const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
+
+    before(async function() {
+      const responses = await Promise.all(flowerNames.map(name => post('flowers', {name})));
+      createdDocuments = responses.map(({body}) => body);
     });
-    it('ItemCount should be equal to 4', async function() {
-      const response = await get('cars');
+
+    it('Should retrieve one element by id', async function() {
+      const response = await getId('flowers', createdDocuments[0].id);
 
       expect(response).to.have.status(200);
-      expect(response.body.pagination.itemsCount).to.be.equal(4);
+      expect(response.body.name).to.be.equal('Daisy');
+      expect(response.body.id).to.be.a('string');
+      expect(response.body.createdAt).to.be.a('string');
+      expect(response.body.updatedAt).to.be.a('string');
+    });
+
+    it('Should retrieve all elements', async function() {
+      const response = await get('flowers');
+
+      expect(response).to.have.status(200);
+      expect(response.body.data[0].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[1].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[2].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[3].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[4].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[5].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[6].name).to.be.oneOf(flowerNames);
+      expect(response.body.data[7].name).to.be.oneOf(flowerNames);
+      expect(response.body.pagination.itemsCount).to.be.equal(8);
+    });
+
+    it('Should handle pagination', async function() {
+      await query('flowers', {pageSize : 2, page : 1})
     });
   });
 
-  describe('Update the element at id', async function() {
-    it('Should change the element at id', async function() {
-      const response = await put('cars', id, { brand: 'Tesla', model: 'Model E' });
+
+  /********
+  UPDATE
+  */
+  describe('Update elements', async function() {
+    it('Should update the element at id', async function() {
+      const response = await put('flowers', createdDocuments[0].id, { name: 'Sunflower', age_in_days: 24} );
 
       expect(response).to.have.status(200);
-      expect(response.body.brand).to.be.equal('Tesla');
-      expect(response.body.model).to.be.equal('Model E');
+      expect(response.body.name).to.be.equal('Sunflower');
+      expect(response.body.age_in_days).to.be.equal(24);
+      expect(response.body.id).to.be.a('string');
+      expect(response.body.id).to.be.equal(createdDocuments[0].id);
+      expect(response.body.createdAt).to.be.a('string');
+      expect(response.body.updatedAt).to.be.a('string');
     });
 
-    it('Should verify that the element has changed', async function() {
-      const response = await getId('cars', id);
+    it('Should only change one field of the element at id', async function() {
+      const response = await patch('flowers', createdDocuments[0].id, { name: 'Daisy'} );
 
       expect(response).to.have.status(200);
-      expect(response.body.brand).to.be.equal('Tesla');
-      expect(response.body.model).to.be.equal('Model E');
+      expect(response.body.name).to.be.equal('Daisy');
+      expect(response.body.age_in_days).to.be.equal(24);
+      expect(response.body.id).to.be.a('string');
+      expect(response.body.id).to.be.equal(createdDocuments[0].id);
+      expect(response.body.createdAt).to.be.a('string');
+      expect(response.body.updatedAt).to.be.a('string');
     });
   });
 
-  describe('Delete the element at id', async function() {
+
+  /********
+  DELETE
+  */
+  describe('Delete elements', async function() {
     it('Should delete the element at id', async function() {
-      const response = await erase('cars', id);
+      const response = await erase('flowers', createdDocuments[0].id);
 
       expect(response).to.have.status(200);
-    });
 
-    it('Should verify that the element has been deleted', async function() {
-      const response = await getId('cars', id);
+      const response2 = await getId('flowers', createdDocuments[0].id);
 
-      expect(response).to.have.status(404);
-      expect(response.body.message).to.not.be.null;
-      expect(response.body.name).to.not.be.null;
-    });
-
-    it('Should verify that the ItemCount has been changed accordingly', async function() {
-      const response = await get('cars');
-
-      expect(response).to.have.status(200);
-      expect(response.body.pagination.itemsCount).to.be.equal(3);
-    });
-  });
-
-  describe('Add an element in the database omitting a required field', async function() {
-    it('Should return a 200 status code, with a JSON body', async function() {
-      const response = await post('cars', {model: 'Megane', serie: 'JJEJEKKEJJEJ'});
-
-      expect(response).to.have.status(400);
-      expect(response.body.message).to.include('required');
-    });
-  });
-
-  describe('Add an element in the database with an already used unique field', async function() {
-    it('Should return a 200 status code, with a JSON body', async function() {
-      const response = await post('cars', {brand: 'Dacia', model: 'Sandero', serie: 'XXXXX'});
-
-      expect(response).to.have.status(400);
-      expect(response.body.errmsg).to.include('duplicate key error');
+      expect(response2).to.have.status(404);
     });
   });
 });
+
+
+/*
+  GET /collection
+  ---
+  {
+    data : [Object],
+    pagination : {
+      page : Number,
+      pageSize : Number,
+      itemCounts : Number
+    }
+  }
+
+  GET /collection/:id
+  ---
+  Object
+
+  GET /collection?query
+  ---
+  {
+    data : [Object],
+    pagination : {
+      page : Number,
+      pageSize : Number,
+      itemCounts : Number
+    }
+  }
+
+  POST /collection
+  Object
+  Object // created object
+
+  PUT /collection/:id
+  Object
+  Object // created object
+
+  PATCH /collection/:id
+  Object // fields to be modified
+  Object // updated object
+
+  DELETE /collection/:id
+  ---
+  Object // deleted object
+
+
+  -----------------------
+
+  GET /collection/:id1/:id2/:id3
+
+*/

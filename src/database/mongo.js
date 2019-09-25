@@ -17,18 +17,20 @@ class Mongo {
 
   async init(dataModel) {
     const dbModel = dataModelToMongoose(dataModel, this.database);
-    return createLibraryFromDataModel(dbModel, this);
+    return createLibraryFromDataModel(dbModel);
   }
 
   /*------------------------------------------------------------
     CRUD
   */
 
-  async create(collection, data = {}) {
+  async create(collection, data) {
 
     if(!this.database) {
-      console.error(`You are not connected to a mongodb server. Please verify that you called connect() and be sure to wait promise resolution.`)
-      return false;
+      const message = `You are not connected to a mongodb server. Please verify that you called connect() and be sure to wait promise resolution.`;
+
+      console.error(message);
+      throw new Error(message);
     }
 
     const Model = this.database.model(collection);
@@ -40,19 +42,15 @@ class Mongo {
       throw new Error(message);
     }
 
-    if (!Array.isArray(data)) {
-      data = [data];
-    }
+    const new_elem = new Model();
 
-    return Promise.all(data.map(function(item) {
-      const new_elem = new Model();
-      Model.schema.eachPath(field => {
-        if (field in item) {
-          new_elem.set(field, item[field]);
-        }
-      });
-      new_elem.save();
-    }));
+    Model.schema.eachPath(field => {
+      if (field in data) {
+        new_elem.set(field, data[field]);
+      }
+    });
+
+    return new_elem.save();
   }
 }
 

@@ -287,7 +287,7 @@ const createLibraryFromDataModel = (mongooseModels, db) => {
 
   Object.entries(mongooseModels).forEach(([name, model]) => {
     library[`get-many-${name}`]    = createGetManyCallback(name, model);
-    library[`post-${name}`]        = db.create(name);
+    library[`post-${name}`]        = createPostCallback(name, model);
     library[`get-one-${name}`]     = createGetCallback(name, model);
     library[`put-${name}`]         = createPutCallback(name, model);
     library[`delete-${name}`]      = createDeleteCallback(name, model);

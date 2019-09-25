@@ -60,8 +60,7 @@ const dataModel = {
         schema: {
             'brand' : {type : 'String', 'required' : true},
             'model' : {type: 'String', 'default' : 'Default Model'},
-            'speed' : {type: 'Number', 'min': 0, 'max': 300},
-            'serie': {type: 'String', 'unique': true}
+            'speed' : {type: 'Number', 'min': 0, 'max': 300}
           }
     }
 };
@@ -86,6 +85,6 @@ const options = { useNewUrlParser : true, useUnifiedTopology: true, useFindAndMo
 var mongoDB = new Mongo("mongodb://localhost:27017/database", options)
 
 const api = new API(dataModel);
-api.addApiModel(dataModel)
+api
   .setDatabase(mongoDB)
   .listen(3000);
