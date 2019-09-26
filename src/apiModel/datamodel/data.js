@@ -92,7 +92,7 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
 
   try {
 
-    const { documents, count } = await db.readMany(name, request.query);
+    const { documents, count, cursor } = await db.readMany(name, request.query);
 
     emit('read', {
       collection : name,
@@ -106,7 +106,8 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
         page,
         pageSize,
         pagesCount : Math.ceil(count / pageSize),
-        itemsCount : count
+        itemsCount : count,
+        cursor
       }
     });
   }

@@ -112,34 +112,76 @@ class Mongo {
 
   async readMany(collection, query = {}, options = {}) {
     const Model = await this.getModel(collection);
-    let { page, pageSize, sort, order, ...restOfQuery } = query;
+    let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
 
-    page     = page * 1     || 0;
-    pageSize = pageSize * 1 || 30;
-    sort     = _convertAPIFieldToMongo(sort) || null;
-    order    = (order + '').toLowerCase() === 'asc' ? 'asc' : 'desc';
+    page       = page * 1     || 0;
+    pageSize   = pageSize * 1 || 30;
+    sort       = _convertAPIFieldToMongo(sort) || null;
+    order      = (order + '').toLowerCase() === 'desc' ? '-1' : '1';
+    const comp =  order === '1' ? '$gt' : '$lt';
 
-    const mongoQuery = {};
+    let mongoQuery = {};
 
-    Object.entries(restOfQuery).forEach(([field, values]) => {
-      const valuesArray = values.split(',').map(val => decodeURIComponent(val));
-      const mongoValue  = valuesArray.length > 1 ?
-        {'$in' : valuesArray} :
-        decodeURIComponent(values);
+    if (cursor) {
+      if (cursor.includes('__'))
+      {
+        const [ fieldSort, nextSort, nextId ] = cursor.split('__');
+        mongoQuery = {
+          $or: [
+            {
+              [fieldSort]: { [comp] : nextSort}
+            },
+            {
+              [fieldSort]: nextSort,
+              _id: { [comp] : nextId }
+            }
+          ]
+        };
+      }
+      else {
+        mongoQuery = {
+          _id: { [comp] : cursor}
+        };
+      }
+    }
+    else {
+      Object.entries(restOfQuery).forEach(([field, values]) => {
+          const valuesArray = values.split(',').map(val => decodeURIComponent(val));
+          const mongoValue  = valuesArray.length > 1 ?
+            {'$in' : valuesArray} :
+            decodeURIComponent(values);
+            mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
+      });
+    }
 
-      mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
-    });
-
+/*
+  If sorting in the db the secondary sorting is always id_
+*/
+    var sortingBy = [['_id', order]];
+    if (sort)
+    {
+      sortingBy.unshift([sort , order]);
+    }
     const documents = await Model.find(mongoQuery)
-      .sort(sort ? {[sort] : order} : {})
+      .sort(sortingBy)
       .skip(page * pageSize)
       .limit(pageSize);
 
+    console.log(mongoQuery);
+
     const results = documents.map(document => _convertDocumentToObject(document));
     const count = await Model.countDocuments();
+    var last = results.length > 0 ? results[results.length - 1].id : '';
+
+    if (sort)
+    {
+      last = sort + '__' + results[results.length -1][sort] + '__' + last;
+    }
+
     return {
       documents: results,
-      count: count
+      count: count,
+      cursor: last
     };
   }
 

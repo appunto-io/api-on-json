@@ -1,16 +1,6 @@
-const { API } = require('./index.js');
+const { API }   = require('./index.js');
 const { Mongo } = require('./database/database.js');
-
-const r                                         = require('rethinkdb');
-const { createServer }                          = require('./backend/index.js')
-const { dataModelToMongoose, compileDataModel } = require('./dataModel/index.node.js');
-const {
-        createLibraryFromDataModel,
-        createApiFromDataModel,
-        compileApiModel,
-        mergeModels,
-        hydrate }                               = require('./apiModel/index.node.js');
-
+const r         = require('rethinkdb');
 
 function sendToConsole(data, flow, meta) {
   console.log(JSON.stringify(data, null, 1));

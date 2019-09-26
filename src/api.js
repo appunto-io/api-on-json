@@ -1,12 +1,11 @@
-const { createServer }                          = require('./backend/index.js')
-const { dataModelToMongoose, compileDataModel } = require('./dataModel/index.node.js');
-const { Mongo }                                 = require('./database/database.js');
+const { createServer }           = require('./backend/index.js')
+const { compileDataModel }       = require('./dataModel/index.node.js');
+const { Mongo }                  = require('./database/database.js');
 const {
-        createLibraryFromDataModel,
         createApiFromDataModel,
         compileApiModel,
         mergeModels,
-        hydrate }                               = require('./apiModel/index.node.js');
+        hydrate }                = require('./apiModel/index.node.js');
 
 
 class API {

@@ -240,13 +240,15 @@ describe('api-on-json test suite', async function() {
 
   let createdDocuments;
   const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
+  const ages        = [   20   ,    21 ,    21 ,    21  ,  25     ,    18      ,   23      ,   30];
 
   describe('Retrieve elements', async function() {
     before(async function() {
       const responses = [];
 
       for (let index in flowerNames) {
-        responses[index] = await post('flowers', {name : flowerNames[index]});
+        responses[index] = await post('flowers', {name : flowerNames[index],
+                                                  age_in_days: ages[index]});
       }
       createdDocuments = responses.map(({body}) => body);
     });
@@ -273,6 +275,9 @@ describe('api-on-json test suite', async function() {
       expect(response.body.pagination.itemsCount).to.be.equal(flowerNames.length);
     });
 
+    /*******
+    QUERY
+    */
     it('Should handle pagination', async function() {
       let page = 0,
           pageSize = 2;
@@ -289,6 +294,51 @@ describe('api-on-json test suite', async function() {
       expect(response2).to.have.status(200);
       expect(response2.body.data.map(({name}) => name)).to.deep.equal(flowerNames.slice(page*pageSize, page*pageSize+pageSize));
       expect(response2.body.data.length).to.be.equal(pageSize);
+
+    });
+
+    it('Should get the flowers after the cursor', async function() {
+      let sort = 'name',
+          cursor = createdDocuments[3].id;
+
+      const response = await query('flowers', { cursor });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data[0].name).to.be.equal(flowerNames[4]);
+      expect(response.body.data[1].name).to.be.equal(flowerNames[5]);
+    });
+
+    it('Should get a response with an empty data', async function() {
+      let last_id = createdDocuments[createdDocuments.length - 1].id;
+
+      const response = await query('flowers', { cursor: last_id });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data).to.be.empty;
+    });
+
+    it('Should get a all flowers older than 21 days starting at id', async function() {
+      let id = createdDocuments[2].id;
+      /*
+      createdDocuments[1]: ages = 21
+      createdDocuments[2]: ages = 21
+      createdDocuments[3]: ages = 21 Start expected
+      createdDocuments[4]: ages = 25
+      createdDocuments[5]: ages = 18 Not in response
+      createdDocuments[6]: ages = 23
+      createdDocuments[7]: ages = 30
+      */
+
+      let cursor = 'age_in_days' + '__' + '21' + '__' + id;
+
+      const response = await query('flowers', { cursor });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data).not.to.be.empty;
+      expect(response.body.data.map(({id}) => id)).to.deep.equal([createdDocuments[3].id, createdDocuments[4].id, createdDocuments[6].id, createdDocuments[7].id]);
+      expect(response.body.data.map(({id}) => id)).not.to.deep.equal([createdDocuments[1].id, createdDocuments[2].id, createdDocuments[5].id]);
 
     });
   });
@@ -360,54 +410,3 @@ describe('api-on-json test suite', async function() {
     });
   });
 });
-
-
-/*
-  GET /collection
-  ---
-  {
-    data : [Object],
-    pagination : {
-      page : Number,
-      pageSize : Number,
-      itemCounts : Number
-    }
-  }
-
-  GET /collection/:id
-  ---
-  Object
-
-  GET /collection?query
-  ---
-  {
-    data : [Object],
-    pagination : {
-      page : Number,
-      pageSize : Number,
-      itemCounts : Number
-    }
-  }
-
-  POST /collection
-  Object
-  Object // created object
-
-  PUT /collection/:id
-  Object
-  Object // created object
-
-  PATCH /collection/:id
-  Object // fields to be modified
-  Object // updated object
-
-  DELETE /collection/:id
-  ---
-  Object // deleted object
-
-
-  -----------------------
-
-  GET /collection/:id1/:id2/:id3
-
-*/
