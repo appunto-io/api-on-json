@@ -9,11 +9,11 @@ Changes _id to id and removes __v from retrieved documents
 const _convertDocumentToObject = (document) =>
   document.toObject({
     transform : (doc, ret, options) => {
-      ret.id = ret._id;
-      delete ret._id;
-      delete ret.__v;
+      const { _id, __v, ...sanitized } = ret;
 
-      return ret;
+      sanitized.id = _id;
+
+      return sanitized;
     }
   });
 
@@ -31,6 +31,7 @@ class Mongo {
     this.url      = url;
     this.options  = { ...options, useNewUrlParser : true};
     this.database = null;
+    this.models   = null;
   }
 
   async connect() {
@@ -43,11 +44,11 @@ class Mongo {
   }
 
   async init(dataModel) {
-    const dbModel = dataModelToMongoose(dataModel, this.database);
-    return createLibraryFromDataModel(dbModel, this);
+    const mongooseModels = dataModelToMongoose(dataModel, this.database);
+    this.models = mongooseModels;
   }
 
-  async getModel(collection) {
+  async _getModel(collection) {
     if(!this.database) {
       const message = `You are not connected to a mongodb server. Please verify that you called connect() and be sure to wait promise resolution.`;
 
@@ -55,7 +56,7 @@ class Mongo {
       throw new Error(message);
     }
 
-    const Model = this.database.model(collection);
+    const Model = this.models[collection];
 
     if(!Model) {
       const message = `Collection ${collection} is not defined in the database`;
@@ -72,7 +73,7 @@ class Mongo {
   */
 
   async create(collection, data = {}) {
-    const Model = await this.getModel(collection);
+    const Model = await this._getModel(collection);
 
     const document = new Model();
 
@@ -88,7 +89,7 @@ class Mongo {
   }
 
   async remove(collection, id) {
-    const Model = await this.getModel(collection);
+    const Model = await this._getModel(collection);
 
     const document = await Model.findByIdAndDelete(id);
 
@@ -99,7 +100,7 @@ class Mongo {
   }
 
   async readOne(collection, id) {
-    const Model = await this.getModel(collection);
+    const Model = await this._getModel(collection);
 
     const document = await Model.findById(id);
 
@@ -111,7 +112,7 @@ class Mongo {
   }
 
   async readMany(collection, query = {}, options = {}) {
-    const Model = await this.getModel(collection);
+    const Model = await this._getModel(collection);
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
@@ -120,16 +121,22 @@ class Mongo {
     order      = (order + '').toLowerCase() === 'desc' ? '-1' : '1';
     const comp =  order === '1' ? '$gt' : '$lt';
 
+    const delimiter = '_';
+
     let mongoQuery = {};
 
     if (cursor) {
-      if (cursor.includes('__'))
+      if (cursor.includes(delimiter))
       {
-        const [ fieldSort, nextSort, nextId ] = cursor.split('__');
+        const [ fieldSort_encoded, nextSort_encoded, nextId ] = cursor.split(delimiter);
+
+        const fieldSort = Buffer.from(fieldSort_encoded, 'base64').toString('ascii');
+        const nextSort = Buffer.from(nextSort_encoded, 'base64').toString('ascii');
+
         mongoQuery = {
           $or: [
             {
-              [fieldSort]: { [comp] : nextSort}
+              [fieldSort]: { [comp] : nextSort }
             },
             {
               [fieldSort]: nextSort,
@@ -154,20 +161,19 @@ class Mongo {
       });
     }
 
-/*
-  If sorting in the db the secondary sorting is always id_
-*/
+    /*
+      If sorting in the db the secondary sorting is always id_
+    */
     var sortingBy = [['_id', order]];
-    if (sort)
-    {
+
+    if (sort) {
       sortingBy.unshift([sort , order]);
     }
+
     const documents = await Model.find(mongoQuery)
       .sort(sortingBy)
       .skip(page * pageSize)
       .limit(pageSize);
-
-    console.log(mongoQuery);
 
     const results = documents.map(document => _convertDocumentToObject(document));
     const count = await Model.countDocuments();
@@ -175,7 +181,14 @@ class Mongo {
 
     if (sort)
     {
-      last = sort + '__' + results[results.length -1][sort] + '__' + last;
+      const data       = results[results.length -1][sort];
+      let buff_data    = new Buffer(data);
+      let encoded_data = buff_data.toString('base64');
+
+      let buff_field    = new Buffer(sort);
+      let encoded_field = buff_field.toString('base64');
+
+      last = buff_field + delimiter + encoded_data + delimiter + last;
     }
 
     return {
@@ -186,8 +199,7 @@ class Mongo {
   }
 
   async update(collection, id, data) {
-
-    const Model = await this.getModel(collection);
+    const Model = await this._getModel(collection);
 
     const document = {};
 
@@ -209,8 +221,7 @@ class Mongo {
   }
 
   async patch(collection, id, data) {
-
-    const Model = await this.getModel(collection);
+    const Model = await this._getModel(collection);
 
     const document = {};
 

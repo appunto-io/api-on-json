@@ -11,10 +11,10 @@ is performed by mongoose.
  */
 const createPostCallback = (name, db) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
+  const { db } = meta.environment;
 
   try {
     const saved = await db.create(name, data);
-
     emit('created', {
       collection : name,
       data       : [saved]
@@ -32,6 +32,7 @@ Create PUT callback
  */
 const createPutCallback = (name, db) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
+  const { db } = meta.environment;
   const id  = meta.request.params['id'];
 
   try {
@@ -54,6 +55,7 @@ Create PATCH callback
  */
 const createPatchCallback = (name, db) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
+  const { db } = meta.environment;
   const id   = meta.request.params['id'];
 
   try {
@@ -84,6 +86,7 @@ Create GET callback retireving a paginated list of documents
  */
 const createGetManyCallback = (name, db) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
+  const { db } = meta.environment;
   const { request, response } = meta;
   let { page, pageSize } = request.query;
 
@@ -91,7 +94,7 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
   pageSize = pageSize * 1 || 30;
 
   try {
-
+    console.log(request.query);
     const { documents, count, cursor } = await db.readMany(name, request.query);
 
     emit('read', {
@@ -121,6 +124,7 @@ Create GET callback that retrieves one object
  */
 const createGetCallback = (name, db) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
+  const { db } = meta.environment;
   const id = meta.request.params['id'];
 
   try {
@@ -149,6 +153,7 @@ Create DELETE callback
  */
 const createDeleteCallback = (name, db) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
+  const { db } = meta.environment;
   const id = meta.request.params['id'];
 
   try {
@@ -205,16 +210,17 @@ const createApiFromDataModel = (dataModel) => {
   return apiModel;
 };
 
-const createLibraryFromDataModel = (dbModels, db) => {
+const createLibraryFromDataModel = (dbModels) => {
   const library = {};
 
-  Object.entries(dbModels).forEach(([name, model]) => {
-    library[`get-many-${name}`]    = createGetManyCallback(name, db);
-    library[`post-${name}`]        = createPostCallback(name, db);
-    library[`get-one-${name}`]     = createGetCallback(name, db);
-    library[`put-${name}`]         = createPutCallback(name, db);
-    library[`delete-${name}`]      = createDeleteCallback(name, db);
-    library[`patch-${name}`]       = createPatchCallback(name, db);
+  Object.entries(dbModels).forEach(([name]) => {
+
+    library[`get-many-${name}`]    = createGetManyCallback(name);
+    library[`post-${name}`]        = createPostCallback(name);
+    library[`get-one-${name}`]     = createGetCallback(name);
+    library[`put-${name}`]         = createPutCallback(name);
+    library[`delete-${name}`]      = createDeleteCallback(name);
+    library[`patch-${name}`]       = createPatchCallback(name);
     library[`post-${name}-input`]  = writeInputFilter;
     library[`put-${name}-input`]   = writeInputFilter;
     library[`patch-${name}-input`] = writeInputFilter;

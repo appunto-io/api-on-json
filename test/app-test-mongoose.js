@@ -6,7 +6,6 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { API }               = require('../src/index.js');
 const { Mongo }             = require('../src/database/database.js');
-
 const expect = chai.expect;
 chai.use(chaiHTTP);
 

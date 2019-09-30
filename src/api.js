@@ -1,7 +1,7 @@
 const { createServer }           = require('./backend/index.js')
 const { compileDataModel }       = require('./dataModel/index.node.js');
-const { Mongo }                  = require('./database/database.js');
 const {
+        createLibraryFromDataModel,
         createApiFromDataModel,
         compileApiModel,
         mergeModels,
@@ -50,29 +50,41 @@ class API {
 
   async listen(port) {
     /*
+      Data model
+     */
+    const mergedDataModel = this.dataModels.reduce(
+      (reduced, model) => mergeModels(reduced, model), {}
+    );
+
+    /*
+      API model
+    */
+    const apiModelFromDataModel         = createApiFromDataModel(mergedDataModel);
+    const compiledApiModelFromDataModel = compileApiModel(apiModelFromDataModel);
+    const dataModelLibrary              = createLibraryFromDataModel(mergedDataModel);
+    const hydratedApiModel              = hydrate(compiledApiModelFromDataModel, dataModelLibrary);
+
+
+    const mergedApiModel = [hydratedApiModel, ...this.apiModels].reduce(
+      (reduced, model) => mergeModels(reduced, model), {}
+    );
+
+    /*
       Database
      */
     await this.database.connect();
+    await this.database.init(mergedDataModel);
 
     /*
-      Model
-     */
-    const mergedDataModel = this.dataModels.reduce(
-      (reduced, model) => mergeModels(reduced, model), {});
-
-    const library = await this.database.init(mergedDataModel);
-
-    const apiModel         = createApiFromDataModel(mergedDataModel);
-    const compiledApiModel = compileApiModel(apiModel);
-
-    const api = hydrate(compiledApiModel, library);
-
-    this.apiModels.unshift(api);
-
-    const mergedApiModel = this.apiModels.reduce(
-      (reduced, model) => mergeModels(reduced, model), {});
-
-    const server = createServer(mergedApiModel, {jwtSecret: this.jwtSecret});
+      Server
+    */
+    const server = createServer(
+      mergedApiModel,
+      {
+        jwtSecret : this.jwtSecret,
+        db        : this.database
+      }
+    );
 
     this.server = server;
     this.server.listen(port);
