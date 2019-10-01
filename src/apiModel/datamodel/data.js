@@ -1,5 +1,4 @@
 var kebabCase = require('lodash.kebabcase');
-var r         = require('rethinkdb')
 
 const writeInputFilter = (data, flow, meta) => flow.continue(meta.request.body);
 
@@ -94,7 +93,6 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
   pageSize = pageSize * 1 || 30;
 
   try {
-    console.log(request.query);
     const { documents, count, cursor } = await db.readMany(name, request.query);
 
     emit('read', {
@@ -115,6 +113,7 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
     });
   }
   catch (error) {
+    console.log(error);
     return flow.stop(400, error);
   }
 };

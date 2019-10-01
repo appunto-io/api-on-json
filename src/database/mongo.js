@@ -1,6 +1,5 @@
 const mongoose                       = require('mongoose');
-const { dataModelToMongoose }        = require('../dataModel/index.node.js');
-const { createLibraryFromDataModel } = require('../apiModel/index.node.js');
+const { dataModelToMongoose }        = require('../dataModel/mongoose.js');
 
 
 /*
@@ -117,21 +116,20 @@ class Mongo {
 
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
-    sort       = _convertAPIFieldToMongo(sort) || null;
+    sort       = Array.isArray(sort) ? sort : _convertAPIFieldToMongo(sort) || null;
     order      = (order + '').toLowerCase() === 'desc' ? '-1' : '1';
     const comp =  order === '1' ? '$gt' : '$lt';
 
-    const delimiter = '_';
+    const delimiter = ';';
 
     let mongoQuery = {};
 
     if (cursor) {
-      if (cursor.includes(delimiter))
-      {
+      if (cursor.includes(delimiter)) {
         const [ fieldSort_encoded, nextSort_encoded, nextId ] = cursor.split(delimiter);
 
-        const fieldSort = Buffer.from(fieldSort_encoded, 'base64').toString('ascii');
-        const nextSort = Buffer.from(nextSort_encoded, 'base64').toString('ascii');
+        const fieldSort = decodeURIComponent(fieldSort_encoded);
+        const nextSort  = decodeURIComponent(nextSort_encoded);
 
         mongoQuery = {
           $or: [
@@ -164,10 +162,20 @@ class Mongo {
     /*
       If sorting in the db the secondary sorting is always id_
     */
-    var sortingBy = [['_id', order]];
+    var sortingBy = [];
 
-    if (sort) {
-      sortingBy.unshift([sort , order]);
+    if (Array.isArray(sort)) {
+      for (let i = 0; i < sort.length; i++) {
+        var [ elem_sort, elem_order ] = sort[i].split(',');
+        elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
+        if (Model[elem_sort]) {
+          sortingBy.unshift([elem_sort, elem_order]);
+          console.log(sortingBy);
+        }
+      }
+    }
+    else {
+      sortingBy.unshift([sort, order]);
     }
 
     const documents = await Model.find(mongoQuery)
@@ -179,16 +187,13 @@ class Mongo {
     const count = await Model.countDocuments();
     var last = results.length > 0 ? results[results.length - 1].id : '';
 
-    if (sort)
-    {
-      const data       = results[results.length -1][sort];
-      let buff_data    = new Buffer(data);
-      let encoded_data = buff_data.toString('base64');
+    if (sort) {
+      const data       = results.length > 0 ? results[results.length - 1][sort] : '';
+      let encoded_data = encodeURIComponent(data);
 
-      let buff_field    = new Buffer(sort);
-      let encoded_field = buff_field.toString('base64');
+      let encoded_field = encodeURIComponent(sort);
 
-      last = buff_field + delimiter + encoded_data + delimiter + last;
+      last = encoded_field + delimiter + encoded_data + delimiter + last;
     }
 
     return {

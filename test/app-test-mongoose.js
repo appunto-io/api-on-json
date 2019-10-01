@@ -124,8 +124,9 @@ const dataModels = {
   },
   'flowers' : {
     schema : {
-      name : {type: 'String', 'unique' : true, 'required': true},
-      age_in_days: 'Number'
+      name : {type: 'String', 'required': true},
+      age_in_days: 'Number',
+      serial : {type: 'String', 'unique': true}
     }
   }
 };
@@ -173,6 +174,7 @@ describe('api-on-json test suite', async function() {
       expect(response.body.serial).to.be.equal('AAAAA');
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
+      id = response.body.id;
     });
 
     it('Should use defaults on missing fields', async function() {
@@ -238,16 +240,17 @@ describe('api-on-json test suite', async function() {
   */
 
   let createdDocuments;
-  const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
-  const ages        = [   20   ,    21 ,    21 ,    21  ,  25     ,    18      ,   23      ,   30];
-
+  const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
+  const ages        = [   20   ,    21 ,    21 ,    21  ,  50   , 25     ,    18      ,   23      ,   30];
+  const serials     = [  'A'   ,   'B'  ,  'C',  'D'    ,  'E'  ,   'F'  ,    'G'     ,     'H'    ,  'I'];
   describe('Retrieve elements', async function() {
     before(async function() {
       const responses = [];
 
       for (let index in flowerNames) {
-        responses[index] = await post('flowers', {name : flowerNames[index],
-                                                  age_in_days: ages[index]});
+        responses[index] = await post('flowers', {name       : flowerNames[index],
+                                                  age_in_days: ages[index],
+                                                  serial     : serials[index]});
       }
       createdDocuments = responses.map(({body}) => body);
     });
@@ -296,7 +299,7 @@ describe('api-on-json test suite', async function() {
 
     });
 
-    it('Should get the flowers after the cursor', async function() {
+    it('Should get the elements after the cursor', async function() {
       let sort = 'name',
           cursor = createdDocuments[3].id;
 
@@ -317,28 +320,88 @@ describe('api-on-json test suite', async function() {
       expect(response.body.data).to.be.empty;
     });
 
-    it('Should get a all flowers older than 21 days starting at id', async function() {
-      let id = createdDocuments[2].id;
-      /*
-      createdDocuments[1]: ages = 21
-      createdDocuments[2]: ages = 21
-      createdDocuments[3]: ages = 21 Start expected
-      createdDocuments[4]: ages = 25
-      createdDocuments[5]: ages = 18 Not in response
-      createdDocuments[6]: ages = 23
-      createdDocuments[7]: ages = 30
-      */
+    it('Should get the element according to their name', async function() {
+      const response = await query('flowers', { sort: 'name' });
 
-      let cursor = 'age_in_days' + '__' + '21' + '__' + id;
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data[0].name).to.be.equal('Carnation');
+      expect(response.body.data[1].name).to.be.equal('Chrysanthemum');
+      expect(response.body.data[2].name).to.be.equal('Daisy');
+    });
+
+    it('Should get the element in descandant order', async function() {
+      const response = await query('flowers', { sort: 'name', order: 'desc' });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data[0].name).to.be.equal('Tulip');
+      expect(response.body.data[1].name).to.be.equal('Tulip');
+      expect(response.body.data[2].name).to.be.equal('Rose');
+    });
+
+    it('Should get the element with highest value1 but lower value2', async function() {
+      const value1 = 'name,desc';
+      const value2 = 'age_in_days,asc';
+
+      const response = await query('flowers', { sort: [value1, value2] });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data[0].name).to.be.equal('Tulip');
+      expect(response.body.data[1].name).to.be.equal('Tulip');
+      expect(response.body.data[0].age_in_days).to.be.equal(21);
+      expect(response.body.data[1].age_in_days).to.be.equal(50);
+    });
+
+
+    /******
+    CURSOR
+    */
+    it('Should get a all elements which validate the condition, starting at id', async function() {
+      let id = createdDocuments[2].id;
+
+      let cursor = 'age_in_days' + ';' + '21' + ';' + id;
 
       const response = await query('flowers', { cursor });
 
       expect(response).to.have.status(200);
       expect(response.body.data).to.be.an('array');
       expect(response.body.data).not.to.be.empty;
-      expect(response.body.data.map(({id}) => id)).to.deep.equal([createdDocuments[3].id, createdDocuments[4].id, createdDocuments[6].id, createdDocuments[7].id]);
+      expect(response.body.data.map(({id}) => id)).to.deep.equal([createdDocuments[3].id, createdDocuments[4].id, createdDocuments[5].id, createdDocuments[7].id, createdDocuments[8].id]);
       expect(response.body.data.map(({id}) => id)).not.to.deep.equal([createdDocuments[1].id, createdDocuments[2].id, createdDocuments[5].id]);
+    });
 
+    it('Should get an empty data because no more elements after cursor', async function() {
+      const get_response = await get('flowers');
+      const last         = get_response.body.pagination.cursor;
+
+      const response = await query('flowers', { cursor: last });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data).to.be.empty;
+    });
+
+    it('Should get all elements after cursor', async function() {
+      const cursor = 'name' + ';' + createdDocuments[4].name + ';' + createdDocuments[4].id;
+
+      const response = await query('flowers', { cursor, order: 'desc' });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data.map(({id}) => id)).not.to.deep.equal([createdDocuments[4].id, createdDocuments[3].id]);
+    });
+
+    it('Should get the element in orderby name and in descandant order starting after cursor', async function() {
+      const cursor = 'name' + ';' + createdDocuments[1].name + ';' + createdDocuments[1].id;
+      const response = await query('flowers', { cursor, sort: 'name', order: 'desc' });
+
+      expect(response).to.have.status(200);
+      expect(response.body.data).to.be.an('array');
+      expect(response.body.data[0].name).to.be.equal('Orchid');
+      expect(response.body.data[1].name).to.be.equal('Lily');
+      expect(response.body.data[2].name).to.be.equal('Hyacinth');
     });
   });
 
@@ -381,14 +444,10 @@ describe('api-on-json test suite', async function() {
     });
 
     it('Should fail on duplicated unique field', async function() {
-      const response = await put('flowers', createdDocuments[0].id, {name: 'Lily'});
+      const response = await put('flowers', createdDocuments[1], {name: 'Sunflower',
+                                                                  serial: 'A'});
 
       expect(response).to.have.status(400);
-
-      const response2 = await getId('flowers', createdDocuments[0].id);
-
-      expect(response2).to.have.status(200);
-      expect(response2.body.name).to.be.equal(flowerNames[0]);
     });
   });
 

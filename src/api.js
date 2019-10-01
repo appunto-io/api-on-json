@@ -1,4 +1,4 @@
-const { createServer }           = require('./backend/index.js')
+const { createServer }           = require('./server/server.js')
 const { compileDataModel }       = require('./dataModel/index.node.js');
 const {
         createLibraryFromDataModel,
