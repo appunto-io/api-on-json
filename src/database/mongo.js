@@ -169,13 +169,12 @@ class Mongo {
         var [ elem_sort, elem_order ] = sort[i].split(',');
         elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
         if (Model[elem_sort]) {
-          sortingBy.unshift([elem_sort, elem_order]);
-          console.log(sortingBy);
+          sortingBy.push([elem_sort, elem_order]);
         }
       }
     }
     else {
-      sortingBy.unshift([sort, order]);
+      sortingBy.push([sort, order]);
     }
 
     const documents = await Model.find(mongoQuery)

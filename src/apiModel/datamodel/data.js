@@ -113,7 +113,7 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
     });
   }
   catch (error) {
-    console.log(error);
+    console.error(error);
     return flow.stop(400, error);
   }
 };
