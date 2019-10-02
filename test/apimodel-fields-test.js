@@ -1,15 +1,18 @@
-const { getDeniedFields } = require('./fields');
+const { getDeniedFields } = require('../src/apiModel/fields.js');
+
+const chai   = require('chai');
+const expect = chai.expect;
 
 
 describe('getDeniedFields', () => {
-  test('getDeniedFields', () => {
+  it('getDeniedFields', () => {
     const fn = getDeniedFields;
 
     expect(fn({
-    })(true, [])).toEqual([]);
+    })(true, [])).to.deep.equal([]);
     expect(fn({
       fields : {}
-    })(true, [])).toEqual([]);
+    })(true, [])).to.deep.equal([]);
     expect(fn({
       fields : {
         'field' : {
@@ -18,7 +21,7 @@ describe('getDeniedFields', () => {
           }
         }
       }
-    }, 'get')(false, [])).toEqual([]);
+    }, 'get')(false, [])).to.deep.equal([]);
     expect(fn({
       fields : {
         'field' : {
@@ -27,7 +30,7 @@ describe('getDeniedFields', () => {
           }
         }
       }
-    }, 'get')(false, [])).toEqual(['field']);
+    }, 'get')(false, [])).to.deep.equal(['field']);
     expect(fn({
       fields : {
         'field' : {
@@ -36,7 +39,7 @@ describe('getDeniedFields', () => {
           }
         }
       }
-    }, 'get')(false, [])).toEqual(['field']);
+    }, 'get')(false, [])).to.deep.equal(['field']);
     expect(fn({
       fields : {
         'field' : {
@@ -45,6 +48,6 @@ describe('getDeniedFields', () => {
           }
         }
       }
-    }, 'get')(true, ['admin'])).toEqual([]);
+    }, 'get')(true, ['admin'])).to.deep.equal([]);
   });
 });

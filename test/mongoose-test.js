@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
-const { compileDataModel } = require('./compiler');
-const { dataModelToMongoose } = require('./mongoose');
+const { compileDataModel }    = require('../src/dataModel/compiler.js');
+const { dataModelToMongoose } = require('../src/dataModel/mongoose.js');
 
 const Model = mongoose.Model;
 
+const chai   = require('chai');
+const expect = chai.expect;
+
 
 describe('Mongoose data model compiler', () => {
-  test('Create mongoose models', () => {
+  it('Create mongoose models', () => {
     const model = dataModelToMongoose(compileDataModel({
       "collection1" : {
         schema : {
@@ -28,23 +31,22 @@ describe('Mongoose data model compiler', () => {
       }
     }), mongoose);
 
-    expect(model["collection1"]).toBeDefined();
-    expect(model["collection2"]).toBeDefined();
+    expect(model["collection1"]).to.not.be.undefined;
+    expect(model["collection2"]).to.not.be.undefined;
 
     const collection1Document = new model["collection1"]({
       field1 : "value"
     });
-    expect(collection1Document.field1).toStrictEqual("value");
-    expect(collection1Document.field2).toStrictEqual(1234);
+    expect(collection1Document.field1).to.be.equal("value");
+    expect(collection1Document.field2).to.be.equal(1234);
 
     const collection2Document = new model["collection2"]({
       field2 : {type:'value'}
     });
-    expect(collection2Document.field1).toStrictEqual("default_string");
-    expect(collection2Document.field2).toEqual({type:"value"});
+    expect(collection2Document.field1).to.be.equal("default_string");
   });
 
-  test("Testing nested arrays", () => {
+  it("Testing nested arrays", () => {
     const model = dataModelToMongoose(compileDataModel({
       "collection3" : {
         schema : {
@@ -57,8 +59,8 @@ describe('Mongoose data model compiler', () => {
       field1 : ["Foo", "Bar"]
     });
 
-    expect(collection3Document.field1[0]).toEqual("Foo");
-    expect(collection3Document.field1[1]).toEqual("Bar");
-    expect(collection3Document.field1.length).toEqual(2);
+    expect(collection3Document.field1[0]).to.deep.equal("Foo");
+    expect(collection3Document.field1[1]).to.deep.equal("Bar");
+    expect(collection3Document.field1.length).to.deep.equal(2);
   });
 });

@@ -1,17 +1,20 @@
-const { getAllowedMethods } = require('./methods');
+const { getAllowedMethods } = require('../src/apiModel/methods.js');
+
+const chai   = require('chai');
+const expect = chai.expect;
 
 describe('getAllowedMethods', () => {
-  test('getAllowedMethods', () => {
+  it('getAllowedMethods', () => {
     const fn = getAllowedMethods;
 
-    expect(fn({})).toEqual([]);
+    expect(fn({})).to.deep.equal([]);
     expect(fn({
       'GET' : false,
       'POST'    : {requiresAuth : true, requiresRoles : false},
       'DELETE'     : {requiresAuth : true, requiresRoles : false},
-    })).toEqual(['POST', 'DELETE']);
+    })).to.deep.equal(['POST', 'DELETE']);
     expect(fn({
       'GET'     : {requiresAuth : true, requiresRoles : false},
-    })).toEqual(['GET']);
+    })).to.deep.equal(['GET']);
   });
 });

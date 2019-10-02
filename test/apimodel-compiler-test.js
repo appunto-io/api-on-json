@@ -7,33 +7,36 @@ const {
 
   keysMap,
   methods
-} = require('./compiler');
+} = require('../src/apiModel/compiler.js');
+
+const chai   = require('chai');
+const expect = chai.expect;
 
 describe('compileRequestRequirements', () => {
-  test('compileRequestRequirements', () => {
+  it('compileRequestRequirements', () => {
     const fn = compileRequestRequirements;
 
-    expect(fn(false)).toEqual(false);
-    expect(fn('string')).toEqual(false);
-    expect(fn(true)).toEqual({requiresAuth:false,requiresRoles:false});
+    expect(fn(false)).to.be.false;
+    expect(fn('string')).to.be.false;
+    expect(fn(true)).to.deep.equal({requiresAuth:false,requiresRoles:false});
     expect(fn({
       requiresAuth : true
-    })).toEqual({requiresAuth:true,requiresRoles:false});
+    })).to.deep.equal({requiresAuth:true,requiresRoles:false});
     expect(fn({
       requiresRoles : false
-    })).toEqual({requiresAuth:true,requiresRoles:false});
+    })).to.deep.equal({requiresAuth:true,requiresRoles:false});
     expect(fn({
       requiresRoles : ['role1', 'role2']
-    })).toEqual({requiresAuth:true,requiresRoles:['role1', 'role2']});
+    })).to.deep.equal({requiresAuth:true,requiresRoles:['role1', 'role2']});
     expect(fn({
       requiresAuth : true,
       requiresRoles : ['role1', 'role2']
-    })).toEqual({requiresAuth:true,requiresRoles:['role1', 'role2']});
+    })).to.deep.equal({requiresAuth:true,requiresRoles:['role1', 'role2']});
   });
 });
 
 describe('compileAuthRequirements', () => {
-  test('compileAuthRequirements', () => {
+  it('compileAuthRequirements', () => {
     const fn = compileAuthRequirements;
     const def = {
       "GET"     : {requiresAuth:true,requiresRoles:['default-role']},
@@ -45,11 +48,11 @@ describe('compileAuthRequirements', () => {
       "DELETE"  : {requiresAuth:true,requiresRoles:['default-role']}
     };
 
-    expect(fn({}, def)).toEqual(def);
+    expect(fn({}, def)).to.deep.equal(def);
 
     expect(fn({
       requiresAuth:false
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : {requiresAuth:false,requiresRoles:false},
       "HEAD"    : {requiresAuth:false,requiresRoles:false},
       "OPTIONS" : {requiresAuth:false,requiresRoles:false},
@@ -61,7 +64,7 @@ describe('compileAuthRequirements', () => {
 
     expect(fn({
       requiresRoles:['role1']
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : {requiresAuth:true,requiresRoles:['role1']},
       "HEAD"    : {requiresAuth:true,requiresRoles:['role1']},
       "OPTIONS" : {requiresAuth:true,requiresRoles:['role1']},
@@ -74,7 +77,7 @@ describe('compileAuthRequirements', () => {
     expect(fn({
       requiresRoles:['role1'],
       write : false
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : {requiresAuth:true,requiresRoles:['role1']},
       "HEAD"    : {requiresAuth:true,requiresRoles:['role1']},
       "OPTIONS" : {requiresAuth:true,requiresRoles:['role1']},
@@ -88,7 +91,7 @@ describe('compileAuthRequirements', () => {
       requiresRoles:['role1'],
       write : false,
       'PUT' : {requiresRoles:["dev"]}
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : {requiresAuth:true,requiresRoles:['role1']},
       "HEAD"    : {requiresAuth:true,requiresRoles:['role1']},
       "OPTIONS" : {requiresAuth:true,requiresRoles:['role1']},
@@ -100,7 +103,7 @@ describe('compileAuthRequirements', () => {
 
     expect(fn({
       write:false
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "POST"    : false,
       "PUT"     : false,
       "PATCH"   : false,
@@ -109,7 +112,7 @@ describe('compileAuthRequirements', () => {
 
     expect(fn({
       read:false
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : false,
       "HEAD"    : false,
       "OPTIONS" : false
@@ -118,7 +121,7 @@ describe('compileAuthRequirements', () => {
     expect(fn({
       write:false,
       read:false
-    })).toEqual(Object.assign({}, def, {
+    })).to.deep.equal(Object.assign({}, def, {
       "GET"     : false,
       "HEAD"    : false,
       "OPTIONS" : false,
@@ -131,7 +134,7 @@ describe('compileAuthRequirements', () => {
     expect(fn({
       write:false,
       read:true
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "POST"    : false,
       "PUT"     : false,
       "PATCH"   : false,
@@ -144,7 +147,7 @@ describe('compileAuthRequirements', () => {
     expect(fn({
       write:false,
       'PUT' : {requiresRoles:["role1", "role2"]}
-    }, def)).toEqual(Object.assign({}, def, {
+    }, def)).to.deep.equal(Object.assign({}, def, {
       "POST"    : false,
       "PUT"     : {requiresAuth:true, requiresRoles:["role1", "role2"]},
       "PATCH"   : false,
@@ -156,12 +159,12 @@ describe('compileAuthRequirements', () => {
 
 
 describe('compileHandlersList', () => {
-  test('compileHandlersList', () => {
+  it('compileHandlersList', () => {
     const fn = compileHandlersList;
 
     expect(fn({
       'read' : 'value'
-    })).toEqual({
+    })).to.deep.equal({
       'GET'     : ['value'],
       'HEAD'    : ['value'],
       'OPTIONS' : ['value']
@@ -169,7 +172,7 @@ describe('compileHandlersList', () => {
 
     expect(fn({
       'write' : 'value'
-    })).toEqual({
+    })).to.deep.equal({
       "POST"    : ['value'],
       "PUT"     : ['value'],
       "PATCH"   : ['value'],
@@ -179,7 +182,7 @@ describe('compileHandlersList', () => {
     expect(fn({
       'read'  : 'readValue',
       'write' : 'writeValue'
-    })).toEqual({
+    })).to.deep.equal({
       'GET'     : ['readValue'],
       'HEAD'    : ['readValue'],
       'OPTIONS' : ['readValue'],
@@ -193,7 +196,7 @@ describe('compileHandlersList', () => {
       'read'  : 'readValue',
       'write' : ['writeValue', 'writeValue2'],
       'GET' : 'getValue'
-    })).toEqual({
+    })).to.deep.equal({
       'GET'     : ['getValue'],
       'HEAD'    : ['readValue'],
       'OPTIONS' : ['readValue'],
@@ -208,10 +211,10 @@ describe('compileHandlersList', () => {
 
 
 describe('compileEndpointModel', () => {
-  test('auth and fields', () => {
+  it('auth and fields', () => {
     const fn = compileEndpointModel;
 
-    expect(fn({})).toEqual({
+    expect(fn({})).to.deep.equal({
       auth : {
         "GET"     : {requiresAuth:true,requiresRoles:false},
         "HEAD"    : {requiresAuth:true,requiresRoles:false},
@@ -236,7 +239,7 @@ describe('compileEndpointModel', () => {
           }
         }
       }
-    })).toEqual({
+    })).to.deep.equal({
       auth : {
         "GET"     : {requiresAuth:false,requiresRoles:false},
         "HEAD"    : {requiresAuth:false,requiresRoles:false},
@@ -266,7 +269,7 @@ describe('compileEndpointModel', () => {
 
 
 
-  test('filters and handlers', () => {
+  it('filters and handlers', () => {
     const fn = compileEndpointModel;
 
     expect(fn({
@@ -276,7 +279,7 @@ describe('compileEndpointModel', () => {
       filters : {
         "POST" : ['::getFilter1', '::getFilter2']
       }
-    })).toEqual({
+    })).to.deep.equal({
       auth : {
         "GET"     : {requiresAuth:true,requiresRoles:false},
         "HEAD"    : {requiresAuth:true,requiresRoles:false},
@@ -296,7 +299,7 @@ describe('compileEndpointModel', () => {
     });
   });
 
-  test('filters and handlers', () => {
+  it('filters and handlers', () => {
     const fn = compileEndpointModel;
 
     expect(fn({
@@ -305,7 +308,7 @@ describe('compileEndpointModel', () => {
           'GET' : '::getHandler'
         }
       }
-    })).toEqual({
+    })).to.deep.equal({
       auth : {
         "GET"     : {requiresAuth:true,requiresRoles:false},
         "HEAD"    : {requiresAuth:true,requiresRoles:false},
@@ -350,7 +353,7 @@ describe('compileEndpointModel', () => {
           }
         }
       }
-    })).toEqual({
+    })).to.deep.equal({
       auth : {
         "GET"     : {requiresAuth:true,requiresRoles:false},
         "HEAD"    : {requiresAuth:true,requiresRoles:false},

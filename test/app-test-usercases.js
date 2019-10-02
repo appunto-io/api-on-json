@@ -1,11 +1,13 @@
 const mongoose              = require('mongoose');
-const assert                = require('assert');
 const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { API }               = require('../src/index.js');
 const { Mongo, Rethink }    = require('../src/database/database.js');
+
+require('dotenv').config({path: __dirname + '/.env'});
+
 const expect = chai.expect;
 chai.use(chaiHTTP);
 
@@ -460,17 +462,21 @@ describe('api-on-json test suite', async function() {
 
   describe('api-on-json test suite rethinkdb', async function() {
     var id;
-    let db = new Rethink("localhost", "28015", "databaseTest");
+
+    const hostname = process.env.HOST;
+    const port = process.env.PORT;
+    const dbName = process.env.DB_NAME;
+
+    let db = new Rethink(hostname, port, dbName);
     before(async() => {
-      this.api2 = new API(dataModels);
+      this.api2 = await new API(dataModels);
       await this.api2.setDatabase(db);
       await this.api2.listen(3000);
     });
 
     after(async () => {
       await this.api2.close();
-      const res = await db.database.getPoolMaster().drain();
-      console.log(res);
+      db.database.getPoolMaster().drain();
     });
 
     describe('Empty database', async function() {
@@ -772,7 +778,7 @@ describe('api-on-json test suite', async function() {
       });
 
       it('Should fail on duplicated unique field', async function() {
-        const response = await put('flowers', createdDocuments[1].id, {name: 'Sunflower', serial: 'A'});
+        const response = await put('flowers', createdDocuments[1].id, {name: 'Sunflower', serial: createdDocuments[2].serial});
 
         expect(response).to.have.status(400);
       });

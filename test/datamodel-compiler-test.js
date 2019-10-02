@@ -4,7 +4,10 @@ const {
   compileSchemaDeclaration,
   compileOptionsDeclaration,
   compileCollection
-} = require('./compiler.js');
+} = require('../src/dataModel/compiler.js');
+
+const chai   = require('chai');
+const expect = chai.expect;
 
 /*
 Hacky function used for debugging. Since console.log() does
@@ -22,29 +25,29 @@ const log = msg => {
 
 describe('JSON data model compiler', () => {
   describe('Field type declarations', () => {
-    test('Declarations with string literals', () => {
+    it('Declarations with string literals', () => {
 
       ["String", "Number", "Date", "Boolean", "Mixed", "Id"].map(literal => {
-        expect(compileTypeDeclaration(literal)).toEqual({type:literal});
+        expect(compileTypeDeclaration(literal)).to.deep.equal({type:literal});
       });
-      expect(compileTypeDeclaration("Unknown")).toEqual({type:"Mixed"});
-      expect(compileTypeDeclaration("String", "__type__")).toEqual({__type__:"String"});
+      expect(compileTypeDeclaration("Unknown")).to.deep.equal({type:"Mixed"});
+      expect(compileTypeDeclaration("String", "__type__")).to.deep.equal({__type__:"String"});
     });
 
-    test('Object definition', () => {
-      expect(compileTypeDeclaration({type : "String"})).toEqual({type:"String"});
-      expect(compileTypeDeclaration({type : "Unknown"})).toEqual({type:"Mixed"});
+    it('Object definition', () => {
+      expect(compileTypeDeclaration({type : "String"})).to.deep.equal({type:"String"});
+      expect(compileTypeDeclaration({type : "Unknown"})).to.deep.equal({type:"Mixed"});
       expect(compileTypeDeclaration({
         type : "String",
         unknown : 'unknown'
-      })).toEqual({
+      })).to.deep.equal({
         type : "String",
       });
 
       expect(compileTypeDeclaration({
         __type__ : "String",
         unknown : 'unknown'
-      }, "__type__")).toEqual({
+      }, "__type__")).to.deep.equal({
         __type__ : "String",
       });
 
@@ -55,7 +58,7 @@ describe('JSON data model compiler', () => {
         "index"    : true,
         "unique"   : true,
         "sparse"   : true
-      })).toEqual({
+      })).to.deep.equal({
         type : "String",
         "required" : true,
         "index"    : true,
@@ -68,7 +71,7 @@ describe('JSON data model compiler', () => {
         "index"    : "true",
         "unique"   : "true",
         "sparse"   : "true"
-      })).toEqual({
+      })).to.deep.equal({
         type : "String",
       });
 
@@ -82,7 +85,7 @@ describe('JSON data model compiler', () => {
         match     : 1234,
         minlength : "string",
         maxlength : "string"
-      })).toEqual({
+      })).to.deep.equal({
         type : "String",
       });
       expect(compileTypeDeclaration({
@@ -94,7 +97,7 @@ describe('JSON data model compiler', () => {
         match     : "pattern",
         minlength : 0,
         maxlength : 100
-      })).toEqual({
+      })).to.deep.equal({
         type : "String",
         default : "1234",
         lowercase : true,
@@ -111,13 +114,13 @@ describe('JSON data model compiler', () => {
         default : "invalid",
         min : "invalid",
         max : "invalid"
-      })).toEqual({
+      })).to.deep.equal({
         type : "Date",
       });
       expect(compileTypeDeclaration({
         type : "Date",
         default : "now",
-      })).toEqual({
+      })).to.deep.equal({
         type : "Date",
         default : "now",
       });
@@ -126,7 +129,7 @@ describe('JSON data model compiler', () => {
         default : "2018",
         min : 2010,
         max : "2018"
-      })).toEqual({
+      })).to.deep.equal({
         type : "Date",
         default : "2018",
         min : 2010,
@@ -139,7 +142,7 @@ describe('JSON data model compiler', () => {
         default : "1234",
         min : "string",
         max : "string"
-      })).toEqual({
+      })).to.deep.equal({
         type : "Number",
       });
       expect(compileTypeDeclaration({
@@ -147,7 +150,7 @@ describe('JSON data model compiler', () => {
         default : 1234,
         min : 0,
         max : 10000
-      })).toEqual({
+      })).to.deep.equal({
         type : "Number",
         default : 1234,
         min : 0,
@@ -158,13 +161,13 @@ describe('JSON data model compiler', () => {
       expect(compileTypeDeclaration({
         type : "Boolean",
         default : "1234",
-      })).toEqual({
+      })).to.deep.equal({
         type : "Boolean",
       });
       expect(compileTypeDeclaration({
         type : "Boolean",
         default : true,
-      })).toEqual({
+      })).to.deep.equal({
         type : "Boolean",
         default : true,
       });
@@ -174,14 +177,14 @@ describe('JSON data model compiler', () => {
         type : "Id",
         default : 1234,
         collection : 1234
-      })).toEqual({
+      })).to.deep.equal({
         type : "Id",
       });
       expect(compileTypeDeclaration({
         type : "Id",
         default : "1234",
         "collection" : "name"
-      })).toEqual({
+      })).to.deep.equal({
         type : "Id",
         default : "1234",
         collection : "name"
@@ -191,60 +194,60 @@ describe('JSON data model compiler', () => {
       expect(compileTypeDeclaration({
         type : "Mixed",
         default : 1234,
-      })).toEqual({
+      })).to.deep.equal({
         type : "Mixed",
         default : 1234,
       });
     });
 
-    test('Nested array declaration', () => {
-      expect(compileTypeDeclaration([])).toEqual([{type:"Mixed"}]);
-      expect(compileTypeDeclaration([{}])).toEqual([{type:"Mixed"}]);
-      expect(compileTypeDeclaration([{type:"Unknown"}])).toEqual([{type:"Mixed"}]);
-      expect(compileTypeDeclaration(["String"])).toEqual([{type:"String"}]);
-      expect(compileTypeDeclaration(["String", "Mixed"])).toEqual([{type:"String"}]);
-      expect(compileTypeDeclaration(["Number"], "__type__")).toEqual([{__type__:"Number"}]);
-      expect(compileTypeDeclaration([{type:"String"}, {type:"Number"}])).toEqual([{type:"String"}]);
+    it('Nested array declaration', () => {
+      expect(compileTypeDeclaration([])).to.deep.equal([{type:"Mixed"}]);
+      expect(compileTypeDeclaration([{}])).to.deep.equal([{type:"Mixed"}]);
+      expect(compileTypeDeclaration([{type:"Unknown"}])).to.deep.equal([{type:"Mixed"}]);
+      expect(compileTypeDeclaration(["String"])).to.deep.equal([{type:"String"}]);
+      expect(compileTypeDeclaration(["String", "Mixed"])).to.deep.equal([{type:"String"}]);
+      expect(compileTypeDeclaration(["Number"], "__type__")).to.deep.equal([{__type__:"Number"}]);
+      expect(compileTypeDeclaration([{type:"String"}, {type:"Number"}])).to.deep.equal([{type:"String"}]);
     });
 
-    test('Nested object declaration', () => {
+    it('Nested object declaration', () => {
       expect(compileTypeDeclaration({
         field1 : "Number",
         field2 : "String",
         field3 : "Unknown"
-      })).toEqual({
+      })).to.deep.equal({
         field1 : {type:"Number"},
         field2 : {type:"String"},
         field3 : {type:"Mixed"}
       });
 
-      expect(compileTypeDeclaration({})).toEqual({type:"Mixed"});
+      expect(compileTypeDeclaration({})).to.deep.equal({type:"Mixed"});
     });
 
-    test('Everything else is replaced by "Mixed"', () => {
-      expect(compileTypeDeclaration(() => {})).toEqual({type:"Mixed"});
+    it('Everything else is replaced by "Mixed"', () => {
+      expect(compileTypeDeclaration(() => {})).to.deep.equal({type:"Mixed"});
     });
   });
 
 
   describe('Schema declarations', () => {
-    test('Compile all fields', () => {
+    it('Compile all fields', () => {
       expect(compileSchemaDeclaration({
         field1 : "String",
         field2 : "Number",
         field3 : {type : "String", default : "value"}
-      })).toEqual({
+      })).to.deep.equal({
         field1 : {type : "String"},
         field2 : {type : "Number"},
         field3 : {type : "String", default : "value"}
       });
     });
 
-    test('Handle typeKey', () => {
+    it('Handle typeKey', () => {
       expect(compileSchemaDeclaration({
         field1 : {type : "String"},
         field3 : {__type__ : "String"}
-      }, "__type__")).toEqual({
+      }, "__type__")).to.deep.equal({
         field1 : {type : {__type__ : "String"}},
         field3 : {__type__ : "String"}
       });
@@ -252,52 +255,52 @@ describe('JSON data model compiler', () => {
   });
 
   describe('Options declarations', () => {
-    test('Handle timestamps option', () => {
+    it('Handle timestamps option', () => {
       expect(compileOptionsDeclaration({
         timestamps : true
-      }).timestamps).toEqual(true);
+      }).timestamps).to.deep.equal(true);
       expect(compileOptionsDeclaration({
         timestamps : false
-      }).timestamps).toEqual(false);
+      }).timestamps).to.deep.equal(false);
       expect(compileOptionsDeclaration({
         timestamps : 'string'
-      }).timestamps).toEqual(true);
+      }).timestamps).to.deep.equal(true);
       expect(compileOptionsDeclaration({
         // timestamps : undefined
-      }).timestamps).toEqual(true);
+      }).timestamps).to.deep.equal(true);
       expect(compileOptionsDeclaration({
         timestamps : {createdAt : "creationDate"}
-      }).timestamps).toEqual({createdAt : "creationDate", updatedAt : "updatedAt"});
+      }).timestamps).to.deep.equal({createdAt : "creationDate", updatedAt : "updatedAt"});
       expect(compileOptionsDeclaration({
         timestamps : {updatedAt : "string"}
-      }).timestamps).toEqual({createdAt : "createdAt", updatedAt : "string"});
+      }).timestamps).to.deep.equal({createdAt : "createdAt", updatedAt : "string"});
       expect(compileOptionsDeclaration({
         timestamps : {createdAt : "creationDate", updatedAt : "string"}
-      }).timestamps).toEqual({createdAt : "creationDate", updatedAt : "string"});
+      }).timestamps).to.deep.equal({createdAt : "creationDate", updatedAt : "string"});
     });
 
-    test('Handle typeKey option', () => {
+    it('Handle typeKey option', () => {
       expect(compileOptionsDeclaration({
         // typeKey : undefined
-      }).typeKey).toEqual("type");
+      }).typeKey).to.deep.equal("type");
       expect(compileOptionsDeclaration({
         typeKey : "__type__"
-      }).typeKey).toEqual("__type__");
+      }).typeKey).to.deep.equal("__type__");
     });
   });
 
   describe('Collection declaration', () => {
-    test('Collection', () => {
+    it('Collection', () => {
       expect(compileCollection({
         schema : {field1:"String", field2:{type:"Number"}}
-      })).toEqual({
+      })).to.deep.equal({
         options : {typeKey:"type", timestamps : true},
         schema  : {field1 : {type:"String"}, field2:{type:"Number"}}
       });
       expect(compileCollection({
         options : {typeKey : "__type__"},
         schema  : {field1:"String", field2:{type:"Number"}}
-      })).toEqual({
+      })).to.deep.equal({
         options : {typeKey:"__type__", timestamps : true},
         schema  : {field1 : {__type__:"String"}, field2:{type:{__type__:"Number"}}}
       });
@@ -305,7 +308,7 @@ describe('JSON data model compiler', () => {
   });
 
   describe('Model declaration', () => {
-    test('Complete model', () => {
+    it('Complete model', () => {
       expect(compileDataModel({
         "user" : {
           schema : {
@@ -322,7 +325,7 @@ describe('JSON data model compiler', () => {
             "expiresAt" : "Date"
           }
         }
-      })).toEqual({
+      })).to.deep.equal({
         "user" : {
           options : {
             timestamps : true,

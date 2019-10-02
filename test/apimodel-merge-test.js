@@ -1,20 +1,23 @@
-const { mergeModels } = require('./merge');
+const { mergeModels } = require('../src/apiModel/merge.js');
+
+const chai   = require('chai');
+const expect = chai.expect;
 
 describe('mergeModels', () => {
-  test('mergeModels', () => {
+  it('mergeModels', () => {
     const fn = mergeModels;
 
     expect(fn({
     }, {
       'key' : 'value'
-    })).toEqual({
+    })).to.deep.equal({
       'key' : 'value'
     });
 
     expect(fn({
       'key' : 'oldValue'
     }, {
-    })).toEqual({
+    })).to.deep.equal({
       'key' : 'oldValue'
     });
 
@@ -22,7 +25,7 @@ describe('mergeModels', () => {
       'key' : ['oldValue']
     }, {
       'key' : 'newValue'
-    })).toEqual({
+    })).to.deep.equal({
       'key' : ['oldValue', 'newValue']
     });
 
@@ -30,7 +33,7 @@ describe('mergeModels', () => {
       'key' : 'oldValue'
     }, {
       'key' : ['newValue']
-    })).toEqual({
+    })).to.deep.equal({
       'key' : ['oldValue', 'newValue']
     });
 
@@ -38,7 +41,7 @@ describe('mergeModels', () => {
       'key' : ['oldValue']
     }, {
       'key' : ['newValue']
-    })).toEqual({
+    })).to.deep.equal({
       'key' : ['oldValue', 'newValue']
     });
 
@@ -46,7 +49,7 @@ describe('mergeModels', () => {
       'key' : 'oldValue'
     }, {
       'key' : 'newValue'
-    })).toEqual({
+    })).to.deep.equal({
       'key' : 'newValue'
     });
 
@@ -54,7 +57,7 @@ describe('mergeModels', () => {
       'key' : 1234
     }, {
       'key' : 456
-    })).toEqual({
+    })).to.deep.equal({
       'key' : 456
     });
 
@@ -68,7 +71,7 @@ describe('mergeModels', () => {
       'nested' : {
         'key2' : 456
       }
-    })).toEqual({
+    })).to.deep.equal({
       'key' : '456',
       'nested' : {
         'key2' : 456
@@ -85,7 +88,7 @@ describe('mergeModels', () => {
       'nested' : {
         'key3' : 456
       }
-    })).toEqual({
+    })).to.deep.equal({
       'key' : '456',
       'nested' : {
         'key2' : 234,
@@ -100,7 +103,7 @@ describe('mergeModels', () => {
       }
     }, {
       'key' : '456',
-    })).toEqual({
+    })).to.deep.equal({
       'key' : '456',
       'nested' : {
         'key2' : 234
@@ -114,7 +117,7 @@ describe('mergeModels', () => {
       'nested' : {
         'key2' : 234
       }
-    })).toEqual({
+    })).to.deep.equal({
       'key' : '456',
       'nested' : {
         'key2' : 234
@@ -132,7 +135,7 @@ describe('mergeModels', () => {
           }
         }
       }
-    })).toEqual({
+    })).to.deep.equal({
       'key' : '456',
       'nested' : {
         'nested' : {
