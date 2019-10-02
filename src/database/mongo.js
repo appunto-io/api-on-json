@@ -55,7 +55,13 @@ class Mongo {
       throw new Error(message);
     }
 
-    const Model = this.models[collection];
+    var Model;
+    if (this.models) {
+      Model = this.models[collection];
+    }
+    else {
+      Model = this.database.model(collection);
+    }
 
     if(!Model) {
       const message = `Collection ${collection} is not defined in the database`;
