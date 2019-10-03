@@ -1,5 +1,5 @@
-const Mongo  = require('./mongo.js');
-const Rethink  = require('./rethink.js');
+const Mongo   = require('./mongo.js');
+const Rethink = require('./rethink.js');
 
 
 

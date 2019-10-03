@@ -11,14 +11,10 @@ async function dataModelToRethink(model, database) {
     if (!tableList.includes(name)) {
       await database.tableCreate(name).run();
     }
-
     models[name] = definition;
   }
-
   return models;
 }
-
-
 
 class Rethink {
   constructor(host, port, dbName, options) {
@@ -36,8 +32,6 @@ class Rethink {
       host: this.host,
       db:   this.dbName
     });
-
-    return this;
   }
 
   async init(dataModel) {
@@ -49,6 +43,7 @@ class Rethink {
 
     var models = await dataModelToRethink(dataModel, this.database);
     this.models = models;
+    return this;
   }
 
   /*------------------------------------------------------------
@@ -350,6 +345,5 @@ class Rethink {
     return changes['_data'][0][0]['new_val'];
   }
 }
-
 
 module.exports = Rethink

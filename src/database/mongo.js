@@ -169,14 +169,15 @@ class Mongo {
       If sorting in the db the secondary sorting is always id_
     */
     var sortingBy = [];
-
     if (Array.isArray(sort)) {
-      for (let i = 0; i < sort.length; i++) {
+      for (let i = 0; i < sort.length; i = i + 1) {
         var [ elem_sort, elem_order ] = sort[i].split(',');
         elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
-        if (Model[elem_sort]) {
-          sortingBy.push([elem_sort, elem_order]);
-        }
+        Model.schema.eachPath(field => {
+          if (elem_sort === field) {
+            sortingBy.push([elem_sort, elem_order]);
+          }
+        });
       }
     }
     else {
