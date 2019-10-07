@@ -468,15 +468,17 @@ describe('api-on-json test suite', async function() {
     const dbName = process.env.DB_NAME;
 
     let db = new Rethink(hostname, port, dbName);
-    before(async() => {
-      this.api2 = await new API(dataModels);
-      await this.api2.setDatabase(db);
-      await this.api2.listen(3000);
+
+    before((done) => {
+      this.api2 = new API(dataModels);
+      this.api2.setDatabase(db);
+      this.api2.listen(3000).then(() => {
+        done();
+      });
     });
 
     after(async () => {
       await this.api2.close();
-      db.database.getPoolMaster().drain();
     });
 
     describe('Empty database', async function() {

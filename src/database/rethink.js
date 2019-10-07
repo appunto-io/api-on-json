@@ -120,7 +120,7 @@ class Rethink {
     const model = this.models[collection]['schema'];
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
     order      = (order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
-    sort       = sort ? sort : 'id';
+    sort       = sort ? sort : [];
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
 
@@ -211,7 +211,7 @@ class Rethink {
     const count = await this.database.table(collection).count().run();
     var last = results.length > 0 ? results[results.length - 1].id : '';
 
-    if (sort) {
+    if (sort.length > 0) {
       const data       = results.length > 0 ? results[results.length - 1][sort] : '';
       let encoded_data = encodeURIComponent(data);
 

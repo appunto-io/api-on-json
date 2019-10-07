@@ -4,8 +4,8 @@
   "description": "API generator",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 10000 --exit",
-    "single-test": "mocha $1 --timeout 10000 --exit"
+    "test": "mocha --timeout 50000 --exit",
+    "single-test": "mocha $1 --timeout 50000 --exit"
   },
   "repository": {
     "type": "git",
