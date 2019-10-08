@@ -1,57 +1,10 @@
-const mongoose                 = require('mongoose');
-const { Mongo }                = require('../src/database/database.js');
-const { MongoMemoryServer }    = require('mongodb-memory-server');
-const databaseGenericTestSuite = require('./database-generic-test.js');
-
 const chai   = require('chai');
 const expect = chai.expect;
 
-/**********************************************
-  Testsuite
-*/
-
-const carSchema = new mongoose.Schema({
-  'brand' : {type : 'String', 'required' : true},
-  'model' : {type: 'String', 'default' : 'Default Model'},
-  'serial': {type: 'String', 'unique': true}
-});
-
-/**********************************************
-Initialization of an in-memory MongoDB server
-that backs the API to be tested
-*/
-describe('mongo database class test suite', async function() {
-  var id;
-  let db;
-  let mongoServer;
-
-  const options = { useNewUrlParser : true ,
-                    useUnifiedTopology: true,
-                    useFindAndModify: false};
-
-  before((done) => {
-    mongoServer = new MongoMemoryServer();
-    mongoServer
-    .getConnectionString()
-    .then(async(mongoUri) => {
-      db = new Mongo(mongoUri, options);
-      return await db.connect();
-    })
-    .then(async() => {
-      await db.database.model('Car', carSchema);
-      done()
-    });
-  });
-
-  after(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-  });
-
-
-  describe('Generic tests', async function() {
-    it('Should run the generic testsuite', async function() {
-
+async function databaseGenericTestSuite(db) {
+  const createdDocuments = [];
+  describe('Empty database', async function() {
+    it('Should return an empty list', async function() {
       const result = await db.readMany('Car');
 
       expect(result).to.be.an('object');
@@ -76,6 +29,8 @@ describe('mongo database class test suite', async function() {
       expect(result.model).to.be.equal('Model S');
       expect(result.serial).to.be.equal('A');
       id = result.id;
+
+      createdDocuments.push(result);
     });
 
     it('Should use defaults on missing fields', async function() {
@@ -83,6 +38,8 @@ describe('mongo database class test suite', async function() {
       expect(result.brand).to.be.equal('Audi');
       expect(result.model).to.be.equal('Default Model');
       expect(result.serial).to.be.equal('B');
+
+      createdDocuments.push(result);
     });
 
     it('Should ignore unknown fields', async function() {
@@ -91,6 +48,8 @@ describe('mongo database class test suite', async function() {
       expect(result.brand).to.be.equal('Alpha Romeo');
       expect(result.serial).to.be.equal('C');
       expect(result.price).to.be.undefined;
+
+      createdDocuments.push(result);
     });
 
     it('Should fail when required fields are missing', async function() {
@@ -117,6 +76,7 @@ describe('mongo database class test suite', async function() {
   READ
   */
   describe('Retrieve elements', async function() {
+
     it('Should retrieve one element by id', async function() {
       const result = await db.readOne('Car', id);
 
@@ -136,17 +96,9 @@ describe('mongo database class test suite', async function() {
       expect(result.documents[1]).to.be.an('object');
       expect(result.documents[2]).to.be.an('object');
 
-      expect(result.documents[0].brand).to.be.equal('Tesla');
-      expect(result.documents[1].brand).to.be.equal('Audi');
-      expect(result.documents[2].brand).to.be.equal('Alpha Romeo');
-
-      expect(result.documents[0].model).to.be.equal('Model S');
-      expect(result.documents[1].model).to.be.equal('Default Model');
-      expect(result.documents[2].model).to.be.equal('Default Model');
-
-      expect(result.documents[0].serial).to.be.equal('A');
-      expect(result.documents[1].serial).to.be.equal('B');
-      expect(result.documents[2].serial).to.be.equal('C');
+      for (let i = 0; i < createdDocuments.length; i++) {
+        expect(createdDocuments).to.deep.include(result.documents[i]);
+      }
 
       expect(result.cursor).to.be.equal(result.documents[result.documents.length - 1].id);
     });
@@ -175,15 +127,6 @@ describe('mongo database class test suite', async function() {
       expect(result.documents[1]).to.be.an('object');
       expect(result.documents[2]).to.be.undefined;
 
-      expect(result.documents[0].brand).to.be.equal('Tesla');
-      expect(result.documents[1].brand).to.be.equal('Audi');
-
-      expect(result.documents[0].model).to.be.equal('Model S');
-      expect(result.documents[1].model).to.be.equal('Default Model');
-
-      expect(result.documents[0].serial).to.be.equal('A');
-      expect(result.documents[1].serial).to.be.equal('B');
-
       page = 2;
       const result2 = await db.readMany('Car', {pageSize, page});
 
@@ -196,18 +139,7 @@ describe('mongo database class test suite', async function() {
       expect(result2.documents[0]).to.be.an('object');
       expect(result2.documents[1]).to.be.an('object');
       expect(result2.documents[2]).to.be.undefined;
-
-      expect(result2.documents[0].brand).to.be.equal('Peugeot');
-      expect(result2.documents[1].brand).to.be.equal('Mercedes');
-
-      expect(result2.documents[0].model).to.be.equal('208');
-      expect(result2.documents[1].model).to.be.equal('AMG');
-
-      expect(result2.documents[0].serial).to.be.equal('E');
-      expect(result2.documents[1].serial).to.be.equal('F');
     });
-
-
 
     it('Should get the element according to their name', async function() {
       const result = await db.readMany('Car', { sort: 'brand' });
@@ -346,6 +278,8 @@ describe('mongo database class test suite', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
+      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+
       const cursor = 'brand' + ';' + documents[4].brand + ';' + documents[4].id;
       const result = await db.readMany('Car', { cursor, sort: 'brand', order: 'desc' });
 
@@ -354,25 +288,14 @@ describe('mongo database class test suite', async function() {
 
       expect(result.documents).to.be.an('array');
 
-      expect(result.documents[0]).to.be.an('object');
-      expect(result.documents[1]).to.be.an('object');
-      expect(result.documents[2]).to.be.an('object');
-      expect(result.documents[3]).to.be.an('object');
-
-      expect(result.documents[0].brand).to.be.equal('Mercedes');
-      expect(result.documents[1].brand).to.be.equal('Ford');
-      expect(result.documents[2].brand).to.be.equal('Audi');
-      expect(result.documents[3].brand).to.be.equal('Alpha Romeo');
-
-      expect(result.documents[0].model).to.be.equal('AMG');
-      expect(result.documents[1].model).to.be.equal('Anglia');
-      expect(result.documents[2].model).to.be.equal('Default Model');
-      expect(result.documents[3].model).to.be.equal('Default Model');
-
-      expect(result.documents[0].serial).to.be.equal('F');
-      expect(result.documents[1].serial).to.be.equal('G');
-      expect(result.documents[2].serial).to.be.equal('B');
-      expect(result.documents[3].serial).to.be.equal('C');
+      if (result.documents[0]) {
+        expect(result.documents[0]).to.be.an('object');
+        expect(result.documents[0].brand < documents[4].brand).to.be.true;
+      }
+      if (result.documents[1]) {
+        expect(result.documents[1]).to.be.an('object');
+        expect(result.documents[1].brand < result.documents[0].brand).to.be.true;
+      }
     });
   });
 
@@ -383,6 +306,8 @@ describe('mongo database class test suite', async function() {
     it('Should update the element at id', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
+
+      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
 
       const result = await db.update('Car', documents[2].id, {brand: 'Daccia', model: 'Sandero', serial:'Z'});
 
@@ -396,11 +321,12 @@ describe('mongo database class test suite', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
+      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+
       const result = await db.patch('Car', documents[2].id, { brand: 'Dacia'} );
 
       expect(result.brand).to.be.equal('Dacia');
-      expect(result.model).to.be.equal('Sandero');
-      expect(result.serial).to.be.equal('Z');
+      expect(result.serial).to.be.equal(documents[2].serial);
       expect(result.id.toString()).to.be.equal(documents[2].id.toString());
     });
 
@@ -437,12 +363,11 @@ describe('mongo database class test suite', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
+      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+
       const result = await db.remove('Car', documents[1].id);
 
-      expect(result.brand).to.be.equal(documents[1].brand);
-      expect(result.model).to.be.equal(documents[1].model);
-      expect(result.serial).to.be.equal(documents[1].serial);
-      expect(result.id.toString()).to.be.equal(documents[1].id.toString());
+      expect(result.deleted).to.be.equal(1);
 
       try {
         await db.readOne('Car', documents[1].id);
@@ -452,4 +377,6 @@ describe('mongo database class test suite', async function() {
       }
     });
   });
-});
+}
+
+module.exports = databaseGenericTestSuite

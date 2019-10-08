@@ -1,6 +1,7 @@
-const restify = require('restify');
-const jwt     = require('jsonwebtoken');
-const { getAllowedMethods, testRoles } = require('../apiModel/index.node.js');
+const restify               = require('restify');
+const jwt                   = require('jsonwebtoken');
+const { getAllowedMethods } = require('../apiModel/methods.js');
+const { testRoles }         = require('../apiModel/roles.js');
 
 const httpToServerMethod = method => ({
   'GET'     : 'get',

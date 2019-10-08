@@ -6,10 +6,23 @@ async function dataModelToRethink(model, database) {
   for (var i = 0; i < entries.length; i = i + 1) {
     const name       = entries[i][0];
     const definition = entries[i][1];
+    const schema     = definition['schema'];
+    const fields     = Object.entries(schema);
 
-    //If the table already exists with the same name no error rased but the dBModel will take the new def
+    //If the table already exists with the same name no error raised but the dBModel will take the new def
     if (!tableList.includes(name)) {
       await database.tableCreate(name).run();
+    }
+
+    const indexList = await database.table(name).indexList().run();
+    for (var j = 0; j < fields.length; j = j + 1) {
+      const field = fields[j][0];
+      const spec  = fields[j][1];
+
+      if (!indexList.includes(field) && ('index' in spec || 'unique' in spec)) {
+          await database.table(name).indexCreate(field).run();
+          await database.table(name).indexWait(field).run();
+      }
     }
     models[name] = definition;
   }
@@ -43,7 +56,6 @@ class Rethink {
 
     var models = await dataModelToRethink(dataModel, this.database);
     this.models = models;
-    return this;
   }
 
   /*------------------------------------------------------------
@@ -54,23 +66,23 @@ class Rethink {
     const obj     = {};
     const model   = this.models[collection]['schema'];
     const options = this.models[collection]['options'];
-    const entries = Object.entries(model);
+    const fields = Object.entries(model);
 
-    for (var i = 0; i < entries.length; i = i + 1) {
-      const field = entries[i][0];
-      const spec  = entries[i][1];
+    for (var i = 0; i < fields.length; i = i + 1) {
+      const field = fields[i][0];
+      const spec  = fields[i][1];
 
-      let { required, unique, default: default_value } = spec;
+      let { required, unique, default: defaultValue } = spec;
 
-      required      = required      ? required      : false;
-      unique        = unique        ? unique        : false;
-      default_value = default_value ? default_value : false;
+      required      = !!required;
+      unique        = !!unique;
+
 
       if (field in data) {
         obj[field] = data[field];
       }
-      else if (default_value) {
-          obj[field] = default_value;
+      else if ('default' in spec) {
+          obj[field] = defaultValue;
       }
 
       if (required) {
@@ -81,9 +93,10 @@ class Rethink {
           throw new Error(message);
         }
       }
+
       if (unique) {
-        const field_exist = await this.database.table(collection).filter(this.database.row(field).eq(obj[field])).run();
-        if (field_exist.length > 0) {
+        const fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        if (fieldExist.length > 0) {
           const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
 
           console.error(message);
@@ -259,8 +272,8 @@ class Rethink {
         }
       }
       if (unique) {
-        const field_exist = await this.database.table(collection).filter(this.database.row(field).eq(obj[field])).run();
-        if (field_exist.length > 0) {
+        const fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        if (fieldExist.length > 0) {
           const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
 
           console.error(message);
@@ -272,7 +285,7 @@ class Rethink {
     if (options['timestamps']) {
       const createdAt = options['timestamps']['createdAt'] ? options['timestamps']['createdAt'] : 'createdAt';
       const updatedAt = options['timestamps']['updatedAt'] ? options['timestamps']['updatedAt'] : 'updatedAt';
-      obj[createdAt] = obj[createdAt] ? obj[createdAt] : new Date();
+      obj[createdAt] = new Date();
       obj[updatedAt] = new Date();
     }
 
@@ -318,8 +331,8 @@ class Rethink {
         }
       }
       if (unique && obj[field]) {
-        const field_exist = await this.database.table(collection).filter(this.database.row(field).eq(obj[field])).run();
-        if (field_exist.length > 0) {
+        const fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        if (fieldExist.length > 0) {
           const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
 
           console.error(message);

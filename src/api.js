@@ -1,11 +1,10 @@
-const { createServer }           = require('./server/server.js')
-const { compileDataModel }       = require('./dataModel/index.node.js');
-const {
-        createLibraryFromDataModel,
-        createApiFromDataModel,
-        compileApiModel,
-        mergeModels,
-        hydrate }                = require('./apiModel/index.node.js');
+const { createServer }              = require('./server/server.js')
+const { compileDataModel }          = require('./dataModel/compiler.js');
+const { compileApiModel }           = require('./apiModel/compiler.js');
+const { mergeModels }               = require('./apiModel/merge')
+const { hydrate }                   = require('./apiModel/hydrate.js');
+const { createLibraryFromDataModel,
+        createApiFromDataModel }    = require('./apiModel/datamodel/data.js');
 
 
 class API {

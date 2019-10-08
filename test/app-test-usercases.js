@@ -70,416 +70,8 @@ async function erase(collection, id) {
   Testsuite
 */
 
-const dataModels = {
-  'cars': {
-    schema: {
-      'brand' : {type : 'String', 'required' : true},
-      'model' : {type: 'String', 'default' : 'Default Model'},
-      'serial': {type: 'String', 'unique': true}
-    }
-  },
-  'fruits' : {
-    options : {
-      timestamps : {
-        createdAt : 'creationDate',
-        updatedAt : 'modificationDate'
-      }
-    },
-    schema : {
-      name : 'String'
-    }
-  },
-  'users' : {
-    options : {
-      timestamps : false
-    },
-    schema : {
-      'name' : {type: 'String', 'unique': true}
-    }
-  },
-  'flowers' : {
-    schema : {
-      name : {type: 'String', 'required': true},
-      age_in_days: 'Number',
-      serial : {type: 'String', 'unique': true}
-    }
-  }
-};
-
-
-describe('api-on-json test suite', async function() {
-
-  /**********************************************
-  Initialization of an in-memory MongoDB server
-  that backs the API to be tested
-  */
-  describe('api-on-json test suite mongoose', async function() {
-    var id;
-    let db;
-    let mongoServer;
-
-    const options = { useNewUrlParser : true ,
-                      useUnifiedTopology: true,
-                      useFindAndModify: false};
-    before((done) => {
-      mongoServer = new MongoMemoryServer();
-      mongoServer
-      .getConnectionString()
-      .then((mongoUri) => {
-        db = new Mongo(mongoUri, options);
-        return db.connect();
-      })
-      .then(async() => {
-        this.api = new API(dataModels);
-        await this.api.setDatabase(db);
-        await this.api.listen(3000);
-        done()});
-    });
-    after(async () => {
-      await this.api.close();
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-
-    describe('Empty database', async function() {
-      it('Should return an empty list', async function() {
-        const response = await get('cars');
-
-        const { data, pagination } = response.body;
-
-        expect(response).to.have.status(200);
-        expect(data).to.be.an('array');
-        expect(data).to.be.empty;
-        expect(pagination.itemsCount).to.be.equal(0);
-      });
-    });
-
-
-    /********
-    CREATE
-    */
-    describe('Create elements', async function() {
-      it('Should add one element to the database', async function() {
-        const response = await post('cars', {
-          brand : 'Tesla',
-          model : 'Model S',
-          serial : 'AAAAA',
-        });
-
-        expect(response).to.have.status(200);
-        expect(response.body.brand).to.be.equal('Tesla');
-        expect(response.body.model).to.be.equal('Model S');
-        expect(response.body.serial).to.be.equal('AAAAA');
-        expect(response.body.createdAt).to.be.a('string');
-        expect(response.body.updatedAt).to.be.a('string');
-        id = response.body.id;
-      });
-
-      it('Should use defaults on missing fields', async function() {
-        const response = await post('cars', {brand: 'Audi'});
-
-        expect(response).to.have.status(200);
-        expect(response.body.brand).to.be.equal('Audi');
-        expect(response.body.model).to.be.equal('Default Model');
-        expect(response.body.serial).to.be.undefined;
-        expect(response.body.createdAt).to.be.a('string');
-        expect(response.body.updatedAt).to.be.a('string');
-      });
-
-      it('Should be possible to change default timestamp names', async function() {
-        const response = await post('fruits', {name : 'Apple'});
-
-        expect(response).to.have.status(200);
-        expect(response.body.name).to.be.equal('Apple');
-        expect(response.body.id).to.be.a('string');
-        expect(response.body.createdAt).to.be.undefined;
-        expect(response.body.updatedAt).to.be.undefined;
-        expect(response.body.creationDate).to.be.a('string');
-        expect(response.body.modificationDate).to.be.a('string');
-      });
-
-      it('Should be possible to avoid default timestamps', async function() {
-        const response = await post('users', {name : 'Mario'});
-
-        expect(response).to.have.status(200);
-        expect(response.body.name).to.be.equal('Mario');
-        expect(response.body.id).to.be.a('string');
-        expect(response.body.createdAt).to.be.undefined;
-        expect(response.body.updatedAt).to.be.undefined;
-      });
-
-      it('Should ignore unknown fields', async function() {
-        const response = await post('users', {name: 'Luigi', job: 'plomber'});
-
-        expect(response).to.have.status(200);
-        expect(response.body.name).to.be.equal('Luigi');
-        expect(response.body.job).to.be.undefined;
-        expect(response.body.id).to.be.a('string');
-        expect(response.body.createdAt).to.be.undefined;
-        expect(response.body.updatedAt).to.be.undefined;
-      });
-
-      it('Should fail when required fields are missing', async function() {
-        const response = await post('cars', {model: 'A1', serial: 'BBBBB'});
-
-        expect(response).to.have.status(400);
-      });
-
-      it('Should fail on duplicated unique field', async function() {
-        const response = await post('users', {name: 'Mario'});
-
-        expect(response).to.have.status(400);
-      });
-    });
-
-
-    /********
-    READ
-    */
-    let createdDocuments;
-    const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
-    const ages        = [   20   ,    21 ,    21 ,    21  ,  50   , 25     ,    18      ,   23      ,   30];
-    const serials     = [  'A'   ,   'B'  ,  'C',  'D'    ,  'E'  ,   'F'  ,    'G'     ,     'H'    ,  'I'];
-
-    describe('Retrieve elements', async function() {
-      before(async function() {
-        const responses = [];
-
-        for (let index in flowerNames) {
-          responses[index] = await post('flowers', {name: flowerNames[index], age_in_days: ages[index], serial: serials[index]});
-        }
-
-        createdDocuments = responses.map(({body}) => body);
-      });
-
-      it('Should retrieve one element by id', async function() {
-        const response = await getId('flowers', createdDocuments[0].id);
-
-        expect(response).to.have.status(200);
-        expect(response.body.name).to.be.equal('Daisy');
-        expect(response.body.id).to.be.a('string');
-        expect(response.body.createdAt).to.be.a('string');
-        expect(response.body.updatedAt).to.be.a('string');
-      });
-
-      it('Should retrieve all elements', async function() {
-        const response = await get('flowers');
-
-        expect(response).to.have.status(200);
-
-        for(let index in flowerNames) {
-          expect(response.body.data[index].name).to.be.equal(flowerNames[index]);
-        }
-
-        expect(response.body.pagination.itemsCount).to.be.equal(flowerNames.length);
-      });
-
-
-      /*******
-      QUERY
-      */
-      it('Should handle pagination', async function() {
-        let page = 0,
-        pageSize = 2;
-
-        const response = await query('flowers', {pageSize, page});
-
-        expect(response).to.have.status(200);
-        expect(response.body.data.map(({name}) => name)).to.deep.equal(flowerNames.slice(page*pageSize, page*pageSize+pageSize));
-        expect(response.body.data.length).to.be.equal(pageSize);
-
-        page = 3;
-        const response2 = await query('flowers', {pageSize, page});
-
-        expect(response2).to.have.status(200);
-        expect(response2.body.data.map(({name}) => name)).to.deep.equal(flowerNames.slice(page*pageSize, page*pageSize+pageSize));
-        expect(response2.body.data.length).to.be.equal(pageSize);
-      });
-
-      it('Should get the elements after the cursor', async function() {
-        let sort = 'name',
-        cursor = createdDocuments[3].id;
-
-        const response = await query('flowers', { cursor });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data[0].name).to.be.equal(flowerNames[4]);
-        expect(response.body.data[1].name).to.be.equal(flowerNames[5]);
-      });
-
-      it('Should get a response with an empty data', async function() {
-        let last_id = createdDocuments[createdDocuments.length - 1].id;
-
-        const response = await query('flowers', { cursor: last_id });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data).to.be.empty;
-      });
-
-      it('Should get the element according to their name', async function() {
-        const response = await query('flowers', { sort: 'name' });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data[0].name).to.be.equal('Carnation');
-        expect(response.body.data[1].name).to.be.equal('Chrysanthemum');
-        expect(response.body.data[2].name).to.be.equal('Daisy');
-      });
-
-      it('Should get the element in descandant order', async function() {
-        const response = await query('flowers', { sort: 'name', order: 'desc' });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data[0].name).to.be.equal('Tulip');
-        expect(response.body.data[1].name).to.be.equal('Tulip');
-        expect(response.body.data[2].name).to.be.equal('Rose');
-      });
-
-      it('Should get the element with highest value1 but lower value2', async function() {
-        const value1 = 'name,desc';
-        const value2 = 'age_in_days,asc';
-
-        const response = await query('flowers', { sort: [value1, value2] });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data[0].name).to.be.equal('Tulip');
-        expect(response.body.data[1].name).to.be.equal('Tulip');
-        expect(response.body.data[0].age_in_days).to.be.equal(21);
-        expect(response.body.data[1].age_in_days).to.be.equal(50);
-      });
-
-
-      /******
-      CURSOR
-      */
-      it('Should get a all elements which validate the condition, starting at id', async function() {
-        let id = createdDocuments[2].id;
-
-        let cursor = 'age_in_days' + ';' + '21' + ';' + id;
-
-        const response = await query('flowers', { cursor });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data).not.to.be.empty;
-        expect(response.body.data.map(({id}) => id)).to.deep.equal([createdDocuments[3].id, createdDocuments[4].id, createdDocuments[5].id, createdDocuments[7].id, createdDocuments[8].id]);
-        expect(response.body.data.map(({id}) => id)).not.to.deep.equal([createdDocuments[1].id, createdDocuments[2].id, createdDocuments[5].id]);
-      });
-
-      it('Should get an empty data because no more elements after cursor', async function() {
-        const get_response = await get('flowers');
-        const last         = get_response.body.pagination.cursor;
-
-        const response = await query('flowers', { cursor: last });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data).to.be.empty;
-      });
-
-      it('Should get all elements after cursor', async function() {
-        const cursor = 'name' + ';' + createdDocuments[4].name + ';' + createdDocuments[4].id;
-
-        const response = await query('flowers', { cursor, order: 'desc' });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data.map(({id}) => id)).not.to.deep.equal([createdDocuments[4].id, createdDocuments[3].id]);
-      });
-
-      it('Should get the element in orderby name and in descandant order starting after cursor', async function() {
-        const cursor = 'name' + ';' + createdDocuments[1].name + ';' + createdDocuments[1].id;
-        const response = await query('flowers', { cursor, sort: 'name', order: 'desc' });
-
-        expect(response).to.have.status(200);
-        expect(response.body.data).to.be.an('array');
-        expect(response.body.data[0].name).to.be.equal('Orchid');
-        expect(response.body.data[1].name).to.be.equal('Lily');
-        expect(response.body.data[2].name).to.be.equal('Hyacinth');
-      });
-    });
-
-    /********
-    UPDATE
-    */
-    describe('Update elements', async function() {
-      it('Should update the element at id', async function() {
-        const response = await put('flowers', createdDocuments[0].id, {name: 'Sunflower', age_in_days: 24});
-
-        expect(response).to.have.status(200);
-        expect(response.body.name).to.be.equal('Sunflower');
-        expect(response.body.age_in_days).to.be.equal(24);
-        expect(response.body.id).to.be.a('string');
-        expect(response.body.id).to.be.equal(createdDocuments[0].id);
-        expect(response.body.createdAt).to.be.a('string');
-        expect(response.body.updatedAt).to.be.a('string');
-      });
-
-      it('Should only change one field of the element at id', async function() {
-        const response = await patch('flowers', createdDocuments[0].id, { name: 'Daisy'} );
-
-        expect(response).to.have.status(200);
-        expect(response.body.name).to.be.equal('Daisy');
-        expect(response.body.age_in_days).to.be.equal(24);
-        expect(response.body.id).to.be.a('string');
-        expect(response.body.id).to.be.equal(createdDocuments[0].id);
-        expect(response.body.createdAt).to.be.a('string');
-        expect(response.body.updatedAt).to.be.a('string');
-      });
-
-      it('Should fail when required fields are missing', async function() {
-        const response = await put('flowers', createdDocuments[0].id, {age_in_days: 3});
-
-        expect(response).to.have.status(400);
-      });
-
-      it('Should fail on duplicated unique field', async function() {
-        const response = await put('flowers', createdDocuments[1], {name: 'Sunflower', serial: 'A'});
-
-        expect(response).to.have.status(400);
-      });
-    });
-
-
-    /********
-    DELETE
-    */
-    describe('Delete elements', async function() {
-      it('Should delete the element at id', async function() {
-        const response = await erase('flowers', createdDocuments[0].id);
-
-        expect(response).to.have.status(200);
-
-        const response2 = await getId('flowers', createdDocuments[0].id);
-
-        expect(response2).to.have.status(404);
-      });
-    });
-  });
-
-  describe('api-on-json test suite rethinkdb', async function() {
-    var id;
-
-    const hostname = process.env.HOST;
-    const port = process.env.PORT;
-    const dbName = process.env.DB_NAME;
-
-    let db = new Rethink(hostname, port, dbName);
-
-    before((done) => {
-      this.api2 = new API(dataModels);
-      this.api2.setDatabase(db);
-      this.api2.listen(3000).then(() => {
-        done();
-      });
-    });
-
-    after(async () => {
-      await this.api2.close();
-    });
+async function databaseTestSuite() {
+  describe('generic api-on-json test suite', async function() {
 
     describe('Empty database', async function() {
       it('Should return an empty list', async function() {
@@ -801,5 +393,105 @@ describe('api-on-json test suite', async function() {
         expect(response2).to.have.status(404);
       });
     });
+  });
+}
+
+
+const dataModels = {
+  'cars': {
+    schema: {
+      'brand' : {type : 'String', 'required' : true},
+      'model' : {type: 'String', 'default' : 'Default Model'},
+      'serial': {type: 'String', 'unique': true}
+    }
+  },
+  'fruits' : {
+    options : {
+      timestamps : {
+        createdAt : 'creationDate',
+        updatedAt : 'modificationDate'
+      }
+    },
+    schema : {
+      name : 'String'
+    }
+  },
+  'users' : {
+    options : {
+      timestamps : false
+    },
+    schema : {
+      'name' : {type: 'String', 'unique': true}
+    }
+  },
+  'flowers' : {
+    schema : {
+      name : {type: 'String', 'required': true},
+      age_in_days: 'Number',
+      serial : {type: 'String', 'unique': true}
+    }
+  }
+};
+
+
+describe('api-on-json test suite', async function() {
+
+  /**********************************************
+  Initialization of an in-memory MongoDB server
+  that backs the API to be tested
+  */
+  describe('api-on-json test suite mongoose', async function() {
+    var id;
+    let db;
+    let mongoServer;
+
+    const options = { useNewUrlParser : true ,
+                      useUnifiedTopology: true,
+                      useFindAndModify: false};
+    before((done) => {
+      mongoServer = new MongoMemoryServer();
+      mongoServer
+      .getConnectionString()
+      .then((mongoUri) => {
+        db = new Mongo(mongoUri, options);
+        return db.connect();
+      })
+      .then(async() => {
+        this.api = new API(dataModels);
+        await this.api.setDatabase(db);
+        await this.api.listen(3000);
+        done()});
+    });
+    after(async () => {
+      await this.api.close();
+      await mongoose.disconnect();
+      await mongoServer.stop();
+    });
+
+    databaseTestSuite();
+  });
+
+  describe('api-on-json test suite rethinkdb', async function() {
+    var id;
+
+    const hostname = process.env.HOST;
+    const port = process.env.PORT;
+    const dbName = process.env.DB_NAME;
+
+    let db = new Rethink(hostname, port, dbName);
+
+    before((done) => {
+      this.api2 = new API(dataModels);
+      this.api2.setDatabase(db);
+      this.api2.listen(3000).then(() => {
+        done();
+      });
+    });
+
+    after(async () => {
+      await this.api2.close();
+    });
+
+    databaseTestSuite();
   });
 });
