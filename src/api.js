@@ -77,7 +77,7 @@ class API {
     /*
       Server
     */
-    const server = createServer(
+    const app = createServer(
       mergedApiModel,
       {
         jwtSecret : this.jwtSecret,
@@ -85,8 +85,7 @@ class API {
       }
     );
 
-    this.server = server;
-    this.server.listen(port);
+    this.server = app.listen(port);
   }
 
   close() {

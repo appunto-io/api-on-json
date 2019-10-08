@@ -79,7 +79,6 @@ const createPatchCallback = (name, db) => async (data = {}, flow, meta) => {
   }
 };
 
-
 /*
 Create GET callback retireving a paginated list of documents
  */
@@ -88,7 +87,6 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
   const { db } = meta.environment;
   const { request, response } = meta;
   let { page, pageSize } = request.query;
-
   page     = page * 1     || 0;
   pageSize = pageSize * 1 || 30;
 

@@ -1,4 +1,6 @@
-const restify               = require('restify');
+const express               = require('express');
+const bodyParser            = require('body-parser');
+const queryParser           = require('express-query-parser')
 const jwt                   = require('jsonwebtoken');
 const { getAllowedMethods } = require('../apiModel/methods.js');
 const { testRoles }         = require('../apiModel/roles.js');
@@ -113,7 +115,6 @@ const justSend200 = (request, response, next) => {
   return next();
 };
 
-
 /*
 Retrieves the array of filter handlers defined in model for the
 given method.
@@ -141,7 +142,6 @@ const getHandlers = (method, model) => {
 
   return handlers;
 };
-
 
 /*
 Creates a request handler for the current API endpoint
@@ -218,7 +218,7 @@ const createHandlersChain = (method, model, environment) => {
       response.sendRaw(res.status, data);
     }
     else {
-      response.send(res.status, data);
+      response.status(res.status).send(data);
     }
 
     return next();
@@ -337,23 +337,24 @@ const createServer = (model, environment) => {
   /*
   Create server with callbacks
    */
-  const server = restify.createServer({handleUncaughtExceptions : true});
+  var app = express();
 
-  // parse body content
-  server.use(restify.plugins.bodyParser());
-  // parse query
-  server.use(restify.plugins.queryParser());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(queryParser({ parseNull: true, parseBoolean: true }));
+
   // catch all errors and log them
-  server.on('restifyError', errorLogHandlers);
-  server.on('uncaughtException', unhandledExceptionsLogHandler);
+  //server.on('restifyError', errorLogHandlers);
+  //server.on('uncaughtException', unhandledExceptionsLogHandler);
   // log requests
-  server.on('after', logHandler);
+  //server.on('after', logHandler);
 
 
   /*
   Deploy routes to server
    */
   Object.entries(routes).forEach(([route, methods]) => {
+
     Object.entries(methods).forEach(([method, callbacks]) => {
       const serverMethod = httpToServerMethod(method);
 
@@ -365,18 +366,28 @@ const createServer = (model, environment) => {
 
       console.info(`createServer(): Adding route '${method} ${route}'`);
 
-      server[serverMethod](route, callbacks);
+      if (serverMethod === 'get') {
+        app.get(route, callbacks);
+      }
+      else if (serverMethod === 'post') {
+        app.post(route, callbacks);
+      }
+      else if (serverMethod === 'put') {
+        app.put(route, callbacks);
+      }
+      else if (serverMethod === 'patch') {
+        app.patch(route, callbacks);
+      }
+      else if (serverMethod === 'del') {
+        app.delete(route, callbacks);
+      }
+      else if (serverMethod === 'opts') {
+        app.options(route, callbacks);
+      }
     });
   });
 
-  const originalListen = server.listen.bind(server);
-  server.listen = (...args) => {
-    console.info(`Server listening to: ${args[0]}`, {port : args[0]});
-
-    originalListen(...args);
-  };
-
-  return server;
+  return app;
 };
 
 module.exports = {

@@ -119,7 +119,7 @@ class Mongo {
   async readMany(collection, query = {}, options = {}) {
     const Model = await this._getModel(collection);
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
-
+    
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
     sort       = Array.isArray(sort) ? sort : _convertAPIFieldToMongo(sort) || null;
