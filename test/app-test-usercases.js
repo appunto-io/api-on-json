@@ -183,10 +183,6 @@ async function databaseTestSuite() {
 
         createdDocuments = responses.map(({body}) => body);
         createdDocuments.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
-
-        for (let index in createdDocuments) {
-          console.log(createdDocuments[index]);
-        }
       });
 
       it('Should retrieve one element by id', async function() {

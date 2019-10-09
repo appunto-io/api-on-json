@@ -8,11 +8,11 @@ const { testRoles }         = require('../apiModel/roles.js');
 const httpToServerMethod = method => ({
   'GET'     : 'get',
   'HEAD'    : 'head',
-  'OPTIONS' : 'opts',
+  'OPTIONS' : 'options',
   'POST'    : 'post',
   'PUT'     : 'put',
   'PATCH'   : 'patch',
-  'DELETE'  : 'del'
+  'DELETE'  : 'delete'
 }[method]);
 
 const isReadMethod  = method => !!{'GET' : 1, 'HEAD' : 1, 'OPTIONS' : 1}[method];
@@ -94,8 +94,6 @@ const createAuthHandler = (method, model, environment) => (request, response, ne
 
   return next();
 };
-
-
 
 /*
 Adds response header to handler CORS.
@@ -225,51 +223,41 @@ const createHandlersChain = (method, model, environment) => {
   };
 };
 
-/*
-Query parser used when default query plugin is not called because no route
-is found
- */
-const parseQuery = (query = '') => {
-  const params = query.split('&')
-    .map((param = '') => param.split('='))
-    .filter((assignement = []) => assignement.length >= 2);
-
-  return params.reduce(
-    (params, [key, value]) => {
-      params[key] = value;
-      return params;
-    }, {}
-  );
+const myConsoleOptions = {
+    handleExceptions: true,
+    json: false,
+    colorize: true,
+    showLevel: false
 };
 
-/*
-Logs request informations
- */
-const logHandler = (request, response, routeObj, error) => {
-  const route  = request.getPath();
-  const infos  = request.getRoute();
-  const query  = request.getQuery();
-  const path   = !!infos && infos.path;
-  const method = !!infos && infos.method;
-  const agent  = request.userAgent();
+function logRequest(req, res, next) {
+  const query       = req.query;
+  const route       = req.url;
+  const [path, str] = req.url.split('?');
+  const method      = req.method;
 
-  console.info(`Request: '${method} ${route}${query ? '?' + query : ''}'`, {
+  console.info(`Request: '${method} ${route}'\n`, {
     handler   : path,
     method,
     route,
-    query     : typeof request.query === 'function' ? parseQuery(query) : request.query,
-    userAgent : agent,
-    remote    : request.headers['x-forwarded-for'] || request.connection.remoteAddress,
-    status    : response.statusCode,
-    error     : response.statusCode >= 500 ? error : (!!error && (error.message || error))
+    query     : query,
+    remote    : req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+    status    : res.statusCode
   });
-};
+  next();
+}
+
+function logError(err, req, res, next) {
+  logRequest(req, res);
+  console.error(err);
+  next();
+}
 
 /*
 Log all errors
  */
 const errorLogHandlers = (request, response, error, callback) => {
-  logHandler(request, response, {}, error);
+  //logHandler(request, response, {}, error);
 
   return callback();
 };
@@ -344,10 +332,10 @@ const createServer = (model, environment) => {
   app.use(queryParser({ parseNull: true, parseBoolean: true }));
 
   // catch all errors and log them
-  //server.on('restifyError', errorLogHandlers);
-  //server.on('uncaughtException', unhandledExceptionsLogHandler);
+  app.use(logRequest);
+
   // log requests
-  //server.on('after', logHandler);
+  app.use(logError);
 
 
   /*
@@ -366,24 +354,8 @@ const createServer = (model, environment) => {
 
       console.info(`createServer(): Adding route '${method} ${route}'`);
 
-      if (serverMethod === 'get') {
-        app.get(route, callbacks);
-      }
-      else if (serverMethod === 'post') {
-        app.post(route, callbacks);
-      }
-      else if (serverMethod === 'put') {
-        app.put(route, callbacks);
-      }
-      else if (serverMethod === 'patch') {
-        app.patch(route, callbacks);
-      }
-      else if (serverMethod === 'del') {
-        app.delete(route, callbacks);
-      }
-      else if (serverMethod === 'opts') {
-        app.options(route, callbacks);
-      }
+      app[serverMethod](route, callbacks);
+
     });
   });
 

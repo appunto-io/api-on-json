@@ -34,7 +34,8 @@
     "mongoose": "^5.7.1",
     "nodemon": "^1.19.3",
     "restify": "^8.4.0",
-    "rethinkdbdash": "^2.3.31"
+    "rethinkdbdash": "^2.3.31",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "dotenv": "^8.1.0",

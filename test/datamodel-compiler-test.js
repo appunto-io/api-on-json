@@ -9,19 +9,6 @@ const {
 const chai   = require('chai');
 const expect = chai.expect;
 
-/*
-Hacky function used for debugging. Since console.log() does
-not work with Jest, all debug messages are sent to a file
-with the same name of the test script and .testlog extension.
-These files should be listed in .gitignore.
-Output can be shown on realtime with $tail -f <filename>.
- */
-const fs = require('fs');
-const log = msg => {
-  fs.writeFileSync(__filename + '.testlog', msg+"\n");
-};
-
-
 
 describe('JSON data model compiler', () => {
   describe('Field type declarations', () => {
