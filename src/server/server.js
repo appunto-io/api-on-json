@@ -359,7 +359,11 @@ const createServer = (model, environment) => {
     });
   });
 
-  return app;
+  const http = require('http').Server(app)
+  const io = require('socket.io');
+  const socket = io(http);
+
+  return http;
 };
 
 module.exports = {
