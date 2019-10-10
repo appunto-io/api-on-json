@@ -128,7 +128,6 @@ Compile API endpoints recursively
  */
 const compileEndpointModel = (model, parent) => {
   model = model || {};
-
   const parentAuth = parent && parent.auth || defaultAuth;
   const auth       = compileAuthRequirements(model.auth || {}, parentAuth);
   const fields     = {};
@@ -139,9 +138,29 @@ const compileEndpointModel = (model, parent) => {
     };
   });
 
+  /*******
+  Setting up default fields
+  */
+  var defaultRealtime = {
+    CONNECT    : [`::connect`],
+    DISCONNECT : [`::disconnect`],
+    INCOMING   : [`::incoming`]
+  };
+  if (!model.realtime) {
+    model.realtime = defaultRealtime;
+  }
+  else {
+    for (elem in defaultRealtime) {
+      if (!model.realtime[elem]) {
+        model.realtime[elem] = defaultRealtime[elem];
+      }
+    }
+  }
+
   const compiled = {
     handlers : compileHandlersList(model.handlers),
     filters  : compileHandlersList(model.filters),
+    realtime : model.realtime,
     auth,
     fields
   };

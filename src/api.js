@@ -63,7 +63,6 @@ class API {
     const dataModelLibrary              = createLibraryFromDataModel(mergedDataModel);
     const hydratedApiModel              = hydrate(compiledApiModelFromDataModel, dataModelLibrary);
 
-
     const mergedApiModel = [hydratedApiModel, ...this.apiModels].reduce(
       (reduced, model) => mergeModels(reduced, model), {}
     );
