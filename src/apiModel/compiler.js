@@ -138,29 +138,9 @@ const compileEndpointModel = (model, parent) => {
     };
   });
 
-  /*******
-  Setting up default fields
-  */
-  var defaultRealtime = {
-    CONNECT    : [`::connect`],
-    DISCONNECT : [`::disconnect`],
-    INCOMING   : [`::incoming`]
-  };
-  if (!model.realtime) {
-    model.realtime = defaultRealtime;
-  }
-  else {
-    for (elem in defaultRealtime) {
-      if (!model.realtime[elem]) {
-        model.realtime[elem] = defaultRealtime[elem];
-      }
-    }
-  }
-
   const compiled = {
     handlers : compileHandlersList(model.handlers),
     filters  : compileHandlersList(model.filters),
-    realtime : model.realtime,
     auth,
     fields
   };
@@ -183,6 +163,7 @@ Compile the entire api model
  */
 const compileApiModel = apiModel => ({
   isApiModel : true,
+  isRealtime : true,
   ...compileEndpointModel(apiModel, null)
 });
 

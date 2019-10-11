@@ -361,7 +361,9 @@ const createServer = (model, environment) => {
   });
 
   var http = require('http').Server(app)
-  hydrateRealtime(model, http, app);
+  if (model.isRealtime) {
+    hydrateRealtime(model, http, app);
+  }
 
   return http;
 };
