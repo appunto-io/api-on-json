@@ -4,7 +4,7 @@ const queryParser           = require('express-query-parser')
 const jwt                   = require('jsonwebtoken');
 const { getAllowedMethods } = require('../apiModel/methods.js');
 const { testRoles }         = require('../apiModel/roles.js');
-const hydrateRealtime       = require('./realtime.js');
+const realtimeHandlers      = require('./realtime.js');
 
 const httpToServerMethod = method => ({
   'GET'     : 'get',
@@ -361,8 +361,8 @@ const createServer = (model, environment) => {
   });
 
   var http = require('http').Server(app)
-  if (model.isRealtime) {
-    hydrateRealtime(model, http, app);
+  if (model.realTime) {
+    realtimeHandlers(model, http, app);
   }
 
   return http;

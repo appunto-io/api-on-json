@@ -3,12 +3,14 @@ const { keysMap, onUndefined } = require('./helpers');
 /*
 Methods list
  */
-const methods      = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const methods      = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'realTime'];
 const readMethods  = ['GET', 'HEAD', 'OPTIONS'];
 const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
 const defaultRequirements = {requiresAuth : true, requiresRoles : false};
 const defaultAuth         = keysMap(methods, () => defaultRequirements);
+
+var isRealtime = false;
 
 const compileRequestRequirements = (requirements) => {
   if (requirements === false) {
@@ -34,8 +36,10 @@ const compileRequestRequirements = (requirements) => {
 /*
 Compiles collection or field requirements
  */
-const compileAuthRequirements = (model, defaultAuth) => {
+const compileAuthRequirements = (model, defaultAuth, realTime) => {
   model = model || {};
+
+  model['realTime'] = realTime ? true : false;
 
   /*
   Use defaultAuth as default access rules
@@ -78,6 +82,10 @@ const compileAuthRequirements = (model, defaultAuth) => {
       compiled[method] = compileRequestRequirements(model[method]);
     }
   });
+
+  if (compiled['realTime']) {
+    isRealtime = true;
+  }
 
   return compiled;
 };
@@ -122,6 +130,20 @@ const compileHandlersList = (model) => {
   return compiled;
 };
 
+function compileRealTime(model) {
+  if (model) {
+    var result = {};
+
+    result['connect']    = model['connect'] || [];
+    result['message']    = model['message'] || [];
+    result['disconnect'] = model['disconnect'] || [];
+
+    return result;
+  }
+
+  return false;
+}
+
 
 /*
 Compile API endpoints recursively
@@ -129,7 +151,8 @@ Compile API endpoints recursively
 const compileEndpointModel = (model, parent) => {
   model = model || {};
   const parentAuth = parent && parent.auth || defaultAuth;
-  const auth       = compileAuthRequirements(model.auth || {}, parentAuth);
+  const realTime   = compileRealTime(model.realTime);
+  const auth       = compileAuthRequirements(model.auth || {}, parentAuth, realTime);
   const fields     = {};
 
   Object.entries(model.fields || {}).forEach(([field, fieldModel]) => {
@@ -141,6 +164,7 @@ const compileEndpointModel = (model, parent) => {
   const compiled = {
     handlers : compileHandlersList(model.handlers),
     filters  : compileHandlersList(model.filters),
+    realTime,
     auth,
     fields
   };
@@ -163,8 +187,8 @@ Compile the entire api model
  */
 const compileApiModel = apiModel => ({
   isApiModel : true,
-  isRealtime : true,
-  ...compileEndpointModel(apiModel, null)
+  ...compileEndpointModel(apiModel, null),
+  realTime   : isRealtime
 });
 
 module.exports = {
