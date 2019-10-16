@@ -54,7 +54,7 @@ function createRegExp(name, ...subNamespaces) {
   return regs;
 }
 
-async function connectCallback(regExp, socket, auth, handlers, environment) {
+async function connectCallback(regExp, socket, auth, handlers, env) {
   var roomId = 0;
 
   socket.of(regExp).on('connection', function (socket) {
@@ -71,7 +71,7 @@ async function connectCallback(regExp, socket, auth, handlers, environment) {
           const token = data.token;
 
           try {
-            const decoded = jwt.verify(token, environment.jwtSecret);
+            const decoded = jwt.verify(token, env.jwtSecret);
             if (decoded) {
               socket.authenticated = true;
             }
@@ -97,9 +97,9 @@ async function connectCallback(regExp, socket, auth, handlers, environment) {
 
       if (socket.authenticated) {
         var query = {};
-        var name  = socket.nsp.name;
+        var path  = socket.nsp.name;
 
-        name = name.split('/')[1]; //get the "collection" name, the name use in model
+        path = path.split('/')[1]; //get the "collection" path, the path use in model
 
         for (elem in socket.handshake.query) {
           if (elem != 'EIO' && elem != 'transport' && elem != 't') {
@@ -115,10 +115,18 @@ async function connectCallback(regExp, socket, auth, handlers, environment) {
         /*******
         Connection handling
         */
+
+        const meta = {
+          env,
+          query,
+          socket,
+          path
+        }
+
         if (handlers['connect']) {
           var res;
           for (let i = 0; i < handlers['connect'].length; i++) {
-            res = handlers['connect'][i](res, environment.db, name, query, sockets);
+            res = handlers['connect'][i](res, meta);
           }
         }
       }
@@ -150,7 +158,7 @@ async function connectCallback(regExp, socket, auth, handlers, environment) {
   });
 }
 
-async function realtimeHandlers(apiModel, http, environment) {
+async function realtimeHandlers(apiModel, http, env) {
   var socket = io(http);
   const fields = Object.entries(apiModel);
   for (let i = 0; i < fields.length; i++) {
@@ -162,7 +170,7 @@ async function realtimeHandlers(apiModel, http, environment) {
         const reg  = regExpNamespaceSubs[i][0];
         const auth = regExpNamespaceSubs[i][1];
         const handlers = regExpNamespaceSubs[i][2];
-        connectCallback(reg, socket, auth, handlers, environment);
+        connectCallback(reg, socket, auth, handlers, env);
       }
     }
   }

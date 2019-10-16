@@ -157,6 +157,29 @@ class Rethink {
     let results;
     var orderingBy = [];
 
+    var filters = [];
+
+    for (let elem in restOfQuery) {
+      if (elem in model) {
+        var values = restOfQuery[elem].split(',');
+        var filter = this.database.row(elem).eq(values[0]);
+
+        for (let i = 1; i < values.length; i++) {
+          filter = filter.or(this.database.row(elem).eq(values[i]));
+        }
+
+        filters.push(filter);
+      }
+    }
+    if (filters.length > 0) {
+      for (let i = 1; i < filters.length; i++) {
+        filters[0] = filters[0].and(filters[i]);
+      }
+    }
+    else {
+      filters[0] = true;
+    }
+
     if (Array.isArray(sort)) {
       for (let i = 0; i < sort.length; i++) {
         var [ elem_sort, elem_order ] = sort[i].split(',');
@@ -184,6 +207,7 @@ class Rethink {
         const nextSort  = nextSort_encoded;
         if (order === 'asc') {
           results = await this.database.table(collection)
+            .filter(filters[0])
             .filter(
               this.database.row(fieldSort).gt(nextSort).or(
                 this.database.row(fieldSort).eq(nextSort).and(
@@ -198,6 +222,7 @@ class Rethink {
         }
         else {
           results = await this.database.table(collection)
+            .filter(filters[0])
             .filter(
               this.database.row(fieldSort).lt(nextSort).or(
                 this.database.row(fieldSort).eq(nextSort).and(
@@ -215,6 +240,7 @@ class Rethink {
         if (order === 'asc') {
           results = await this.database.table(collection)
             .between(cursor, this.database.maxval, { leftBound: "open" })
+            .filter(filters[0])
             .orderBy(...orderingBy)
             .skip(page * pageSize)
             .limit(pageSize)
@@ -223,6 +249,7 @@ class Rethink {
         else {
           results = await this.database.table(collection)
             .between(this.database.minval, cursor, { rightBound: "open" })
+            .filter(filters[0])
             .orderBy(...orderingBy)
             .skip(page * pageSize)
             .limit(pageSize)
@@ -232,6 +259,7 @@ class Rethink {
     }
     else {
       results = await this.database.table(collection)
+        .filter(filters[0])
         .orderBy(...orderingBy)
         .skip(page * pageSize)
         .limit(pageSize)
@@ -386,30 +414,45 @@ class Rethink {
   /************
   Observe: Allow to get changes on a selection in realtime
   */
-  async observe(collection, query = {}, options = {}, sockets, callback) {
+  async observe(collection, query = {}, options = {}, socket, callback) {
     const model = this.models[collection]['schema'];
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
 
     var results;
+    var filters = [];
 
     for (let elem in restOfQuery) {
       if (elem in model) {
-        results = await this.database.table(collection)
-          .filter(this.database.row(elem).eq(restOfQuery[elem]))
-          .changes()
-          .run(function(err, iterator) {
-            iterator.each(function (err, item) {
-              callback(sockets, item);
-            });
-          });
+        var values = restOfQuery[elem].split(',');
+        var filter = this.database.row(elem).eq(values[0]);
+
+        for (let i = 1; i < values.length; i++) {
+          filter = filter.or(this.database.row(elem).eq(values[i]));
+        }
+
+        filters.push(filter);
       }
     }
+    if (filters.length > 0) {
+      for (let i = 1; i < filters.length; i++) {
+        filters[0] = filters[0].and(filters[i]);
+      }
+      results = await this.database.table(collection)
+        .filter(filters[0])
+        .changes()
+        .run(function(err, iterator) {
+          iterator.each(function (err, item) {
+            callback(socket, item);
+          });
+        });
+    }
+
     if (query.length === 0) {
       results = await this.database.table(collection)
         .changes()
         .run(function(err, cursor) {
           cursor.each(function (err, item) {
-            callback(sockets, item);
+            callback(socket, item);
           });
         });
     }
