@@ -59,22 +59,6 @@ class API {
       API model
     */
     const apiModelFromDataModel         = createApiFromDataModel(mergedDataModel);
-
-    apiModelFromDataModel['/cars']['realTime'] = {
-      'connect'    : ['::realtimeHandlers.carsConnect'],
-      'message'    : ['::realtimeHandlers.carsMessage', '::otherHandlers.carsMessage2', (...args) => {console.log(...args)}],
-      'disconnect' : ['::realtimeHandlers.carsDisconnect']
-    };
-    apiModelFromDataModel['/cars']['/:id']['realTime'] = {
-      'connect'    : ['::realtimeHandlers.carsConnect'],
-      'message'    : ['::realtimeHandlers.carsMessage', '::otherHandlers.carsMessage2', (...args) => {console.log(...args)}],
-      'disconnect' : ['::realtimeHandlers.carsDisconnect']
-    };
-    apiModelFromDataModel['/apples']['realTime'] = {
-      'message'    : ['::realtimeHandlers.applesMessage', '::otherHandlers.applesMessage2', (...args) => {console.log(...args)}],
-      'disconnect' : ['::realtimeHandlers.applesDisconnect']
-    };
-
     const compiledApiModelFromDataModel = compileApiModel(apiModelFromDataModel);
     const dataModelLibrary              = createLibraryFromDataModel(mergedDataModel);
     const hydratedApiModel              = hydrate(compiledApiModelFromDataModel, dataModelLibrary);

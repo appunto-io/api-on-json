@@ -4,6 +4,7 @@ const {
   compileEndpointModel,
   compileApiModel,
   compileHandlersList,
+  compileRealTime,
 
   keysMap,
   methods
@@ -45,7 +46,8 @@ describe('compileAuthRequirements', () => {
       "POST"    : {requiresAuth:true,requiresRoles:['default-role']},
       "PUT"     : {requiresAuth:true,requiresRoles:['default-role']},
       "PATCH"   : {requiresAuth:true,requiresRoles:['default-role']},
-      "DELETE"  : {requiresAuth:true,requiresRoles:['default-role']}
+      "DELETE"  : {requiresAuth:true,requiresRoles:['default-role']},
+      realTime  : false
     };
 
     expect(fn({}, def)).to.deep.equal(def);
@@ -222,11 +224,13 @@ describe('compileEndpointModel', () => {
         "POST"    : {requiresAuth:true,requiresRoles:false},
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false}
+        "DELETE"  : {requiresAuth:true,requiresRoles:false},
+        realTime  : false
       },
       fields : {},
       filters : {},
-      handlers : {}
+      handlers : {},
+      realTime  : false
     });
 
     expect(fn({
@@ -247,10 +251,12 @@ describe('compileEndpointModel', () => {
         "POST"    : {requiresAuth:false,requiresRoles:false},
         "PUT"     : {requiresAuth:false,requiresRoles:false},
         "PATCH"   : {requiresAuth:false,requiresRoles:false},
-        "DELETE"  : {requiresAuth:false,requiresRoles:false}
+        "DELETE"  : {requiresAuth:false,requiresRoles:false},
+        realTime  : false
       },
       filters : {},
       handlers : {},
+      realTime  : false,
       fields : {
         'createdAt' : {
           auth : {
@@ -260,7 +266,8 @@ describe('compileEndpointModel', () => {
             "POST"    : false,
             "PUT"     : false,
             "PATCH"   : false,
-            "DELETE"  : false
+            "DELETE"  : false,
+            realTime  : false
           }
         }
       }
@@ -287,7 +294,8 @@ describe('compileEndpointModel', () => {
         "POST"    : {requiresAuth:true,requiresRoles:false},
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false}
+        "DELETE"  : {requiresAuth:true,requiresRoles:false},
+        realTime  : false
       },
       fields : {},
       filters : {
@@ -295,7 +303,8 @@ describe('compileEndpointModel', () => {
       },
       handlers : {
         "GET" : ['::getHandler']
-      }
+      },
+      realTime  : false
     });
   });
 
@@ -316,11 +325,13 @@ describe('compileEndpointModel', () => {
         "POST"    : {requiresAuth:true,requiresRoles:false},
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false}
+        "DELETE"  : {requiresAuth:true,requiresRoles:false},
+        realTime  : false,
       },
       fields : {},
       filters : {},
       handlers : {},
+      realTime : false,
       '/collection' : {
         auth : {
           "GET"     : {requiresAuth:true,requiresRoles:false},
@@ -329,13 +340,15 @@ describe('compileEndpointModel', () => {
           "POST"    : {requiresAuth:true,requiresRoles:false},
           "PUT"     : {requiresAuth:true,requiresRoles:false},
           "PATCH"   : {requiresAuth:true,requiresRoles:false},
-          "DELETE"  : {requiresAuth:true,requiresRoles:false}
+          "DELETE"  : {requiresAuth:true,requiresRoles:false},
+          realTime  : false,
         },
         fields : {},
         filters : {},
         handlers : {
           'GET' : ['::getHandler']
-        }
+        },
+        realTime : false,
       }
     });
 
@@ -361,11 +374,13 @@ describe('compileEndpointModel', () => {
         'POST'    : {requiresAuth:true,requiresRoles:['testRole']},
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false}
+        "DELETE"  : {requiresAuth:true,requiresRoles:false},
+        realTime  : false
       },
       fields : {},
       filters : {},
       handlers : {},
+      realTime  : false,
       '/collection' : {
         auth : {
           "GET"     : {requiresAuth:true,requiresRoles:false},
@@ -374,11 +389,13 @@ describe('compileEndpointModel', () => {
           'POST'    : {requiresAuth:true,requiresRoles:['testRole']},
           "PUT"     : {requiresAuth:true,requiresRoles:false},
           "PATCH"   : {requiresAuth:true,requiresRoles:false},
-          "DELETE"  : {requiresAuth:true,requiresRoles:false}
+          "DELETE"  : {requiresAuth:true,requiresRoles:false},
+          realTime  : false
         },
         fields : {},
         filters : {},
         handlers : {},
+        realTime  : false,
         '/child' : {
           auth : {
             "GET"     : {requiresAuth:true,requiresRoles:false},
@@ -387,16 +404,73 @@ describe('compileEndpointModel', () => {
             'POST'    : {requiresAuth:true,requiresRoles:['testRole']},
             "PUT"     : {requiresAuth:true,requiresRoles:false},
             "PATCH"   : {requiresAuth:true,requiresRoles:false},
-            "DELETE"  : {requiresAuth:true,requiresRoles:false}
+            "DELETE"  : {requiresAuth:true,requiresRoles:false},
+            realTime  : false
           },
           fields : {},
           filters : {},
           handlers : {
             'GET' : ['::getChildHandler']
           },
+          realTime  : false
         }
       }
     });
+  });
+});
 
+describe('compileRealTime', () => {
+  it('compileRealTime', () => {
+    const fn = compileRealTime;
+
+    expect(fn({
+    })).to.deep.equal({
+      'connect'    : [],
+      'message'    : [],
+      'disconnect' : []
+    });
+
+    expect(fn({
+      'connect' : '::connect'
+    })).to.deep.equal({
+      'connect'    : '::connect',
+      'message'    : [],
+      'disconnect' : []
+    });
+
+    expect(fn({
+      'disconnect' : '::disconnect'
+    })).to.deep.equal({
+      'connect'    : [],
+      'message'    : [],
+      'disconnect' : '::disconnect'
+    });
+
+    expect(fn({
+      'message' : '::message'
+    })).to.deep.equal({
+      'connect'    : [],
+      'message'    : '::message',
+      'disconnect' : []
+    });
+
+    expect(fn({
+      'connect' : '::connect',
+      'message' : '::message'
+    })).to.deep.equal({
+      'connect'    : '::connect',
+      'message'    : '::message',
+      'disconnect' : []
+    });
+
+    expect(fn({
+      'connect'    : '::connect',
+      'message'    : '::message',
+      'disconnect' : '::disconnect'
+    })).to.deep.equal({
+      'connect'    : '::connect',
+      'message'    : '::message',
+      'disconnect' : '::disconnect'
+    });
   });
 });
