@@ -186,9 +186,9 @@ const compileEndpointModel = (model, parent) => {
 Compile the entire api model
  */
 const compileApiModel = apiModel => ({
-  isApiModel : true,
+  isApiModel  : true,
   ...compileEndpointModel(apiModel, null),
-  realTime   : isRealtime
+  hasRealtime : isRealtime
 });
 
 module.exports = {
@@ -198,6 +198,7 @@ module.exports = {
   compileRequestRequirements,
   compileAuthRequirements,
   compileHandlersList,
+  compileRealTime,
   compileEndpointModel,
   compileApiModel
 }

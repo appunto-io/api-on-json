@@ -62,6 +62,10 @@ class Rethink {
     CRUD
   */
 
+
+  /************
+  Create: Handle POST request
+  */
   async create(collection, data = {}) {
     const obj     = {};
     const model   = this.models[collection]['schema'];
@@ -121,14 +125,26 @@ class Rethink {
     return changes['_data'][0][0]['new_val'];
   }
 
+
+  /************
+  Remove: Handle DELETE request
+  */
   async remove(collection, id) {
     return await this.database.table(collection).get(id).delete().run();
   }
 
+
+  /************
+  ReadOne: Handle GET request on specific ID
+  */
   async readOne(collection, id) {
     return await this.database.table(collection).get(id).run();
   }
 
+
+  /************
+  ReadMany: Handle GET request with query
+  */
   async readMany(collection, query = {}, options = {}) {
     const model = this.models[collection]['schema'];
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
@@ -240,6 +256,10 @@ class Rethink {
     };
   }
 
+
+  /************
+  Update: Handle PUT request
+  */
   async update(collection, id, data) {
     const obj   = {id: id};
     const model = this.models[collection]['schema'];
@@ -298,6 +318,10 @@ class Rethink {
     return changes['_data'][0][0]['new_val'];
   }
 
+
+  /************
+  Patch: Handle PATCH request
+  */
   async patch(collection, id, data) {
     const obj   = {};
     const model = this.models[collection]['schema'];
@@ -356,6 +380,39 @@ class Rethink {
     await this.database.table(collection).get(id).update(obj).run();
 
     return changes['_data'][0][0]['new_val'];
+  }
+
+
+  /************
+  Observe: Allow to get changes on a selection in realtime
+  */
+  async observe(collection, query = {}, options = {}, sockets, callback) {
+    const model = this.models[collection]['schema'];
+    let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
+
+    var results;
+
+    for (let elem in restOfQuery) {
+      if (elem in model) {
+        results = await this.database.table(collection)
+          .filter(this.database.row(elem).eq(restOfQuery[elem]))
+          .changes()
+          .run(function(err, iterator) {
+            iterator.each(function (err, item) {
+              callback(sockets, item);
+            });
+          });
+      }
+    }
+    if (query.length === 0) {
+      results = await this.database.table(collection)
+        .changes()
+        .run(function(err, cursor) {
+          cursor.each(function (err, item) {
+            callback(sockets, item);
+          });
+        });
+    }
   }
 }
 

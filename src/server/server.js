@@ -361,8 +361,8 @@ const createServer = (model, environment) => {
   });
 
   var http = require('http').Server(app)
-  if (model.realTime) {
-    realtimeHandlers(model, http, app);
+  if (model.hasRealtime) {
+    realtimeHandlers(model, http, environment);
   }
 
   return http;
