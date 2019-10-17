@@ -9,7 +9,6 @@ async function dataModelToRethink(model, database) {
     const schema     = definition['schema'];
     const fields     = Object.entries(schema);
 
-    //If the table already exists with the same name no error raised but the dBModel will take the new def
     if (!tableList.includes(name)) {
       await database.tableCreate(name).run();
     }
@@ -433,6 +432,7 @@ class Rethink {
         filters.push(filter);
       }
     }
+
     if (filters.length > 0) {
       for (let i = 1; i < filters.length; i++) {
         filters[0] = filters[0].and(filters[i]);
@@ -447,7 +447,7 @@ class Rethink {
         });
     }
 
-    if (query.length === 0) {
+    if (Object.entries(query).length === 0) {
       results = await this.database.table(collection)
         .changes()
         .run(function(err, cursor) {

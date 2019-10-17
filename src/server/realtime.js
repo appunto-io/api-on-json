@@ -137,7 +137,6 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
     */
     if (handlers['message']) {
       var message = '';
-
       for (let i = 0; i < handlers['message'].length; i++) {
         message = handlers['message'][i](message);
       }

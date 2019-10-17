@@ -1,10 +1,12 @@
-const { createServer }              = require('./server/server.js')
-const { compileDataModel }          = require('./dataModel/compiler.js');
-const { compileApiModel }           = require('./apiModel/compiler.js');
-const { mergeModels }               = require('./apiModel/merge')
-const { hydrate }                   = require('./apiModel/hydrate.js');
+const { createServer }                       = require('./server/server.js')
+const { compileDataModel }                   = require('./dataModel/compiler.js');
+const { compileApiModel }                    = require('./apiModel/compiler.js');
+const { mergeModels }                        = require('./apiModel/merge')
+const { hydrate }                            = require('./apiModel/hydrate.js');
 const { createLibraryFromDataModel,
-        createApiFromDataModel }    = require('./apiModel/datamodel/data.js');
+        createApiFromDataModel }             = require('./apiModel/datamodel/data.js');
+const { createRealtimeApiFromDataModel,
+        createRealtimeLibraryFromDataModel } = require('./apiModel/datamodel/dataRealtime.js');
 
 
 class API {
@@ -63,7 +65,13 @@ class API {
     const dataModelLibrary              = createLibraryFromDataModel(mergedDataModel);
     const hydratedApiModel              = hydrate(compiledApiModelFromDataModel, dataModelLibrary);
 
-    const mergedApiModel = [hydratedApiModel, ...this.apiModels].reduce(
+    const realTimeApiModelFromDataModel         = createRealtimeApiFromDataModel(mergedDataModel);
+    const realTimeCompiledApiModelFromDataModel = compileApiModel(realTimeApiModelFromDataModel);
+    const realTimeDataModelLibrary              = createRealtimeLibraryFromDataModel(mergedDataModel);
+    const realTimeHydratedApiModel              = hydrate(realTimeCompiledApiModelFromDataModel, realTimeDataModelLibrary);
+
+
+    const mergedApiModel = [hydratedApiModel, realTimeHydratedApiModel, ...this.apiModels].reduce(
       (reduced, model) => mergeModels(reduced, model), {}
     );
 

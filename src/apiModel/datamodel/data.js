@@ -210,7 +210,7 @@ const createApiFromDataModel = (dataModel) => {
 const createLibraryFromDataModel = (dbModels) => {
   const library = {};
   Object.entries(dbModels).forEach(([name]) => {
-
+    
     library[`get-many-${name}`]    = createGetManyCallback(name);
     library[`post-${name}`]        = createPostCallback(name);
     library[`get-one-${name}`]     = createGetCallback(name);
