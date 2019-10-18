@@ -16,7 +16,6 @@ const tokenB = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3
 /**********************************************
   Generic HTTP requests based on chai HTTP
 */
-
 async function post(collection, data) {
   return chai.request('http://localhost:3000')
     .post(`/${collection}`)

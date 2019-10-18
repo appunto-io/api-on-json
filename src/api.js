@@ -74,6 +74,7 @@ class API {
       (reduced, model) => mergeModels(reduced, model), {}
     );
 
+    console.log(JSON.stringify(mergedApiModel, null, 2));
     /*
       Database
      */
