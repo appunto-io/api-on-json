@@ -70,7 +70,6 @@ class API {
     const realTimeDataModelLibrary              = createRealtimeLibraryFromDataModel(mergedDataModel);
     const realTimeHydratedApiModel              = hydrate(realTimeCompiledApiModelFromDataModel, realTimeDataModelLibrary);
 
-
     const mergedApiModel = [hydratedApiModel, realTimeHydratedApiModel, ...this.apiModels].reduce(
       (reduced, model) => mergeModels(reduced, model), {}
     );

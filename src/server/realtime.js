@@ -74,7 +74,7 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
             const decoded = jwt.verify(token, env.jwtSecret);
             if (decoded) {
               if (auth.requiresRoles) {
-                socket.authenticated = auth.requiresRoles.includes(decoded);
+                socket.authenticated = auth.requiresRoles.includes(decoded.role);
               }
               else {
                 socket.authenticated = true;

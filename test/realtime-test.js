@@ -88,10 +88,18 @@ describe('realTime test suite', async function() {
   const port = process.env.PORT;
   const dbName = process.env.DB_NAME;
 
-  var db = new Rethink("localhost", "28015", "G");
+  var db = new Rethink(hostname, port, dbName);
 
   var api  = new API(dataModels);
+  var roleApiModel = {
+    '/cars': {
+      auth: {
+        realTime: {requiresRoles: ['admin']}
+      }
+    }
+  };
 
+  api.addApiModel(roleApiModel);
 
   const admin  = jwt.sign({ role: 'admin' }, api.jwtSecret);
   const user   = jwt.sign({ role: 'user' }, api.jwtSecret);
@@ -191,6 +199,46 @@ describe('realTime test suite', async function() {
       post('cars', {
         brand : 'tesla',
         model : 'X'
+      });
+    });
+  });
+
+  it('Testing if the socket dont receives a message when he dont have the rights', function(done) {
+    var socket1 = io.connect('http://localhost:3000/cars?brand=tesla&model=S', {forceNew: true});
+    var socket2 = io.connect('http://localhost:3000/cars?brand=tesla&model=S', {forceNew: true});
+
+
+    var socket_1_received = false;
+
+    socket1.on('need authentication', function() {
+      socket1.emit('authenticate', {token: user});
+
+      socket1.on('update', function(message) {
+        socket_1_received = true;
+        socket1.disconnect();
+      });
+    });
+
+    socket2.on('need authentication', function() {
+      socket2.emit('authenticate', {token: admin});
+
+      socket2.on('succeed', function() {
+        expect(socket2.connected).to.be.true;
+        expect(socket2.id).to.not.be.null;
+      });
+
+      socket2.on('update', function(message) {
+        expect(socket2.connected).to.be.true;
+        expect(socket2.id).to.not.be.null;
+        expect(message).to.not.be.null;
+        expect(socket_1_received).to.be.false;
+        socket2.disconnect();
+        done();
+      });
+
+      post('cars', {
+        brand : 'tesla',
+        model : 'S'
       });
     });
   });
@@ -327,6 +375,19 @@ describe('realTime test suite', async function() {
 
     socket.on('need authentication', function() {
       socket.emit('authenticate', {token: 'invalid'});
+
+      socket.on('unauthorized', function(data) {
+        expect(data.message).to.be.equal('failed to authenticate');
+        done();
+      });
+    });
+  });
+
+  it('Testing authentication with a wrong role (not enough permissions)', function(done) {
+    var socket = io.connect('http://localhost:3000/cars?brand=tesla&model=S', {forceNew: true});
+
+    socket.on('need authentication', function() {
+      socket.emit('authenticate', {token: user});
 
       socket.on('unauthorized', function(data) {
         expect(data.message).to.be.equal('failed to authenticate');
