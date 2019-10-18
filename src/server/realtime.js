@@ -63,7 +63,7 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
     socket.emit('need authentication');
 
     socket.on('authenticate', function (data) {
-      if (auth === false) {
+      if (!auth || !auth.requiresAuth) {
         socket.authenticated = true;
       }
       else {
@@ -73,13 +73,18 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
           try {
             const decoded = jwt.verify(token, env.jwtSecret);
             if (decoded) {
-              socket.authenticated = true;
+              if (auth.requiresRoles) {
+                socket.authenticated = auth.requiresRoles.includes(decoded);
+              }
+              else {
+                socket.authenticated = true;
+              }
             }
           }
           catch (err) {
             socket.authenticated = false;
             if (err) {
-              socket.emit('unauthorized', { message: err.message });
+              socket.emit('try again', { message: err.message });
             }
           }
         }
@@ -96,13 +101,14 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
       }, 5000);
 
       if (socket.authenticated) {
+        socket.emit('succeed');
         var query = {};
         var path  = socket.nsp.name;
 
         path = path.split('/')[1]; //get the "collection" path, the path use in model
 
         for (elem in socket.handshake.query) {
-          if (elem != 'EIO' && elem != 'transport' && elem != 't') {
+          if (elem != 'EIO' && elem != 'transport' && elem != 't' && elem != 'b64') {
             query[elem] = socket.handshake.query[elem];
           }
         }

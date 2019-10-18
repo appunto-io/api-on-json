@@ -98,7 +98,10 @@ class Rethink {
       }
 
       if (unique) {
-        const fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        var fieldExist = [];
+        if (obj[field]) {
+          fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        }
         if (fieldExist.length > 0) {
           const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
 
@@ -146,7 +149,7 @@ class Rethink {
   */
   async readMany(collection, query = {}, options = {}) {
     const model = this.models[collection]['schema'];
-    let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
+    let { page, pageSize, sort, order, cursor, ...restOfquery } = query;
     order      = (order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
     sort       = sort ? sort : [];
     page       = page * 1     || 0;
@@ -158,9 +161,9 @@ class Rethink {
 
     var filters = [];
 
-    for (let elem in restOfQuery) {
+    for (let elem in restOfquery) {
       if (elem in model) {
-        var values = restOfQuery[elem].split(',');
+        var values = restOfquery[elem].split(';');
         var filter = this.database.row(elem).eq(values[0]);
 
         for (let i = 1; i < values.length; i++) {
@@ -319,7 +322,10 @@ class Rethink {
         }
       }
       if (unique) {
-        const fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        var fieldExist = [];
+        if (obj[field]) {
+          fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
+        }
         if (fieldExist.length > 0) {
           const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
 
@@ -415,14 +421,14 @@ class Rethink {
   */
   async observe(collection, query = {}, options = {}, socket, callback) {
     const model = this.models[collection]['schema'];
-    let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
 
     var results;
     var filters = [];
 
-    for (let elem in restOfQuery) {
+    for (let elem in query) {
       if (elem in model) {
-        var values = restOfQuery[elem].split(',');
+        var values = query[elem].split(';');
+
         var filter = this.database.row(elem).eq(values[0]);
 
         for (let i = 1; i < values.length; i++) {
@@ -450,8 +456,8 @@ class Rethink {
     if (Object.entries(query).length === 0) {
       results = await this.database.table(collection)
         .changes()
-        .run(function(err, cursor) {
-          cursor.each(function (err, item) {
+        .run(function(err, iterator) {
+          iterator.each(function (err, item) {
             callback(socket, item);
           });
         });

@@ -47,7 +47,7 @@ describe('compileAuthRequirements', () => {
       "PUT"     : {requiresAuth:true,requiresRoles:['default-role']},
       "PATCH"   : {requiresAuth:true,requiresRoles:['default-role']},
       "DELETE"  : {requiresAuth:true,requiresRoles:['default-role']},
-      realTime  : false
+      realTime  : {requiresAuth:true,requiresRoles:false}
     };
 
     expect(fn({}, def)).to.deep.equal(def);
@@ -225,7 +225,7 @@ describe('compileEndpointModel', () => {
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
         "DELETE"  : {requiresAuth:true,requiresRoles:false},
-        realTime  : false
+        realTime  : {requiresAuth:true,requiresRoles:false}
       },
       fields : {},
       filters : {},
@@ -252,7 +252,7 @@ describe('compileEndpointModel', () => {
         "PUT"     : {requiresAuth:false,requiresRoles:false},
         "PATCH"   : {requiresAuth:false,requiresRoles:false},
         "DELETE"  : {requiresAuth:false,requiresRoles:false},
-        realTime  : false
+        realTime  : {requiresAuth:true,requiresRoles:false}
       },
       filters : {},
       handlers : {},
@@ -267,7 +267,7 @@ describe('compileEndpointModel', () => {
             "PUT"     : false,
             "PATCH"   : false,
             "DELETE"  : false,
-            realTime  : false
+            realTime  : {requiresAuth:true,requiresRoles:false}
           }
         }
       }
@@ -295,7 +295,7 @@ describe('compileEndpointModel', () => {
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
         "DELETE"  : {requiresAuth:true,requiresRoles:false},
-        realTime  : false
+        realTime  : {requiresAuth:true,requiresRoles:false}
       },
       fields : {},
       filters : {
@@ -326,7 +326,7 @@ describe('compileEndpointModel', () => {
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
         "DELETE"  : {requiresAuth:true,requiresRoles:false},
-        realTime  : false,
+        realTime  : {requiresAuth:true,requiresRoles:false}
       },
       fields : {},
       filters : {},
@@ -341,19 +341,16 @@ describe('compileEndpointModel', () => {
           "PUT"     : {requiresAuth:true,requiresRoles:false},
           "PATCH"   : {requiresAuth:true,requiresRoles:false},
           "DELETE"  : {requiresAuth:true,requiresRoles:false},
-          realTime  : false,
+          realTime  : {requiresAuth:true,requiresRoles:false}
         },
         fields : {},
         filters : {},
         handlers : {
           'GET' : ['::getHandler']
         },
-        realTime : false,
+        realTime : false
       }
     });
-
-
-
 
     expect(fn({
       auth : {
@@ -375,7 +372,7 @@ describe('compileEndpointModel', () => {
         "PUT"     : {requiresAuth:true,requiresRoles:false},
         "PATCH"   : {requiresAuth:true,requiresRoles:false},
         "DELETE"  : {requiresAuth:true,requiresRoles:false},
-        realTime  : false
+        realTime  : {requiresAuth:true,requiresRoles:false}
       },
       fields : {},
       filters : {},
@@ -390,7 +387,7 @@ describe('compileEndpointModel', () => {
           "PUT"     : {requiresAuth:true,requiresRoles:false},
           "PATCH"   : {requiresAuth:true,requiresRoles:false},
           "DELETE"  : {requiresAuth:true,requiresRoles:false},
-          realTime  : false
+          realTime  : {requiresAuth:true,requiresRoles:false}
         },
         fields : {},
         filters : {},
@@ -405,7 +402,7 @@ describe('compileEndpointModel', () => {
             "PUT"     : {requiresAuth:true,requiresRoles:false},
             "PATCH"   : {requiresAuth:true,requiresRoles:false},
             "DELETE"  : {requiresAuth:true,requiresRoles:false},
-            realTime  : false
+            realTime  : {requiresAuth:true,requiresRoles:false}
           },
           fields : {},
           filters : {},

@@ -12,7 +12,7 @@ function createMessageCallback(message) {
 }
 
 function callback(socket, item) {
-  socket.emit('message', 'Update: ' + JSON.stringify(item, null, 2));
+  socket.emit('update', 'Update: ' + JSON.stringify(item, null, 2));
 }
 
 function createConnectCallback(data, meta) {

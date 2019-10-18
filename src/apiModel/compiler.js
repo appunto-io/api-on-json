@@ -83,6 +83,9 @@ const compileAuthRequirements = (model, defaultAuth, realTime) => {
     }
   });
 
+
+  compiled['realTime'] = defaultRequirements;
+
   if (compiled['realTime']) {
     isRealtime = true;
   }
@@ -157,7 +160,7 @@ const compileEndpointModel = (model, parent) => {
 
   Object.entries(model.fields || {}).forEach(([field, fieldModel]) => {
     fields[field] = {
-      auth : compileAuthRequirements(fieldModel.auth || {}, auth)
+      auth : compileAuthRequirements(fieldModel.auth || {}, auth, realTime)
     };
   });
 
