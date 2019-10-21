@@ -4,6 +4,7 @@ const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { API }               = require('../src/index.js');
+const { compileApiModel }   = require('../src/apiModel/compiler.js')
 const { Mongo, Rethink }    = require('../src/database/database.js');
 
 require('dotenv').config({path: __dirname + '/.env'});
@@ -62,6 +63,12 @@ async function patch(collection, id, data) {
 async function erase(collection, id) {
   return chai.request('http://localhost:3000')
     .delete(`/${collection}/` + id)
+    .set('Authorization', token);
+}
+
+async function options(collection) {
+  return chai.request('http://localhost:3000')
+    .options(`/${collection}/` + id)
     .set('Authorization', token);
 }
 
@@ -387,6 +394,31 @@ async function databaseTestSuite() {
         const response2 = await getId('flowers', createdDocuments[0].id);
 
         expect(response2).to.have.status(404);
+      });
+    });
+
+    /********
+    OPTIONS
+    */
+    describe('OPTIONS request', async function() {
+      it('default cors', async function() {
+        const response = await options('flowers');
+
+        expect(response).to.have.status(204);
+        expect(response.headers['x-powered-by']).to.be.equal('Express');
+        expect(response.headers['access-control-allow-origin']).to.be.equal('*');
+        expect(response.headers['access-control-allow-methods']).to.be.equal('GET,HEAD,PUT,PATCH,POST,DELETE');
+      });
+    });
+
+    describe('OPTIONS request', async function() {
+      it('custom cors', async function() {
+        const response = await options('flowers');
+
+        expect(response).to.have.status(204);
+        expect(response.headers['x-powered-by']).to.be.equal('Express');
+        expect(response.headers['access-control-allow-origin']).to.be.equal('*');
+        expect(response.headers['access-control-allow-methods']).to.be.equal('GET,HEAD,PUT,PATCH,POST,DELETE');
       });
     });
   });

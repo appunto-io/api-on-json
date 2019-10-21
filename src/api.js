@@ -15,7 +15,9 @@ class API {
     this.dataModels = [];
     this.apiModels  = [];
     this.jwtSecret  = '--default-jwt-secret--';
+
     this.server;
+    this.model;
     this.database;
 
     if (dataModel) {
@@ -76,6 +78,7 @@ class API {
         console.warn('The database you are using can\'t use realTime');
         hydratedApiModel.hasRealtime = false;
       }
+
       mergedApiModel = [hydratedApiModel, ...this.apiModels].reduce(
         (reduced, model) => mergeModels(reduced, model), {}
       );
@@ -85,6 +88,8 @@ class API {
         (reduced, model) => mergeModels(reduced, model), {}
       );
     }
+
+    this.model = mergedApiModel;
 
     /*
       Database
