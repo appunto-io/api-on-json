@@ -6,6 +6,21 @@ const { getAllowedMethods } = require('../apiModel/methods.js');
 const { testRoles }         = require('../apiModel/roles.js');
 const realtimeHandlers      = require('./realtime.js');
 
+var cors                    = require('cors');
+
+function findCors(route, model) {
+
+  var paths = route.split('/');
+  for (let i = 1; i < paths.length; i++) {
+    paths[i] = '/' + paths[i];
+
+    if (model) {
+      model = model[paths[i]];
+    }
+  }
+  return model.cors;
+}
+
 const httpToServerMethod = method => ({
   'GET'     : 'get',
   'HEAD'    : 'head',
@@ -224,13 +239,6 @@ const createHandlersChain = (method, model, environment) => {
   };
 };
 
-const myConsoleOptions = {
-    handleExceptions: true,
-    json: false,
-    colorize: true,
-    showLevel: false
-};
-
 function logRequest(req, res, next) {
   const query       = req.query;
   const route       = req.url;
@@ -291,8 +299,6 @@ const recurseModel = (path, model, environment, addRoute) => {
     }
   });
 };
-
-
 
 const createServer = (model, environment) => {
   if (!model || !model.isApiModel) {
@@ -355,7 +361,7 @@ const createServer = (model, environment) => {
 
       console.info(`createServer(): Adding route '${method} ${route}'`);
 
-      app[serverMethod](route, callbacks);
+      app[serverMethod](route, cors(findCors(route, model)), callbacks);
 
     });
   });

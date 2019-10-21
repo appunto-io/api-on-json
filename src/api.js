@@ -60,26 +60,39 @@ class API {
     /*
       API model
     */
-    const apiModelFromDataModel         = createApiFromDataModel(mergedDataModel);
-    const compiledApiModelFromDataModel = compileApiModel(apiModelFromDataModel);
-    const dataModelLibrary              = createLibraryFromDataModel(mergedDataModel);
-    const hydratedApiModel              = hydrate(compiledApiModelFromDataModel, dataModelLibrary);
+    var mergedApiModel = {};
 
-    const realTimeApiModelFromDataModel         = createRealtimeApiFromDataModel(mergedDataModel);
-    const realTimeCompiledApiModelFromDataModel = compileApiModel(realTimeApiModelFromDataModel);
-    const realTimeDataModelLibrary              = createRealtimeLibraryFromDataModel(mergedDataModel);
-    const realTimeHydratedApiModel              = hydrate(realTimeCompiledApiModelFromDataModel, realTimeDataModelLibrary);
+    if (Object.entries(mergedDataModel).length != 0) {
+      const apiModelFromDataModel         = createApiFromDataModel(mergedDataModel);
+      const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(mergedDataModel);
 
-    const mergedApiModel = [hydratedApiModel, realTimeHydratedApiModel, ...this.apiModels].reduce(
-      (reduced, model) => mergeModels(reduced, model), {}
-    );
+      const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
+      const compiledApiModel         = compileApiModel(apiModel);
+      const dataModelLibrary         = createLibraryFromDataModel(mergedDataModel);
+      const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(mergedDataModel);
+      const hydratedApiModel         = hydrate(compiledApiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
 
-    console.log(JSON.stringify(mergedApiModel, null, 2));
+      if (hydratedApiModel.hasRealtime && (typeof this.database.observe != "function")) {
+        console.warn('The database you are using can\'t use realTime');
+        hydratedApiModel.hasRealtime = false;
+      }
+      mergedApiModel = [hydratedApiModel, ...this.apiModels].reduce(
+        (reduced, model) => mergeModels(reduced, model), {}
+      );
+    }
+    else {
+      mergedApiModel = [...this.apiModels].reduce(
+        (reduced, model) => mergeModels(reduced, model), {}
+      );
+    }
+
     /*
       Database
      */
-    await this.database.connect();
-    await this.database.init(mergedDataModel);
+     if (this.database) {
+       await this.database.connect();
+       await this.database.init(mergedDataModel);
+     }
 
     /*
       Server

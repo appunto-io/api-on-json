@@ -178,6 +178,10 @@ describe('realTime test suite', async function() {
     await api.listen(3000);
   });
 
+  after(async () => {
+    await api.close();
+  });
+
   it('Testing get route', async function() {
     const response = await get('cars');
     expect(response.text).to.be.equal('getMany');

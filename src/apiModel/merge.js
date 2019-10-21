@@ -1,5 +1,6 @@
 const mergeModels = (...models) => {
   const merge = (accumulator, source) => {
+
     if (accumulator === undefined) {return source;}
 
     if (source === undefined) {return accumulator;}
@@ -13,7 +14,6 @@ const mergeModels = (...models) => {
       if (merged.length > 1) {
         merged = merged.filter((elem) => elem != false);
       }
-      
       return merged
     }
 
@@ -22,7 +22,7 @@ const mergeModels = (...models) => {
     }
 
     Object.entries(source).forEach(([key, value]) => {
-      accumulator[key] = merge(accumulator[key], value);
+        accumulator[key] = merge(accumulator[key], value);
     });
 
     return accumulator;

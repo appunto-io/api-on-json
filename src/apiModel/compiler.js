@@ -9,6 +9,12 @@ const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
 const defaultRequirements = {requiresAuth : true, requiresRoles : false};
 const defaultAuth         = keysMap(methods, () => defaultRequirements);
+const defaultCorsOptions  = {
+  origin               : "*",
+  methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue    : false,
+  optionsSuccessStatus : 204
+}
 
 var isRealtime = false;
 
@@ -147,6 +153,23 @@ function compileRealTime(model) {
   return false;
 }
 
+function compileCors(model, defaultCors) {
+  if (model === false) {
+    return false;
+  }
+  if (model && defaultCors) {
+    var options = {
+      origin               : model.origin ? model.origin : defaultCors.origin,
+      methods              : model.methods ? model.methods : defaultCors.methods,
+      preflightContinue    : model.preflightContinue ? model.preflightContinue : defaultCors.preflightContinue,
+      optionsSuccessStatus : model.optionsSuccessStatus ? model.optionsSuccessStatus : defaultCors.optionsSuccessStatus,
+    }
+
+    return options;
+  }
+  return defaultCors;
+}
+
 
 /*
 Compile API endpoints recursively
@@ -157,6 +180,16 @@ const compileEndpointModel = (model, parent) => {
   const realTime   = compileRealTime(model.realTime);
   const auth       = compileAuthRequirements(model.auth || {}, parentAuth, realTime);
   const fields     = {};
+  var defaultCors  = defaultCorsOptions;
+
+
+  if (model.cors != undefined) {
+    defaultCors = compileCors(model.cors, defaultCors);
+    //console.log(defaultCors);
+  }
+  else if (parent) {
+    defaultCors = compileCors(parent.cors, defaultCors);
+  }
 
   Object.entries(model.fields || {}).forEach(([field, fieldModel]) => {
     fields[field] = {
@@ -168,6 +201,7 @@ const compileEndpointModel = (model, parent) => {
     handlers : compileHandlersList(model.handlers),
     filters  : compileHandlersList(model.filters),
     realTime,
+    cors     : compileCors(model.cors, defaultCors),
     auth,
     fields
   };

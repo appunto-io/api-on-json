@@ -85,9 +85,8 @@ var room = 'lobby';
 describe('realTime test suite', async function() {
   const hostname = process.env.HOST;
   const port = process.env.PORT;
-  const dbName = process.env.DB_NAME;
 
-  var db = new Rethink(hostname, port, dbName);
+  var db = new Rethink(hostname, port, 'realTime');
 
   var api  = new API(dataModels);
   var roleApiModel = {
@@ -107,6 +106,10 @@ describe('realTime test suite', async function() {
   before(async () => {
     await api.setDatabase(db);
     await api.listen(3000);
+  });
+
+  after(async () => {
+    await api.close();
   });
 
   it('Testing connection', function(done) {
