@@ -185,7 +185,6 @@ const compileEndpointModel = (model, parent) => {
 
   if (model.cors != undefined) {
     defaultCors = compileCors(model.cors, defaultCors);
-    //console.log(defaultCors);
   }
   else if (parent) {
     defaultCors = compileCors(parent.cors, defaultCors);
@@ -236,6 +235,7 @@ module.exports = {
   compileAuthRequirements,
   compileHandlersList,
   compileRealTime,
+  compileCors,
   compileEndpointModel,
   compileApiModel
 }

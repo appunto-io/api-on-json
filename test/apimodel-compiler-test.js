@@ -3,6 +3,7 @@ const {
   compileAuthRequirements,
   compileEndpointModel,
   compileApiModel,
+  compileCors,
   compileHandlersList,
   compileRealTime,
 
@@ -230,7 +231,13 @@ describe('compileEndpointModel', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false
+      realTime  : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "*",
+        preflightContinue    : false
+      }
     });
 
     expect(fn({
@@ -257,6 +264,12 @@ describe('compileEndpointModel', () => {
       filters : {},
       handlers : {},
       realTime  : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "*",
+        preflightContinue    : false
+      },
       fields : {
         'createdAt' : {
           auth : {
@@ -304,7 +317,13 @@ describe('compileEndpointModel', () => {
       handlers : {
         "GET" : ['::getHandler']
       },
-      realTime  : false
+      realTime  : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "*",
+        preflightContinue    : false
+      }
     });
   });
 
@@ -332,6 +351,12 @@ describe('compileEndpointModel', () => {
       filters : {},
       handlers : {},
       realTime : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "*",
+        preflightContinue    : false
+      },
       '/collection' : {
         auth : {
           "GET"     : {requiresAuth:true,requiresRoles:false},
@@ -348,7 +373,13 @@ describe('compileEndpointModel', () => {
         handlers : {
           'GET' : ['::getHandler']
         },
-        realTime : false
+        realTime : false,
+        cors: {
+          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          optionsSuccessStatus : 204,
+          origin               : "*",
+          preflightContinue    : false
+        }
       }
     });
 
@@ -378,6 +409,12 @@ describe('compileEndpointModel', () => {
       filters : {},
       handlers : {},
       realTime  : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "*",
+        preflightContinue    : false
+      },
       '/collection' : {
         auth : {
           "GET"     : {requiresAuth:true,requiresRoles:false},
@@ -393,6 +430,12 @@ describe('compileEndpointModel', () => {
         filters : {},
         handlers : {},
         realTime  : false,
+        cors: {
+          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          optionsSuccessStatus : 204,
+          origin               : "*",
+          preflightContinue    : false
+        },
         '/child' : {
           auth : {
             "GET"     : {requiresAuth:true,requiresRoles:false},
@@ -409,7 +452,102 @@ describe('compileEndpointModel', () => {
           handlers : {
             'GET' : ['::getChildHandler']
           },
-          realTime  : false
+          realTime  : false,
+          cors: {
+            methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+            optionsSuccessStatus : 204,
+            origin               : "*",
+            preflightContinue    : false
+          }
+        }
+      }
+    });
+  });
+
+  it('Test compilation with cors', () => {
+    const fn = compileEndpointModel;
+
+    expect(fn({
+      cors: {
+        origin: 'example.com'
+      }
+    })).to.deep.equal({
+      auth : {
+        "GET"     : {requiresAuth:true,requiresRoles:false},
+        "HEAD"    : {requiresAuth:true,requiresRoles:false},
+        "OPTIONS" : {requiresAuth:true,requiresRoles:false},
+        "POST"    : {requiresAuth:true,requiresRoles:false},
+        "PUT"     : {requiresAuth:true,requiresRoles:false},
+        "PATCH"   : {requiresAuth:true,requiresRoles:false},
+        "DELETE"  : {requiresAuth:true,requiresRoles:false},
+        realTime  : {requiresAuth:true,requiresRoles:false}
+      },
+      fields : {},
+      filters : {},
+      handlers : {},
+      realTime  : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "example.com",
+        preflightContinue    : false
+      }
+    });
+  });
+
+  it('Test compilation with cors with nested', () => {
+    const fn = compileEndpointModel;
+
+    expect(fn({
+      cors: {
+        origin: '*'
+      },
+      '/:id' : {
+        cors: {
+          origin: 'example.com'
+        }
+      }
+    })).to.deep.equal({
+      auth : {
+        "GET"     : {requiresAuth:true,requiresRoles:false},
+        "HEAD"    : {requiresAuth:true,requiresRoles:false},
+        "OPTIONS" : {requiresAuth:true,requiresRoles:false},
+        "POST"    : {requiresAuth:true,requiresRoles:false},
+        "PUT"     : {requiresAuth:true,requiresRoles:false},
+        "PATCH"   : {requiresAuth:true,requiresRoles:false},
+        "DELETE"  : {requiresAuth:true,requiresRoles:false},
+        realTime  : {requiresAuth:true,requiresRoles:false}
+      },
+      fields : {},
+      filters : {},
+      handlers : {},
+      realTime  : false,
+      cors: {
+        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        optionsSuccessStatus : 204,
+        origin               : "*",
+        preflightContinue    : false
+      },
+      '/:id' : {
+        auth : {
+          "GET"     : {requiresAuth:true,requiresRoles:false},
+          "HEAD"    : {requiresAuth:true,requiresRoles:false},
+          "OPTIONS" : {requiresAuth:true,requiresRoles:false},
+          "POST"    : {requiresAuth:true,requiresRoles:false},
+          "PUT"     : {requiresAuth:true,requiresRoles:false},
+          "PATCH"   : {requiresAuth:true,requiresRoles:false},
+          "DELETE"  : {requiresAuth:true,requiresRoles:false},
+          realTime  : {requiresAuth:true,requiresRoles:false}
+        },
+        fields : {},
+        filters : {},
+        handlers : {},
+        realTime  : false,
+        cors : {
+          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          optionsSuccessStatus : 204,
+          origin               : "example.com",
+          preflightContinue    : false
         }
       }
     });
@@ -468,6 +606,72 @@ describe('compileRealTime', () => {
       'connect'    : '::connect',
       'message'    : '::message',
       'disconnect' : '::disconnect'
+    });
+  });
+});
+
+describe('compileCors', () => {
+  const defaultCors = {
+    origin               : "*",
+    methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue    : false,
+    optionsSuccessStatus : 204
+  };
+
+  it('compileCors', () => {
+    const fn = compileCors;
+
+    expect(fn({
+    }, defaultCors)).to.deep.equal({
+      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      optionsSuccessStatus : 204,
+      origin               : "*",
+      preflightContinue    : false
+    });
+
+    expect(fn({
+      methods : "POST,HEAD"
+    }, defaultCors)).to.deep.equal({
+      methods              : "POST,HEAD",
+      optionsSuccessStatus : 204,
+      origin               : "*",
+      preflightContinue    : false
+    });
+
+    expect(fn({
+      origin : "example.com"
+    }, defaultCors)).to.deep.equal({
+      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      optionsSuccessStatus : 204,
+      origin               : "example.com",
+      preflightContinue    : false
+    });
+
+    expect(fn({
+      origin : ["example1.com", "example2.com", "example3.com"]
+    }, defaultCors)).to.deep.equal({
+      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      optionsSuccessStatus : 204,
+      origin : ["example1.com", "example2.com", "example3.com"],
+      preflightContinue    : false
+    });
+
+    expect(fn({
+      optionsSuccessStatus : 206
+    }, defaultCors)).to.deep.equal({
+      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      optionsSuccessStatus : 206,
+      origin               : "*",
+      preflightContinue    : false
+    });
+
+    expect(fn({
+      preflightContinue : true
+    }, defaultCors)).to.deep.equal({
+      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      optionsSuccessStatus : 204,
+      origin               : "*",
+      preflightContinue    : true
     });
   });
 });
