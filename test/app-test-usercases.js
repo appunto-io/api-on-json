@@ -405,7 +405,6 @@ async function databaseTestSuite() {
         const response = await options('flowers');
 
         expect(response).to.have.status(204);
-        expect(response.headers['x-powered-by']).to.be.equal('Express');
         expect(response.headers['access-control-allow-origin']).to.be.equal('*');
         expect(response.headers['access-control-allow-methods']).to.be.equal('GET,HEAD,PUT,PATCH,POST,DELETE');
       });
@@ -413,10 +412,9 @@ async function databaseTestSuite() {
 
     describe('OPTIONS request', async function() {
       it('custom cors', async function() {
-        const response = await options('flowers');
+        const response = await options('users');
 
         expect(response).to.have.status(204);
-        expect(response.headers['x-powered-by']).to.be.equal('Express');
         expect(response.headers['access-control-allow-origin']).to.be.equal('*');
         expect(response.headers['access-control-allow-methods']).to.be.equal('GET,HEAD,PUT,PATCH,POST,DELETE');
       });
@@ -461,6 +459,17 @@ const dataModels = {
   }
 };
 
+const apiModelCustomCors = {
+  '/users': {
+    cors : {
+    origin : 'example.com',
+    methods : 'GET,POST'
+    }
+  }
+}
+
+const compiledApiModelCustomCors = compileApiModel(apiModelCustomCors);
+
 
 describe('api-on-json test suite', async function() {
 
@@ -486,6 +495,7 @@ describe('api-on-json test suite', async function() {
       })
       .then(async() => {
         this.api = new API(dataModels);
+        this.api.addApiModel(compiledApiModelCustomCors);
         await this.api.setDatabase(db);
         await this.api.listen(3000);
         done()});

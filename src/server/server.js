@@ -1,4 +1,5 @@
 const express               = require('express');
+const helmet                = require('helmet');
 const bodyParser            = require('body-parser');
 const queryParser           = require('express-query-parser')
 const jwt                   = require('jsonwebtoken');
@@ -107,18 +108,6 @@ const createAuthHandler = (method, model, environment) => (request, response, ne
     accountId,
     roles
   };
-
-  return next();
-};
-
-/*
-Adds response header to handler CORS.
- */
-const CORSHandler = (request, response, next) => {
-  response.header('Access-Control-Allow-Origin',   '*');
-  response.header('Access-Control-Allow-Headers',  'Authorization,Content-Type');
-  response.header('Access-Control-Expose-Headers', 'X-Total-Count');
-  response.header('Access-Control-Allow-Methods',  'GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE');
 
   return next();
 };
@@ -286,7 +275,7 @@ const recurseModel = (path, model, environment, addRoute) => {
     const authorization = createAuthHandler(method, model, environment);
     const handler       = createHandlersChain(method, model, environment);
 
-    addRoute(path || '/', method, [CORSHandler, authorization, handler]);
+    addRoute(path || '/', method, [authorization, handler]);
   });
 
 
@@ -323,10 +312,10 @@ const createServer = (model, environment) => {
   recurseModel('', model, environment, addRoute);
 
   /*
-  If not user defined, add handlers for OPTIONS method to allow CORS.
+  If not user defined.
    */
   Object.values(routes).forEach(methods => {
-    methods['OPTIONS'] = methods['OPTIONS'] || [CORSHandler, justSend200];
+    methods['OPTIONS'] = methods['OPTIONS'] || [justSend200];
   });
 
   /*
@@ -334,14 +323,33 @@ const createServer = (model, environment) => {
    */
   var app = express();
 
+  /*
+  Setting up Helmet for HTTP security
+  */
+  if (model.security) {
+    const options = Object.entries(model.security);
+      for (let i = 0; i < options.length; i++) {
+        const middlewareName    = options[i][0];
+        const middlewareOptions = options[i][1];
+        app.use(helmet[middlewareName](middlewareOptions));
+      }
+  }
+
+  /*
+  Setting up parsing middleware for request and response
+  */
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(queryParser({ parseNull: true, parseBoolean: true }));
 
-  // catch all errors and log them
+  /*
+  Catch all errors and log them
+  */
   app.use(logRequest);
 
-  // log requests
+  /*
+  Log requests
+  */
   app.use(logError);
 
 
