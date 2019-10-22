@@ -1,13 +1,14 @@
 const { keysMap, onUndefined } = require('./helpers');
+const { createAuthHandler }    = require('../server/server.js');
 
 /*
 Methods list
  */
 const methods      = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'realTime'];
-const readMethods  = ['GET', 'HEAD', 'OPTIONS'];
+const readMethods  = ['GET', 'HEAD', 'OPTIONS', 'realTime'];
 const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
-const defaultRequirements = {requiresAuth : true, requiresRoles : false};
+const defaultRequirements = {requiresAuth : true, requiresRoles : false, policies : [createAuthHandler]};
 const defaultAuth         = keysMap(methods, () => defaultRequirements);
 const defaultCorsOptions  = {
   origin               : "*",
@@ -23,12 +24,19 @@ const compileRequestRequirements = (requirements) => {
     return false;
   }
   else if (requirements === true) {
-    return {requiresAuth : false, requiresRoles : false};
+    return {requiresAuth : false, requiresRoles : false, policies : [createAuthHandler]};
   }
   else if (typeof requirements === 'object') {
+    var policies = [createAuthHandler];
+
+    if (requirements.policies) {
+      policies = [createAuthHandler, ...requirements.policies];
+    }
+
     return {
       requiresAuth  : onUndefined(requirements.requiresAuth, true),
-      requiresRoles : onUndefined(requirements.requiresRoles, false)
+      requiresRoles : onUndefined(requirements.requiresRoles, false),
+      policies
     };
   }
 
@@ -56,7 +64,7 @@ const compileAuthRequirements = (model, defaultAuth, realTime) => {
   Apply common rules to all request methods if at least one of the
   requiresAuth or requiersRoles specifications are available.
    */
-  if (model.requiresAuth !== undefined || model.requiresRoles !== undefined) {
+  if (model.requiresAuth !== undefined || model.requiresRoles !== undefined || model.policies !== undefined) {
     const commonRequirements = compileRequestRequirements(model);
 
     methods.forEach(method => {compiled[method] = commonRequirements;});

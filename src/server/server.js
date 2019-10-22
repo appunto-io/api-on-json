@@ -32,7 +32,7 @@ const httpToServerMethod = method => ({
   'DELETE'  : 'delete'
 }[method]);
 
-const isReadMethod  = method => !!{'GET' : 1, 'HEAD' : 1, 'OPTIONS' : 1}[method];
+const isReadMethod  = method => !!{'GET' : 1, 'HEAD' : 1, 'OPTIONS' : 1, 'realTime': 1}[method];
 // const isWriteMethod = method => !!{'POST' : 1, 'PUT' : 1, 'PATCH' : 1, 'DELETE' : 1}[method];
 
 /*
@@ -327,12 +327,20 @@ const createServer = (model, environment) => {
   Setting up Helmet for HTTP security
   */
   if (model.security) {
-    const options = Object.entries(model.security);
-      for (let i = 0; i < options.length; i++) {
-        const middlewareName    = options[i][0];
-        const middlewareOptions = options[i][1];
-        app.use(helmet[middlewareName](middlewareOptions));
+    Object.entries(model.security).forEach(
+      ([name, options]) => {
+        if( helmet[name] ) {
+           app.use(helmet[name](options));
+        }
       }
+    );
+
+    // const options = Object.entries(model.security);
+    //   for (let i = 0; i < options.length; i++) {
+    //     const middlewareName    = options[i][0];
+    //     const middlewareOptions = options[i][1];
+    //     app.use(helmet[middlewareName](middlewareOptions));
+    //   }
   }
 
   /*
@@ -383,5 +391,6 @@ const createServer = (model, environment) => {
 };
 
 module.exports = {
-  createServer
+  createServer,
+  createAuthHandler
 };
