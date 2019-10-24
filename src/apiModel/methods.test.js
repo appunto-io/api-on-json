@@ -1,4 +1,4 @@
-const { getAllowedMethods } = require('../src/apiModel/methods.js');
+const { getAllowedMethods } = require('./methods.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

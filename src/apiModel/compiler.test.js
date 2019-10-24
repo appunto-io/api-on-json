@@ -9,9 +9,9 @@ const {
 
   keysMap,
   methods
-} = require('../src/apiModel/compiler.js');
+} = require('./compiler.js');
 
-const { createAuthHandler } = require('../src/server/server.js')
+const { createAuthHandler } = require('../server/server.js')
 
 const chai   = require('chai');
 const expect = chai.expect;

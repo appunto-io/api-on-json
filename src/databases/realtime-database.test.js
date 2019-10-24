@@ -3,13 +3,11 @@ const chaiHTTP = require('chai-http');
 var io         = require('socket.io-client');
 const jwt      = require('jsonwebtoken');
 
-const { API }     = require('../src/index.js');
-const { Rethink } = require('../src/database/database.js');
+const { API }     = require('../index.js');
+const { Rethink } = require('./databases.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);
-
-require('dotenv').config({path: __dirname + '/.env'});
 
 const tokenB = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.1Yv6_KkkdfizAkirOLkPh_xnFGu8B_003xZvu_YxgFY';
 
@@ -83,10 +81,8 @@ var room = 'lobby';
 
 
 describe('realTime test suite', async function() {
-  const hostname = process.env.HOST;
-  const port = process.env.PORT;
 
-  var db = new Rethink(hostname, port, 'realTime');
+  var db = new Rethink("localhost", "28015", 'realTime');
 
   var api  = new API(dataModels);
   var roleApiModel = {

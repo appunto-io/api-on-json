@@ -1,4 +1,4 @@
-const { getDeniedFields } = require('../src/apiModel/fields.js');
+const { getDeniedFields } = require('./fields.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

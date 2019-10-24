@@ -1,4 +1,4 @@
-const { testRoles } = require('../src/apiModel/roles.js');
+const { testRoles } = require('./roles.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

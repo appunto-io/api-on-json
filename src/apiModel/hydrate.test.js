@@ -1,4 +1,4 @@
-const { hydrate } = require('../src/apiModel/hydrate.js');
+const { hydrate } = require('./hydrate.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

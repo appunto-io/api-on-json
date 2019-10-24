@@ -1,7 +1,7 @@
 const mongoose                 = require('mongoose');
-const { Mongo }                = require('../src/database/database.js');
+const { Mongo }                = require('./databases.js');
 const { MongoMemoryServer }    = require('mongodb-memory-server');
-const databaseGenericTestSuite = require('./database-generic-test.js');
+const databaseGenericTestSuite = require('./database-generic.test.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

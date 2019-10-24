@@ -1,4 +1,4 @@
-const { mergeModels } = require('../src/apiModel/merge.js');
+const { mergeModels } = require('./merge.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

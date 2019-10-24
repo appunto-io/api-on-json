@@ -3,11 +3,9 @@ const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
-const { API }               = require('../src/index.js');
-const { compileApiModel }   = require('../src/apiModel/compiler.js')
-const { Mongo, Rethink }    = require('../src/database/database.js');
-
-require('dotenv').config({path: __dirname + '/.env'});
+const { API }               = require('./index.js');
+const { compileApiModel }   = require('./apiModel/compiler.js')
+const { Mongo, Rethink }    = require('./databases/databases.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);
@@ -512,11 +510,7 @@ describe('api-on-json test suite', async function() {
   describe('api-on-json test suite rethinkdb', async function() {
     var id;
 
-    const hostname = process.env.HOST;
-    const port = process.env.PORT;
-    const dbName = process.env.DB_NAME;
-
-    let db = new Rethink(hostname, port, dbName);
+    let db = new Rethink("localhost", "28015", "db");
 
     before((done) => {
       this.api2 = new API(dataModels);

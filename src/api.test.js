@@ -2,7 +2,7 @@ const chai     = require('chai');
 const chaiHTTP = require('chai-http');
 const jwt      = require('jsonwebtoken');
 
-const { API }     = require('../src/index.js');
+const { API }     = require('./index.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);

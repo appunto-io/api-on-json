@@ -4,7 +4,7 @@ const {
   compileSchemaDeclaration,
   compileOptionsDeclaration,
   compileCollection
-} = require('../src/dataModel/compiler.js');
+} = require('./compiler.js');
 
 const chai   = require('chai');
 const expect = chai.expect;

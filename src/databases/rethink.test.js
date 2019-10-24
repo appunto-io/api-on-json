@@ -1,8 +1,6 @@
-const { Rethink } = require('../src/database/database.js');
+const { Rethink } = require('./databases.js');
 
-require('dotenv').config({path: __dirname + '/.env'});
-
-const databaseGenericTestSuite = require('./database-generic-test.js');
+const databaseGenericTestSuite = require('./database-generic.test.js');
 const chai                     = require('chai');
 const expect                   = chai.expect;
 
@@ -25,10 +23,7 @@ const carModel = {
 describe('rethink database class test suite', async function() {
   var id;
 
-  const hostname = process.env.HOST;
-  const port = process.env.PORT;
-
-  var db = new Rethink(hostname, port, "unitary");
+  var db = new Rethink("localhost", "28015", "unitary");
   before(async() => {
     await db.connect();
     await db.init(carModel);

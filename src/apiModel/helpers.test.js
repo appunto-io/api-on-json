@@ -1,4 +1,4 @@
-const { onUndefined } = require('../src/apiModel/helpers.js');
+const { onUndefined } = require('./helpers.js');
 
 const chai   = require('chai');
 const expect = chai.expect;
