@@ -3,8 +3,8 @@ const chaiHTTP = require('chai-http');
 var io         = require('socket.io-client');
 const jwt      = require('jsonwebtoken');
 
-const { API }     = require('../index.js');
-const { Rethink } = require('./databases.js');
+const { API }     = require('../../index.js');
+const { Rethink } = require('../databases.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);

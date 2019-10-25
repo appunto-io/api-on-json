@@ -1,12 +1,12 @@
 const { createServer }                       = require('./server/server.js')
-const { compileDataModel }                   = require('./dataModel/compiler.js');
-const { compileApiModel }                    = require('./apiModel/compiler.js');
-const { mergeModels }                        = require('./apiModel/merge')
-const { hydrate }                            = require('./apiModel/hydrate.js');
+const { compileDataModel }                   = require('./datamodel/helpers/compiler.js');
+const { compileApiModel }                    = require('./apimodel/helpers/compiler.js');
+const { mergeModels }                        = require('../shared/merge.js')
+const { hydrate }                            = require('./apimodel/helpers/hydrate.js');
 const { createLibraryFromDataModel,
-        createApiFromDataModel }             = require('./apiModel/datamodel/data.js');
+        createApiFromDataModel }             = require('./datamodel/helpers/data.js');
 const { createRealtimeApiFromDataModel,
-        createRealtimeLibraryFromDataModel } = require('./apiModel/datamodel/dataRealtime.js');
+        createRealtimeLibraryFromDataModel } = require('./datamodel/helpers/dataRealtime.js');
 
 
 class API {

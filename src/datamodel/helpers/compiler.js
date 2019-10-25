@@ -6,7 +6,7 @@ const {
   isNestedObject,
   isTypeDeclaration,
   isTypeName
-} = require('./helpers');
+} = require('./helpers.js');
 
 
 /**

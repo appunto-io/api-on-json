@@ -4,7 +4,7 @@ const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { API }               = require('./index.js');
-const { compileApiModel }   = require('./apiModel/compiler.js')
+const { compileApiModel }   = require('./apimodel/helpers/compiler.js')
 const { Mongo, Rethink }    = require('./databases/databases.js');
 
 const expect = chai.expect;

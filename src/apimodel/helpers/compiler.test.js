@@ -11,7 +11,7 @@ const {
   methods
 } = require('./compiler.js');
 
-const { createAuthHandler } = require('../server/server.js')
+const { createAuthHandler } = require('../../server/server.js')
 
 const chai   = require('chai');
 const expect = chai.expect;

@@ -1,5 +1,5 @@
-const io            = require('socket.io');
-const jwt           = require('jsonwebtoken');
+const io  = require('socket.io');
+const jwt = require('jsonwebtoken');
 
 function _recCreateRegExp(name, reg, ...subNamespaces) {
   var subRegs = [];

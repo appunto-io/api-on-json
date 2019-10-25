@@ -1,5 +1,5 @@
 const { keysMap, onUndefined } = require('./helpers');
-const { createAuthHandler }    = require('../server/server.js');
+const { createAuthHandler }    = require('../../server/server.js');
 
 /*
 Methods list
