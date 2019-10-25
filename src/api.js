@@ -1,13 +1,9 @@
 const { createServer }                       = require('./server/server.js')
-const { compileDataModel }                   = require('./datamodel/helpers/compiler.js');
 const { compileApiModel }                    = require('./apimodel/helpers/compiler.js');
-const { mergeModels }                        = require('../shared/merge.js')
-const { hydrate }                            = require('./apimodel/helpers/hydrate.js');
-const { createLibraryFromDataModel,
-        createApiFromDataModel }             = require('./datamodel/helpers/data.js');
-const { createRealtimeApiFromDataModel,
-        createRealtimeLibraryFromDataModel } = require('./datamodel/helpers/dataRealtime.js');
-
+const { mergeModels }                        = require('./shared/merge.js')
+const { hydrate }                            = require('./datamodel/helpers/hydrate.js');
+const { compileDataModel }                   = require('./datamodel/helpers/compiler.js');
+const { DataModel }                   = require('./datamodel/datamodel.js');
 
 class API {
   constructor(dataModel)
@@ -59,20 +55,16 @@ class API {
       (reduced, model) => mergeModels(reduced, model), {}
     );
 
+    const dataModel = new DataModel(mergedDataModel);
+
     /*
       API model
     */
     var mergedApiModel = {};
 
     if (Object.entries(mergedDataModel).length != 0) {
-      const apiModelFromDataModel         = createApiFromDataModel(mergedDataModel);
-      const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(mergedDataModel);
-
-      const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
-      const compiledApiModel         = compileApiModel(apiModel);
-      const dataModelLibrary         = createLibraryFromDataModel(mergedDataModel);
-      const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(mergedDataModel);
-      const hydratedApiModel         = hydrate(compiledApiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
+      const opt = {};
+      const hydratedApiModel         = dataModel.toApi(opt);
 
       if (hydratedApiModel.hasRealtime && (typeof this.database.observe != "function")) {
         console.warn('The database you are using can\'t use realTime');
@@ -89,6 +81,7 @@ class API {
       );
     }
 
+    mergedApiModel = compileApiModel(mergedApiModel);
     this.model = mergedApiModel;
 
     /*

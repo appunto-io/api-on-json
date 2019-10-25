@@ -1,4 +1,4 @@
-const { Rethink } = require('../databases.js');
+const { Rethink } = require('./rethink.js');
 
 const databaseGenericTestSuite = require('../database-generic.test.js');
 const chai                     = require('chai');

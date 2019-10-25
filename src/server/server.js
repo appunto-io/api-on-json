@@ -4,7 +4,7 @@ const bodyParser            = require('body-parser');
 const queryParser           = require('express-query-parser')
 const jwt                   = require('jsonwebtoken');
 const { getAllowedMethods } = require('./helpers/methods.js');
-const { testRoles }         = require('../../shared/roles.js');
+const { testRoles }         = require('../shared/roles.js');
 const realtimeHandlers      = require('./realtime.js');
 
 var cors                    = require('cors');

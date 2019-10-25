@@ -1,4 +1,4 @@
-const { objectMap } = require('./helpers');
+const { objectMap } = require('../../apimodel/helpers/helpers.js');
 
 const CALLBACK_PATTERN = '::';
 

@@ -465,4 +465,4 @@ class Rethink {
   }
 }
 
-module.exports = Rethink
+module.exports = { Rethink: Rethink }

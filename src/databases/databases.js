@@ -1,9 +1,6 @@
-const Mongo   = require('./mongo/mongo.js');
-const Rethink = require('./rethink/rethink.js');
+const { Mongo }   = require('./mongo/mongo.js');
+const { Rethink } = require('./rethink/rethink.js');
 
 
 
-module.exports = {
-  Mongo : Mongo,
-  Rethink : Rethink
-}
+module.exports = {Mongo, Rethink}

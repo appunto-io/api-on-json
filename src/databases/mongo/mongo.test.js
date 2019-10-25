@@ -1,5 +1,5 @@
 const mongoose                 = require('mongoose');
-const { Mongo }                = require('../databases.js');
+const { Mongo }                = require('./mongo.js');
 const { MongoMemoryServer }    = require('mongodb-memory-server');
 const databaseGenericTestSuite = require('../database-generic.test.js');
 

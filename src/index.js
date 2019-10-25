@@ -1,4 +1,5 @@
 const API = require('./api.js');
+const DataModel = require('./datamodel/datamodel.js')
 
 
-module.exports = { API }
+module.exports = { API, DataModel : DataModel }

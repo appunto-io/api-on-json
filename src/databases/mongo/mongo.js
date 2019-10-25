@@ -256,4 +256,4 @@ class Mongo {
   }
 }
 
-module.exports = Mongo
+module.exports = { Mongo : Mongo}
