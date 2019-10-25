@@ -3,7 +3,10 @@ const chaiHTTP = require('chai-http');
 var io         = require('socket.io-client');
 const jwt      = require('jsonwebtoken');
 
-const { API }     = require('../../index.js');
+const { DataModel,
+        ApiModel,
+        Server }  = require('../../index.js');
+
 const { Rethink } = require('../databases.js');
 
 const expect = chai.expect;
@@ -84,7 +87,15 @@ describe('realTime test suite', async function() {
 
   var db = new Rethink("localhost", "28015", 'realTime');
 
-  var api  = new API(dataModels);
+  const opt = {
+    realTime: true
+  };
+
+  const env = {
+    db        : db,
+    jwtSecret : "--default-jwt-secret--"
+  }
+
   var roleApiModel = {
     '/cars': {
       auth: {
@@ -93,19 +104,26 @@ describe('realTime test suite', async function() {
     }
   };
 
-  api.addApiModel(roleApiModel);
+  //api.addApiModel(roleApiModel);
 
-  const admin  = jwt.sign({ role: 'admin' }, api.jwtSecret);
-  const user   = jwt.sign({ role: 'user' }, api.jwtSecret);
-  const collab = jwt.sign({ role: 'collab' }, api.jwtSecret);
+  const admin  = jwt.sign({ role: 'admin' }, env.jwtSecret);
+  const user   = jwt.sign({ role: 'user' }, env.jwtSecret);
+  const collab = jwt.sign({ role: 'collab' }, env.jwtSecret);
 
-  before(async () => {
-    await api.setDatabase(db);
-    await api.listen(3000);
+  before(async() => {
+    const dataModel = new DataModel(dataModels);
+
+    await db.connect();
+    await db.init(dataModel.get());
+    const apiModel  = dataModel.toApi(opt);
+
+
+    this.server  = apiModel.toServer(env);
+    await this.server.listen(3000);
   });
 
   after(async () => {
-    await api.close();
+    await this.server.close();
   });
 
   it('Testing connection', function(done) {

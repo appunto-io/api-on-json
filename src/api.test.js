@@ -2,7 +2,9 @@ const chai     = require('chai');
 const chaiHTTP = require('chai-http');
 const jwt      = require('jsonwebtoken');
 
-const { API }     = require('./index.js');
+const {
+        ApiModel,
+        Server }            = require('./index.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);
@@ -166,20 +168,25 @@ const apiModel = {
 };
 
 describe('realTime test suite', async function() {
-  var api  = new API();
+  var api  = new ApiModel(apiModel);
 
-  api.addApiModel(apiModel);
+  const env = {
+    jwtSecret : "--default-jwt-secret--"
+  }
 
-  const admin  = jwt.sign({ role: 'admin' }, api.jwtSecret);
-  const user   = jwt.sign({ role: 'user' }, api.jwtSecret);
-  const collab = jwt.sign({ role: 'collab' }, api.jwtSecret);
+  const admin  = jwt.sign({ role: 'admin' }, env.jwtSecret);
+  const user   = jwt.sign({ role: 'user' }, env.jwtSecret);
+  const collab = jwt.sign({ role: 'collab' }, env.jwtSecret);
 
   before(async () => {
-    await api.listen(3000);
+
+
+    this.server  = api.toServer(env);
+    await this.server.listen(3000);
   });
 
   after(async () => {
-    await api.close();
+    await this.server.close();
   });
 
   it('Testing get route', async function() {

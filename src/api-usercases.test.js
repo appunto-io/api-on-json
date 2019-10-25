@@ -3,9 +3,13 @@ const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
-const { API }               = require('./index.js');
 const { compileApiModel }   = require('./apimodel/helpers/compiler.js')
 const { Mongo, Rethink }    = require('./databases/databases.js');
+
+const { DataModel,
+        ApiModel,
+        Server }            = require('./index.js');
+
 
 const expect = chai.expect;
 chai.use(chaiHTTP);
@@ -492,14 +496,29 @@ describe('api-on-json test suite', async function() {
         return db.connect();
       })
       .then(async() => {
-        this.api = new API(dataModels);
-        this.api.addApiModel(compiledApiModelCustomCors);
-        await this.api.setDatabase(db);
-        await this.api.listen(3000);
+        const dataModel = new DataModel(dataModels);
+
+        await db.connect();
+        await db.init(dataModel.get());
+
+        const opt = {
+          realTime: false
+        };
+
+        const apiModel  = dataModel.toApi(opt);
+
+        var rethinkDB = new Rethink("localhost", "28015", "G");
+        const env = {
+          db        : db,
+          jwtSecret : "--default-jwt-secret--"
+        }
+
+        this.server  = apiModel.toServer(env);
+        await this.server.listen(3000);
         done()});
     });
     after(async () => {
-      await this.api.close();
+      await this.server.close();
       await mongoose.disconnect();
       await mongoServer.stop();
     });
@@ -512,16 +531,29 @@ describe('api-on-json test suite', async function() {
 
     let db = new Rethink("localhost", "28015", "db");
 
-    before((done) => {
-      this.api2 = new API(dataModels);
-      this.api2.setDatabase(db);
-      this.api2.listen(3000).then(() => {
-        done();
-      });
+    const opt = {
+      realTime: false
+    };
+
+    before(async() => {
+      const dataModel = new DataModel(dataModels);
+
+      await db.connect();
+      await db.init(dataModel.get());
+      const apiModel = dataModel.toApi(opt);
+
+      const env = {
+        db        : db,
+        jwtSecret : "--default-jwt-secret--"
+      }
+
+      this.server2 = apiModel.toServer(env);
+      await this.server2.listen(3000);
+
     });
 
     after(async () => {
-      await this.api2.close();
+      await this.server2.close();
     });
 
     databaseTestSuite();

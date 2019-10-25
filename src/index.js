@@ -1,5 +1,8 @@
-const API = require('./api.js');
-const DataModel = require('./datamodel/datamodel.js')
+const { DataModel } = require('./datamodel/datamodel.js');
+const { ApiModel }  = require('./apimodel/apimodel.js');
+const { Server }    = require('./server/server.js');
 
 
-module.exports = { API, DataModel : DataModel }
+module.exports = { DataModel,
+                   ApiModel,
+                   Server}

@@ -5,6 +5,7 @@ const { createApiFromDataModel,
 const { createRealtimeApiFromDataModel,
         createRealtimeLibraryFromDataModel } = require('./helpers/dataRealtime.js');
 const { mergeModels }                        = require('../shared/merge.js')
+const { ApiModel }                           = require('../apimodel/apimodel.js');
 
 class DataModel {
   constructor(...dataModels)
@@ -20,6 +21,13 @@ class DataModel {
         }
       }
     );
+  }
+
+  get() {
+    const merged = this.models.reduce(
+      (reduced, model) => mergeModels(reduced, model), {}
+    );
+    return merged;
   }
 
   toApi(options) {
@@ -39,7 +47,7 @@ class DataModel {
       hydratedApiModel.hasRealtime = false;
     }
 
-    return hydratedApiModel;
+    return new ApiModel(hydratedApiModel);
   }
 }
 
