@@ -17,8 +17,6 @@ const defaultCorsOptions  = {
   optionsSuccessStatus : 204
 }
 
-var isRealtime = false;
-
 const compileRequestRequirements = (requirements) => {
   if (requirements === false) {
     return false;
@@ -99,10 +97,6 @@ const compileAuthRequirements = (model, defaultAuth, realTime) => {
 
 
   compiled['realTime'] = defaultRequirements;
-
-  if (compiled['realTime']) {
-    isRealtime = true;
-  }
 
   return compiled;
 };
@@ -232,7 +226,7 @@ Compile the entire api model
 const compileApiModel = apiModel => ({
   isApiModel  : true,
   ...compileEndpointModel(apiModel, null),
-  hasRealtime : isRealtime
+  hasRealtime: apiModel.hasRealtime === undefined ? true : apiModel.hasRealtime
 });
 
 module.exports = {

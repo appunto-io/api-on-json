@@ -39,7 +39,7 @@ const isReadMethod  = method => !!{'GET' : 1, 'HEAD' : 1, 'OPTIONS' : 1, 'realTi
 Creates a request handler that manage authentication and authorizations.
 The returned handler is the first handler to be executed for each route.
  */
-const createAuthHandler = (method, model, environment) => (request, response, next) => {
+const createAuthHandler = (method, model, environment) => async(request, response, next) => {
   environment = environment || {};
   const {auth} = model;
 
@@ -52,8 +52,8 @@ const createAuthHandler = (method, model, environment) => (request, response, ne
   if (methodAuth === false) {
     const allowedMethods = getAllowedMethods(auth);
 
-    response.header('Allow', allowedMethods.join(','));
-    response.send(405, 'Method Not Allowed');
+    await response.header('Allow', allowedMethods.join(','));
+    await response.status(405).send('Method Not Allowed');
     return next(false);
   }
 
@@ -79,19 +79,19 @@ const createAuthHandler = (method, model, environment) => (request, response, ne
   }
 
   /*
-  If no authorization is required, then just continue. Otherwise
+  If no authorization is required, then continue. Otherwise
   test authentication and roles
    */
   const { requiresAuth, requiresRoles } = methodAuth;
 
   if (requiresAuth !== false) {
     if (!isAuthenticated) {
-      response.send(401, 'Invalid token');
+      await response.status(401).send('Invalid token');
       return next(false);
     }
 
     if (!testRoles(requiresRoles || [], roles)) {
-      response.send(401, 'Missing required role');
+      await response.status(401).send('Missing required role');
       return next(false);
     }
   }
@@ -112,8 +112,8 @@ const createAuthHandler = (method, model, environment) => (request, response, ne
   return next();
 };
 
-const justSend200 = (request, response, next) => {
-  response.send(200);
+const justSend200 = async(request, response, next) => {
+  await response.send(200);
 
   return next();
 };
@@ -215,13 +215,19 @@ const createHandlersChain = (method, model, environment) => {
       environment
     });
 
-    response.set(res.headers);
+    await response.set(res.headers);
 
     if (res.sendRaw) {
-      response.sendRaw(res.status, data);
+      await response.sendRaw(res.status, data);
     }
     else {
-      response.status(res.status).send(data);
+      try {
+        await response.status(res.status).send(data);
+      }
+      catch(err) {
+        throw(err);
+      }
+
     }
 
     return next();
@@ -255,13 +261,13 @@ function logError(err, req, res, next) {
 Log all errors
  */
 const errorLogHandlers = (request, response, error, callback) => {
-  //logHandler(request, response, {}, error);
+  logHandler(request, response, {}, error);
 
   return callback();
 };
 
-const unhandledExceptionsLogHandler = (request, response, route, err) => {
-  response.send(err);
+const unhandledExceptionsLogHandler = async(request, response, route, err) => {
+  await response.send(err);
 };
 
 

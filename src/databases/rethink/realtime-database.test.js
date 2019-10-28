@@ -104,8 +104,6 @@ describe('realTime test suite', async function() {
     }
   };
 
-  //api.addApiModel(roleApiModel);
-
   const admin  = jwt.sign({ role: 'admin' }, env.jwtSecret);
   const user   = jwt.sign({ role: 'user' }, env.jwtSecret);
   const collab = jwt.sign({ role: 'collab' }, env.jwtSecret);
@@ -116,6 +114,7 @@ describe('realTime test suite', async function() {
     await db.connect();
     await db.init(dataModel.get());
     const apiModel  = dataModel.toApi(opt);
+    apiModel.addApiModel(roleApiModel);
 
 
     this.server  = apiModel.toServer(env);

@@ -27,7 +27,46 @@ class DataModel {
     const merged = this.models.reduce(
       (reduced, model) => mergeModels(reduced, model), {}
     );
-    return merged;
+    return compileDataModel(merged);
+  }
+
+  addDataModel(...dataModels) {
+    dataModels.forEach(
+      model => {
+        if (model instanceof DataModel) {
+          this.models = [...this.models, ...model.models];
+        }
+        else {
+          this.models.push(model)
+        }
+      }
+    );
+  }
+
+  addCollection(collection, definition) {
+    var newModel = {};
+    newModel[collection] = definition;
+
+    this.models.push(newModel);
+  }
+
+  addField(collection, field, definition) {
+    var newModel = {};
+    newModel[field] = definition;
+
+    this.addCollection(collection, {schema: newModel});
+  }
+
+  removeColleciton(collection) {
+    this.addCollection(collection, null)
+  }
+
+  removeField(collection, field) {
+    this.addField(collection, field, null);
+  }
+
+  setOptions(collection, options) {
+    this.addCollection(collection, options);
   }
 
   toApi(options) {
@@ -43,7 +82,7 @@ class DataModel {
     const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(merged);
     const hydratedApiModel         = hydrate(apiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
 
-    if (!options.realTime) {
+    if (options.realTime === false) {
       hydratedApiModel.hasRealtime = false;
     }
 

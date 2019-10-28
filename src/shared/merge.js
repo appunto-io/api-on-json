@@ -22,7 +22,12 @@ const mergeModels = (...models) => {
     }
 
     Object.entries(source).forEach(([key, value]) => {
+      if (value === null) {
+        delete accumulator[key];
+      }
+      else {
         accumulator[key] = merge(accumulator[key], value);
+      }
     });
 
     return accumulator;
