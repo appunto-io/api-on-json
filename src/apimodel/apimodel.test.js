@@ -385,5 +385,6 @@ describe('ApiModel test suite', () => {
     const options = {};
 
     const server = apiModel.toServer(options);
+    expect(server.server).to.not.be.undefined;
   });
 });
