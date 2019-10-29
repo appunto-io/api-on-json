@@ -1,5 +1,5 @@
 const { keysMap, onUndefined } = require('./helpers');
-const { createAuthHandler }    = require('../../server/server.js');
+const { createAuthHandler }    = require('../../server/helpers/helpers.js');
 
 /*
 Methods list
@@ -28,7 +28,7 @@ const compileRequestRequirements = (requirements) => {
     var policies = [createAuthHandler];
 
     if (requirements.policies) {
-      policies = [createAuthHandler, ...requirements.policies];
+      policies = requirements.policies;
     }
 
     return {

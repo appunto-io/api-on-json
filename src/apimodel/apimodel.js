@@ -39,6 +39,48 @@ class ApiModel {
     );
   }
 
+  addRoute(route, definition) {
+    var newModel = {};
+    var current  = newModel;
+
+    if (route.includes('/')) {
+
+      var paths = route.split('/');
+
+      paths = paths.filter(value => value != '');
+
+      for (let i = 0; i < paths.length; i++) {
+        var path = '/' + paths[i];
+
+        if (i + 1 === paths.length) {
+          current[path] = definition;
+        }
+        else {
+          current[path] = {};
+        }
+
+        current = current[path];
+      }
+    }
+    else {
+      newModel['/' + route] = definition;
+    }
+
+    this.models.push(newModel);
+  }
+
+  removeRoute(route) {
+    this.addRoute(route, null);
+  }
+
+  addHandlers(route, handlers) {
+    this.addRoute(route, handlers);
+  }
+
+  addFilters(route, filters) {
+    this.addRoute(route, filters);
+  }
+
   toServer(env) {
     const merged = this.models.reduce(
       (reduced, model) => mergeModels(reduced, model), {}
