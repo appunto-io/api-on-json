@@ -147,7 +147,7 @@ class Rethink {
   /************
   ReadMany: Handle GET request with query
   */
-  async readMany(collection, query = {}, options = {}) {
+  async readMany(collection, query = {}) {
     const model = this.models[collection]['schema'];
     let { page, pageSize, sort, order, cursor, ...restOfquery } = query;
     order      = (order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
@@ -182,9 +182,11 @@ class Rethink {
       filters[0] = true;
     }
 
+    var elem_sort;
+    var elem_order;
     if (Array.isArray(sort)) {
       for (let i = 0; i < sort.length; i++) {
-        var [ elem_sort, elem_order ] = sort[i].split(',');
+        [ elem_sort, elem_order ] = sort[i].split(',');
         elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : order;
         if (model[elem_sort]) {
           orderingBy.push(this.database[elem_order](elem_sort));
@@ -192,7 +194,7 @@ class Rethink {
       }
     }
     else {
-      var [ elem_sort, elem_order ] = sort.split(',');
+      [ elem_sort, elem_order ] = sort.split(',');
       elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : order;
       if (model[elem_sort]) {
         orderingBy.push(this.database[elem_order](elem_sort));
@@ -419,10 +421,9 @@ class Rethink {
   /************
   Observe: Allow to get changes on a selection in realtime
   */
-  async observe(collection, query = {}, options = {}, socket, callback) {
+  async observe(collection, query = {}, socket, callback) {
     const model = this.models[collection]['schema'];
 
-    var results;
     var filters = [];
 
     for (let elem in query) {
@@ -443,7 +444,7 @@ class Rethink {
       for (let i = 1; i < filters.length; i++) {
         filters[0] = filters[0].and(filters[i]);
       }
-      results = await this.database.table(collection)
+      await this.database.table(collection)
         .filter(filters[0])
         .changes()
         .run(function(err, iterator) {
@@ -454,7 +455,7 @@ class Rethink {
     }
 
     if (Object.entries(query).length === 0) {
-      results = await this.database.table(collection)
+      await this.database.table(collection)
         .changes()
         .run(function(err, iterator) {
           iterator.each(function (err, item) {

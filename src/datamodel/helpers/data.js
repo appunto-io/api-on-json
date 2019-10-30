@@ -8,7 +8,7 @@ Create POST callback
 Add a new document in the collection. Document validation
 is performed by mongoose.
  */
-const createPostCallback = (name, db) => async (data = {}, flow, meta) => {
+const createPostCallback = (name) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
 
@@ -29,7 +29,7 @@ const createPostCallback = (name, db) => async (data = {}, flow, meta) => {
 /*
 Create PUT callback
  */
-const createPutCallback = (name, db) => async (data = {}, flow, meta) => {
+const createPutCallback = (name) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
   const id  = meta.request.params['id'];
@@ -52,7 +52,7 @@ const createPutCallback = (name, db) => async (data = {}, flow, meta) => {
 /*
 Create PATCH callback
  */
-const createPatchCallback = (name, db) => async (data = {}, flow, meta) => {
+const createPatchCallback = (name) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
   const id   = meta.request.params['id'];
@@ -65,7 +65,7 @@ const createPatchCallback = (name, db) => async (data = {}, flow, meta) => {
       TBD: Generate consistent error messaging
        */
       return flow.stop(404, {error : 'DocumentNotFound'});
-    };
+    }
 
     emit('updated', {
       collection : name,
@@ -82,7 +82,7 @@ const createPatchCallback = (name, db) => async (data = {}, flow, meta) => {
 /*
 Create GET callback retireving a paginated list of documents
  */
-const createGetManyCallback = (name, db) => async (data, flow, meta) => {
+const createGetManyCallback = (name) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
   const { request, response } = meta;
@@ -119,7 +119,7 @@ const createGetManyCallback = (name, db) => async (data, flow, meta) => {
 /*
 Create GET callback that retrieves one object
  */
-const createGetCallback = (name, db) => async (data, flow, meta) => {
+const createGetCallback = (name) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
   const id = meta.request.params['id'];
@@ -148,7 +148,7 @@ const createGetCallback = (name, db) => async (data, flow, meta) => {
 /*
 Create DELETE callback
  */
-const createDeleteCallback = (name, db) => async (data, flow, meta) => {
+const createDeleteCallback = (name) => async (data, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
   const id = meta.request.params['id'];
@@ -210,7 +210,7 @@ const createApiFromDataModel = (dataModel) => {
 const createLibraryFromDataModel = (dbModels) => {
   const library = {};
   Object.entries(dbModels).forEach(([name]) => {
-    
+
     library[`get-many-${name}`]    = createGetManyCallback(name);
     library[`post-${name}`]        = createPostCallback(name);
     library[`get-one-${name}`]     = createGetCallback(name);

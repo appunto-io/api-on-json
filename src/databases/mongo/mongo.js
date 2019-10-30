@@ -7,8 +7,9 @@ Changes _id to id and removes __v from retrieved documents
  */
 const _convertDocumentToObject = (document) =>
   document.toObject({
-    transform : (doc, ret, options) => {
-      const { _id, __v, ...sanitized } = ret;
+    transform : (doc, ret) => {
+      Reflect.deleteProperty(ret, '__v');
+      const { _id, ...sanitized } = ret;
 
       sanitized.id = _id;
 
@@ -116,7 +117,7 @@ class Mongo {
     return _convertDocumentToObject(document);
   }
 
-  async readMany(collection, query = {}, options = {}) {
+  async readMany(collection, query = {}) {
     const Model = await this._getModel(collection);
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
 

@@ -2,13 +2,9 @@ const mongoose              = require('mongoose');
 const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-
-const { compileApiModel }   = require('./apimodel/helpers/compiler.js')
 const { Mongo, Rethink }    = require('./databases/databases.js');
 
-const { DataModel,
-        ApiModel,
-        Server }            = require('./index.js');
+const { DataModel }         = require('./index.js');
 
 
 const expect = chai.expect;
@@ -70,7 +66,7 @@ async function erase(collection, id) {
 
 async function options(collection) {
   return chai.request('http://localhost:3000')
-    .options(`/${collection}/` + id)
+    .options(`/${collection}`)
     .set('Authorization', token);
 }
 
@@ -81,7 +77,6 @@ async function options(collection) {
 
 async function databaseTestSuite() {
   describe('generic api-on-json test suite', async function() {
-
     describe('Empty database', async function() {
       it('Should return an empty list', async function() {
         const response = await get('cars');
@@ -113,7 +108,6 @@ async function databaseTestSuite() {
         expect(response.body.serial).to.be.equal('AAAAA');
         expect(response.body.createdAt).to.be.a('string');
         expect(response.body.updatedAt).to.be.a('string');
-        id = response.body.id;
       });
 
       it('Should use defaults on missing fields', async function() {
@@ -160,7 +154,7 @@ async function databaseTestSuite() {
         expect(response.body.updatedAt).to.be.undefined;
       });
 
-      it('Should fail when required fields are missing', async function() {
+      it('Should fail when required fields are missing', async function() {
         const response = await post('cars', {model: 'A1', serial: 'BBBBB'});
 
         expect(response).to.have.status(400);
@@ -179,19 +173,19 @@ async function databaseTestSuite() {
     */
     let createdDocuments;
     const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
-    const ages        = [   20   ,    21 ,    21 ,    21  ,  50   , 25     ,    18      ,   23      ,   30];
-    const serials     = [  'A'   ,   'B'  ,  'C',  'D'    ,  'E'  ,   'F'  ,    'G'     ,     'H'    ,  'I'];
+    const ages        = [ 20,       21,     21,      21,      50,      25,        18,          23,           30];
+    const serials     = [ 'A',      'B',    'C',    'D',     'E',     'F',       'G',         'H',          'I'];
 
     describe('Retrieve elements', async function() {
       before(async function() {
         const responses = [];
 
-        for (let index in flowerNames) {
+        for (let index = 0; index < flowerNames.length; index++) {
           responses[index] = await post('flowers', {name: flowerNames[index], age_in_days: ages[index], serial: serials[index]});
         }
 
         createdDocuments = responses.map(({body}) => body);
-        createdDocuments.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+        createdDocuments.sort((a, b) => (a.id > b.id) ? 1 : -1);
       });
 
       it('Should retrieve one element by id', async function() {
@@ -228,8 +222,8 @@ async function databaseTestSuite() {
 
         expect(response).to.have.status(200);
 
-        for (let i = page*pageSize; i < page*pageSize+pageSize; i++) {
-          expect(response.body.data[i - page*pageSize]).to.deep.equal(createdDocuments[i]);
+        for (let i = page * pageSize; i < page * pageSize + pageSize; i++) {
+          expect(response.body.data[i - page * pageSize]).to.deep.equal(createdDocuments[i]);
         }
 
         expect(response.body.data.length).to.be.equal(pageSize);
@@ -239,16 +233,15 @@ async function databaseTestSuite() {
 
         expect(response2).to.have.status(200);
 
-        for (let i = page*pageSize; i < page*pageSize+pageSize; i++) {
-          expect(response2.body.data[i - page*pageSize]).to.deep.equal(createdDocuments[i]);
+        for (let i = page * pageSize; i < page * pageSize + pageSize; i++) {
+          expect(response2.body.data[i - page * pageSize]).to.deep.equal(createdDocuments[i]);
         }
 
         expect(response2.body.data.length).to.be.equal(pageSize);
       });
 
       it('Should get the elements after the cursor', async function() {
-        let sort = 'name',
-        cursor = createdDocuments[3].id;
+        let cursor = createdDocuments[3].id;
 
         const response = await query('flowers', { cursor });
 
@@ -317,7 +310,7 @@ async function databaseTestSuite() {
       });
 
       it('Should get all elements after cursor', async function() {
-        const cursor = 'name' + ';' + createdDocuments[4].name + ';' + createdDocuments[4].id;
+        const cursor = 'name;' + createdDocuments[4].name + ';' + createdDocuments[4].id;
 
         const response = await query('flowers', { cursor, order: 'desc' });
 
@@ -327,7 +320,7 @@ async function databaseTestSuite() {
       });
 
       it('Should get the element in orderby name and in descandant order starting after cursor', async function() {
-        const cursor = 'name' + ';' + createdDocuments[1].name + ';' + createdDocuments[1].id;
+        const cursor = 'name;' + createdDocuments[1].name + ';' + createdDocuments[1].id;
         const response = await query('flowers', { cursor, sort: 'name', order: 'desc' });
 
         expect(response).to.have.status(200);
@@ -370,7 +363,7 @@ async function databaseTestSuite() {
         expect(response.body.updatedAt).to.be.a('string');
       });
 
-      it('Should fail when required fields are missing', async function() {
+      it('Should fail when required fields are missing', async function() {
         const response = await put('flowers', createdDocuments[0].id, {age_in_days: 3});
 
         expect(response).to.have.status(400);
@@ -408,7 +401,7 @@ async function databaseTestSuite() {
 
         expect(response).to.have.status(204);
         expect(response.headers['access-control-allow-origin']).to.be.equal('*');
-        expect(response.headers['access-control-allow-methods']).to.be.equal('GET,HEAD,PUT,PATCH,POST,DELETE');
+        expect(response.headers['access-control-allow-methods']).to.be.equal('GET, HEAD, PUT, PATCH, POST, DELETE');
       });
     });
 
@@ -418,7 +411,7 @@ async function databaseTestSuite() {
 
         expect(response).to.have.status(204);
         expect(response.headers['access-control-allow-origin']).to.be.equal('*');
-        expect(response.headers['access-control-allow-methods']).to.be.equal('GET,HEAD,PUT,PATCH,POST,DELETE');
+        expect(response.headers['access-control-allow-methods']).to.be.equal('GET, HEAD, PUT, PATCH, POST, DELETE');
       });
     });
   });
@@ -461,18 +454,6 @@ const dataModels = {
   }
 };
 
-const apiModelCustomCors = {
-  '/users': {
-    cors : {
-    origin : 'example.com',
-    methods : 'GET,POST'
-    }
-  }
-}
-
-const compiledApiModelCustomCors = compileApiModel(apiModelCustomCors);
-
-
 describe('api-on-json test suite', async function() {
 
   /**********************************************
@@ -480,11 +461,10 @@ describe('api-on-json test suite', async function() {
   that backs the API to be tested
   */
   describe('api-on-json test suite mongoose', async function() {
-    var id;
     let db;
     let mongoServer;
 
-    const options = { useNewUrlParser : true ,
+    const options = { useNewUrlParser : true,
                       useUnifiedTopology: true,
                       useFindAndModify: false};
     before((done) => {
@@ -507,7 +487,6 @@ describe('api-on-json test suite', async function() {
 
         const apiModel  = dataModel.toApi(opt);
 
-        var rethinkDB = new Rethink("localhost", "28015", "G");
         const env = {
           db        : db,
           jwtSecret : "--default-jwt-secret--"
@@ -527,8 +506,6 @@ describe('api-on-json test suite', async function() {
   });
 
   describe('api-on-json test suite rethinkdb', async function() {
-    var id;
-
     let db = new Rethink("localhost", "28015", "db");
 
     const opt = {

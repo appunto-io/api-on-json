@@ -2,13 +2,9 @@ const {
   compileRequestRequirements,
   compileAuthRequirements,
   compileEndpointModel,
-  compileApiModel,
   compileCors,
   compileHandlersList,
-  compileRealTime,
-
-  keysMap,
-  methods
+  compileRealTime
 } = require('./compiler.js');
 
 const { createAuthHandler } = require('../../server/helpers/helpers.js')
@@ -22,20 +18,20 @@ describe('compileRequestRequirements', () => {
 
     expect(fn(false)).to.be.false;
     expect(fn('string')).to.be.false;
-    expect(fn(true)).to.deep.equal({requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]});
+    expect(fn(true)).to.deep.equal({requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]});
     expect(fn({
       requiresAuth : true
-    })).to.deep.equal({requiresAuth:true,requiresRoles:false, policies : [createAuthHandler]});
+    })).to.deep.equal({requiresAuth:true, requiresRoles:false, policies : [createAuthHandler]});
     expect(fn({
       requiresRoles : false
-    })).to.deep.equal({requiresAuth:true,requiresRoles:false, policies : [createAuthHandler]});
+    })).to.deep.equal({requiresAuth:true, requiresRoles:false, policies : [createAuthHandler]});
     expect(fn({
       requiresRoles : ['role1', 'role2']
-    })).to.deep.equal({requiresAuth:true,requiresRoles:['role1', 'role2'], policies : [createAuthHandler]});
+    })).to.deep.equal({requiresAuth:true, requiresRoles:['role1', 'role2'], policies : [createAuthHandler]});
     expect(fn({
       requiresAuth : true,
       requiresRoles : ['role1', 'role2']
-    })).to.deep.equal({requiresAuth:true,requiresRoles:['role1', 'role2'], policies : [createAuthHandler]});
+    })).to.deep.equal({requiresAuth:true, requiresRoles:['role1',  'role2'], policies : [createAuthHandler]});
   });
 });
 
@@ -43,14 +39,14 @@ describe('compileAuthRequirements', () => {
   it('compileAuthRequirements', () => {
     const fn = compileAuthRequirements;
     const def = {
-      "GET"     : {requiresAuth:true,requiresRoles:['default-role']},
-      "HEAD"    : {requiresAuth:true,requiresRoles:['default-role']},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:['default-role']},
-      "POST"    : {requiresAuth:true,requiresRoles:['default-role']},
-      "PUT"     : {requiresAuth:true,requiresRoles:['default-role']},
-      "PATCH"   : {requiresAuth:true,requiresRoles:['default-role']},
-      "DELETE"  : {requiresAuth:true,requiresRoles:['default-role']},
-      realTime  : {requiresAuth:true,requiresRoles:false, policies : [createAuthHandler]}
+      "GET"     : {requiresAuth:true, requiresRoles:['default-role']},
+      "HEAD"    : {requiresAuth:true, requiresRoles:['default-role']},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:['default-role']},
+      "POST"    : {requiresAuth:true, requiresRoles:['default-role']},
+      "PUT"     : {requiresAuth:true, requiresRoles:['default-role']},
+      "PATCH"   : {requiresAuth:true, requiresRoles:['default-role']},
+      "DELETE"  : {requiresAuth:true, requiresRoles:['default-role']},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies : [createAuthHandler]}
     };
 
     expect(fn({}, def)).to.deep.equal(def);
@@ -58,34 +54,34 @@ describe('compileAuthRequirements', () => {
     expect(fn({
       requiresAuth:false
     }, def)).to.deep.equal(Object.assign({}, def, {
-      "GET"     : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "HEAD"    : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "OPTIONS" : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "POST"    : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "PUT"     : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "PATCH"   : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "DELETE"  : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]}
+      "GET"     : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "HEAD"    : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "OPTIONS" : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "POST"    : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "PUT"     : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "PATCH"   : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "DELETE"  : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]}
     }));
 
     expect(fn({
       requiresRoles:['role1']
     }, def)).to.deep.equal(Object.assign({}, def, {
-      "GET"     : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "HEAD"    : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "POST"    : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "PUT"     : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "PATCH"   : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "DELETE"  : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]}
+      "GET"     : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "POST"    : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "PUT"     : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]}
     }));
 
     expect(fn({
       requiresRoles:['role1'],
       write : false
     }, def)).to.deep.equal(Object.assign({}, def, {
-      "GET"     : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "HEAD"    : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
+      "GET"     : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "POST"    : false,
       "PUT"     : false,
       "PATCH"   : false,
@@ -97,11 +93,11 @@ describe('compileAuthRequirements', () => {
       write : false,
       'PUT' : {requiresRoles:["dev"]}
     }, def)).to.deep.equal(Object.assign({}, def, {
-      "GET"     : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "HEAD"    : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:['role1'], policies : [createAuthHandler]},
+      "GET"     : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "POST"    : false,
-      "PUT"     : {requiresAuth:true,requiresRoles:['dev'], policies : [createAuthHandler]},
+      "PUT"     : {requiresAuth:true, requiresRoles:['dev'], policies : [createAuthHandler]},
       "PATCH"   : false,
       "DELETE"  : false
     }));
@@ -144,9 +140,9 @@ describe('compileAuthRequirements', () => {
       "PUT"     : false,
       "PATCH"   : false,
       "DELETE"  : false,
-      "GET"     : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "HEAD"    : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
-      "OPTIONS" : {requiresAuth:false,requiresRoles:false, policies : [createAuthHandler]},
+      "GET"     : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "HEAD"    : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      "OPTIONS" : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
     }));
 
     expect(fn({
@@ -224,21 +220,21 @@ describe('compileEndpointModel', () => {
 
     expect(fn({})).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -257,20 +253,20 @@ describe('compileEndpointModel', () => {
       }
     })).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:false,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -285,7 +281,7 @@ describe('compileEndpointModel', () => {
             "PUT"     : false,
             "PATCH"   : false,
             "DELETE"  : false,
-            realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+            realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
           }
         }
       }
@@ -306,14 +302,14 @@ describe('compileEndpointModel', () => {
       }
     })).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {
@@ -324,7 +320,7 @@ describe('compileEndpointModel', () => {
       },
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -343,35 +339,35 @@ describe('compileEndpointModel', () => {
       }
     })).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
       },
       '/collection' : {
         auth : {
-          "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+          "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
         },
         fields : {},
         filters : {},
@@ -380,7 +376,7 @@ describe('compileEndpointModel', () => {
         },
         realTime : false,
         cors: {
-          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
           origin               : "*",
           preflightContinue    : false
@@ -390,7 +386,7 @@ describe('compileEndpointModel', () => {
 
     expect(fn({
       auth : {
-        'POST' : {requiresAuth:true,requiresRoles:['testRole']},
+        'POST' : {requiresAuth:true, requiresRoles:['testRole']},
       },
       '/collection' : {
         '/child' : {
@@ -401,56 +397,56 @@ describe('compileEndpointModel', () => {
       }
     })).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        'POST'    : {requiresAuth:true,requiresRoles:['testRole'], policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        'POST'    : {requiresAuth:true, requiresRoles:['testRole'], policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
       },
       '/collection' : {
         auth : {
-          "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          'POST'    : {requiresAuth:true,requiresRoles:['testRole'], policies:[createAuthHandler]},
-          "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+          "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          'POST'    : {requiresAuth:true, requiresRoles:['testRole'], policies:[createAuthHandler]},
+          "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
         },
         fields : {},
         filters : {},
         handlers : {},
         realTime  : false,
         cors: {
-          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
           origin               : "*",
           preflightContinue    : false
         },
         '/child' : {
           auth : {
-            "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-            "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-            "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-            'POST'    : {requiresAuth:true,requiresRoles:['testRole'], policies:[createAuthHandler]},
-            "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-            "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-            "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-            realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+            "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+            "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+            "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+            'POST'    : {requiresAuth:true, requiresRoles:['testRole'], policies:[createAuthHandler]},
+            "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+            "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+            "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+            realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
           },
           fields : {},
           filters : {},
@@ -459,7 +455,7 @@ describe('compileEndpointModel', () => {
           },
           realTime  : false,
           cors: {
-            methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+            methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
             optionsSuccessStatus : 204,
             origin               : "*",
             preflightContinue    : false
@@ -478,21 +474,21 @@ describe('compileEndpointModel', () => {
       }
     })).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "example.com",
         preflightContinue    : false
@@ -514,42 +510,42 @@ describe('compileEndpointModel', () => {
       }
     })).to.deep.equal({
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
       },
       '/:id' : {
         auth : {
-          "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+          "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
         },
         fields : {},
         filters : {},
         handlers : {},
         realTime  : false,
         cors : {
-          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
           origin               : "example.com",
           preflightContinue    : false
@@ -618,7 +614,7 @@ describe('compileRealTime', () => {
 describe('compileCors', () => {
   const defaultCors = {
     origin               : "*",
-    methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+    methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     preflightContinue    : false,
     optionsSuccessStatus : 204
   };
@@ -628,16 +624,16 @@ describe('compileCors', () => {
 
     expect(fn({
     }, defaultCors)).to.deep.equal({
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin               : "*",
       preflightContinue    : false
     });
 
     expect(fn({
-      methods : "POST,HEAD"
+      methods : "POST, HEAD"
     }, defaultCors)).to.deep.equal({
-      methods              : "POST,HEAD",
+      methods              : "POST, HEAD",
       optionsSuccessStatus : 204,
       origin               : "*",
       preflightContinue    : false
@@ -646,7 +642,7 @@ describe('compileCors', () => {
     expect(fn({
       origin : "example.com"
     }, defaultCors)).to.deep.equal({
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin               : "example.com",
       preflightContinue    : false
@@ -655,7 +651,7 @@ describe('compileCors', () => {
     expect(fn({
       origin : ["example1.com", "example2.com", "example3.com"]
     }, defaultCors)).to.deep.equal({
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin : ["example1.com", "example2.com", "example3.com"],
       preflightContinue    : false
@@ -664,7 +660,7 @@ describe('compileCors', () => {
     expect(fn({
       optionsSuccessStatus : 206
     }, defaultCors)).to.deep.equal({
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 206,
       origin               : "*",
       preflightContinue    : false
@@ -673,7 +669,7 @@ describe('compileCors', () => {
     expect(fn({
       preflightContinue : true
     }, defaultCors)).to.deep.equal({
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin               : "*",
       preflightContinue    : true

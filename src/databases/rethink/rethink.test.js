@@ -1,9 +1,6 @@
 const { Rethink } = require('./rethink.js');
 
 const databaseGenericTestSuite = require('../database-generic.test.js');
-const chai                     = require('chai');
-const expect                   = chai.expect;
-
 
 /**********************************************
   Testsuite
@@ -21,7 +18,6 @@ const carModel = {
 };
 
 describe('rethink database class test suite', async function() {
-  var id;
 
   var db = new Rethink("localhost", "28015", "unitary");
   before(async() => {

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 function _recCreateRegExp(name, reg, ...subNamespaces) {
   var subRegs = [];
   if (name[1] === ':') {
-    reg = reg + '(\/(\\w*\\d*))';
+    reg = reg + '(/(\\w*\\d*))';
   }
   else {
     reg = reg + `${name}`;
@@ -107,7 +107,7 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
 
         path = path.split('/')[1]; //get the "collection" path, the path use in model
 
-        for (elem in socket.handshake.query) {
+        for (let elem in socket.handshake.query) {
           if (elem != 'EIO' && elem != 'transport' && elem != 't' && elem != 'b64') {
             query[elem] = socket.handshake.query[elem];
           }

@@ -3,6 +3,7 @@ const expect = chai.expect;
 
 async function databaseGenericTestSuite(db) {
   const createdDocuments = [];
+  var id;
   describe('Empty database', async function() {
     it('Should return an empty list', async function() {
       const result = await db.readMany('Car');
@@ -52,9 +53,9 @@ async function databaseGenericTestSuite(db) {
       createdDocuments.push(result);
     });
 
-    it('Should fail when required fields are missing', async function() {
+    it('Should fail when required fields are missing', async function() {
       try {
-        const result = await db.create('Car', {model: 'A1', serial: 'BBBBB'});
+        await db.create('Car', {model: 'A1', serial: 'BBBBB'});
       }
       catch (error) {
         expect(error).to.not.be.null;
@@ -63,7 +64,7 @@ async function databaseGenericTestSuite(db) {
 
     it('Should fail on duplicated unique field', async function() {
       try {
-        const result = await post('Car', {serial: 'A'});
+        await db.create('Car', {serial: 'A'});
       }
       catch (error) {
         expect(error).to.not.be.null;
@@ -278,9 +279,9 @@ async function databaseGenericTestSuite(db) {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
-      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+      documents.sort((a, b) => (a.id > b.id) ? 1 : -1);
 
-      const cursor = 'brand' + ';' + documents[4].brand + ';' + documents[4].id;
+      const cursor = 'brand;' + documents[4].brand + ';' + documents[4].id;
       const result = await db.readMany('Car', { cursor, sort: 'brand', order: 'desc' });
 
       expect(result).to.be.an('object');
@@ -307,7 +308,7 @@ async function databaseGenericTestSuite(db) {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
-      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+      documents.sort((a, b) => (a.id > b.id) ? 1 : -1);
 
       const result = await db.update('Car', documents[2].id, {brand: 'Daccia', model: 'Sandero', serial:'Z'});
 
@@ -321,7 +322,7 @@ async function databaseGenericTestSuite(db) {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
-      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+      documents.sort((a, b) => (a.id > b.id) ? 1 : -1);
 
       const result = await db.patch('Car', documents[2].id, { brand: 'Dacia'} );
 
@@ -330,12 +331,12 @@ async function databaseGenericTestSuite(db) {
       expect(result.id.toString()).to.be.equal(documents[2].id.toString());
     });
 
-    it('Should fail when required fields are missing', async function() {
+    it('Should fail when required fields are missing', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
       try {
-        const result = await db.update('Car', documents[2].id, {model: 'Romero'});
+        await db.update('Car', documents[2].id, {model: 'Romero'});
       }
       catch (err) {
         expect(err).to.not.be.null;
@@ -347,7 +348,7 @@ async function databaseGenericTestSuite(db) {
       const documents = response.documents;
 
       try {
-        const result = await db.update('Car', documents[2].id, {serial: 'A'});
+        await db.update('Car', documents[2].id, {serial: 'A'});
       }
       catch (err) {
         expect(err).to.not.be.null;
@@ -363,7 +364,7 @@ async function databaseGenericTestSuite(db) {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
-      documents.sort((a, b) => (a.id > b.id) ? 1 : (b.id > a.id) ? -1 : 0);
+      documents.sort((a, b) => (a.id > b.id) ? 1 : -1);
 
       const result = await db.remove('Car', documents[1].id);
 

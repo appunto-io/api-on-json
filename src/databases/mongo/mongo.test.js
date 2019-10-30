@@ -1,7 +1,6 @@
 const mongoose                 = require('mongoose');
 const { Mongo }                = require('./mongo.js');
 const { MongoMemoryServer }    = require('mongodb-memory-server');
-const databaseGenericTestSuite = require('../database-generic.test.js');
 
 const chai   = require('chai');
 const expect = chai.expect;
@@ -22,10 +21,10 @@ that backs the API to be tested
 */
 describe('mongo database class test suite', async function() {
   var id;
-  let db;
+  var db;
   let mongoServer;
 
-  const options = { useNewUrlParser : true ,
+  const options = { useNewUrlParser : true,
                     useUnifiedTopology: true,
                     useFindAndModify: false};
 
@@ -46,19 +45,6 @@ describe('mongo database class test suite', async function() {
   after(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-  });
-
-
-  describe('Generic tests', async function() {
-    it('Should run the generic testsuite', async function() {
-
-      const result = await db.readMany('Car');
-
-      expect(result).to.be.an('object');
-      expect(result).to.not.be.empty;
-      expect(result.documents).to.be.an('array');
-      expect(result.count).to.be.equal(0);
-    });
   });
 
   /********
@@ -85,7 +71,7 @@ describe('mongo database class test suite', async function() {
       expect(result.serial).to.be.equal('B');
     });
 
-    it('Should ignore unknown fields', async function() {
+    it('Should ignore unknown fields', async function () {
       const result = await db.create('Car', {brand: 'Alpha Romeo', price: '112$', serial: 'C'});
 
       expect(result.brand).to.be.equal('Alpha Romeo');
@@ -93,9 +79,9 @@ describe('mongo database class test suite', async function() {
       expect(result.price).to.be.undefined;
     });
 
-    it('Should fail when required fields are missing', async function() {
+    it('Should fail when required fields are missing', async function () {
       try {
-        const result = await db.create('Car', {model: 'A1', serial: 'BBBBB'});
+        await db.create('Car', {model: 'A1', serial: 'BBBBB'});
       }
       catch (error) {
         expect(error).to.not.be.null;
@@ -104,7 +90,7 @@ describe('mongo database class test suite', async function() {
 
     it('Should fail on duplicated unique field', async function() {
       try {
-        const result = await post('Car', {serial: 'A'});
+        await db.create('Car', {serial: 'A'});
       }
       catch (error) {
         expect(error).to.not.be.null;
@@ -346,7 +332,7 @@ describe('mongo database class test suite', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
-      const cursor = 'brand' + ';' + documents[4].brand + ';' + documents[4].id;
+      const cursor = 'brand;' + documents[4].brand + ';' + documents[4].id;
       const result = await db.readMany('Car', { cursor, sort: 'brand', order: 'desc' });
 
       expect(result).to.be.an('object');
@@ -404,12 +390,12 @@ describe('mongo database class test suite', async function() {
       expect(result.id.toString()).to.be.equal(documents[2].id.toString());
     });
 
-    it('Should fail when required fields are missing', async function() {
+    it('Should fail when required fields are missing', async function() {
       const response  = await db.readMany('Car');
       const documents = response.documents;
 
       try {
-        const result = await db.update('Car', documents[2].id, {model: 'Romero'});
+        await db.update('Car', documents[2].id, {model: 'Romero'});
       }
       catch (err) {
         expect(err).to.not.be.null;
@@ -421,7 +407,7 @@ describe('mongo database class test suite', async function() {
       const documents = response.documents;
 
       try {
-        const result = await db.update('Car', documents[2].id, {serial: 'A'});
+        await db.update('Car', documents[2].id, {serial: 'A'});
       }
       catch (err) {
         expect(err).to.not.be.null;

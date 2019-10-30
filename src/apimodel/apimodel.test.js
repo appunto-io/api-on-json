@@ -3,49 +3,48 @@ const expect = chai.expect;
 
 const { createAuthHandler } = require('../server/helpers/helpers.js');
 const { ApiModel }          = require('./apimodel.js');
-const { Server }            = require('../server/server.js');
 
 const carsApiModel = {
   isApiModel: true,
   hasRealtime: true,
   '/cars': {
     auth : {
-      "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+      "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
     },
     fields : {},
     filters : {},
     handlers : {},
     realTime  : false,
     cors: {
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin               : "*",
       preflightContinue    : false
     }
   },
   auth : {
-    "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+    "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
   },
   fields : {},
   filters : {},
   handlers : {},
   realTime  : false,
   cors: {
-    methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+    methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     optionsSuccessStatus : 204,
     origin               : "*",
     preflightContinue    : false
@@ -57,42 +56,42 @@ const appleApiModel = {
   hasRealtime: true,
   '/apple': {
     auth : {
-      "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+      "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
     },
     fields : {},
     filters : {},
     handlers : {},
     realTime  : false,
     cors: {
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin               : "*",
       preflightContinue    : false
     }
   },
   auth : {
-    "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+    "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
   },
   fields : {},
   filters : {},
   handlers : {},
   realTime  : false,
   cors: {
-    methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+    methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     optionsSuccessStatus : 204,
     origin               : "*",
     preflightContinue    : false
@@ -103,53 +102,53 @@ const usersApiModel = {
   isApiModel: true,
   hasRealtime: true,
   auth : {
-    "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-    realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+    "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+    realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
   },
   '/cars': {
     auth : {
-      "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-      realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+      "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
     },
     fields : {},
     filters : {},
     handlers : {},
     realTime  : false,
     cors: {
-      methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
       origin               : "*",
       preflightContinue    : false
     },
     '/users': {
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -161,7 +160,7 @@ const usersApiModel = {
   handlers : {},
   realTime  : false,
   cors: {
-    methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+    methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     optionsSuccessStatus : 204,
     origin               : "*",
     preflightContinue    : false
@@ -182,21 +181,21 @@ describe('ApiModel test suite', () => {
       isApiModel: true,
       hasRealtime: true,
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -231,21 +230,21 @@ describe('ApiModel test suite', () => {
       isApiModel: true,
       hasRealtime: true,
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -263,13 +262,13 @@ describe('ApiModel test suite', () => {
       hasRealtime: true,
       '/cars': {
         auth : {
-          "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-          "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
+          "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+          "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
           realTime  : false
         },
         fields : {},
@@ -277,20 +276,20 @@ describe('ApiModel test suite', () => {
         handlers : {},
         realTime  : false,
         cors: {
-          methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+          methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
           origin               : "*",
           preflightContinue    : false
         }
       },
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         realTime  : false
       },
       fields : {},
@@ -298,7 +297,7 @@ describe('ApiModel test suite', () => {
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false
@@ -354,21 +353,21 @@ describe('ApiModel test suite', () => {
       isApiModel: true,
       hasRealtime: true,
       auth : {
-        "GET"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true,requiresRoles:false, policies:[createAuthHandler]}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
       realTime  : false,
       cors: {
-        methods              : "GET,HEAD,PUT,PATCH,POST,DELETE",
+        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
         origin               : "*",
         preflightContinue    : false

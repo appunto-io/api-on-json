@@ -3,9 +3,7 @@ const chaiHTTP = require('chai-http');
 var io         = require('socket.io-client');
 const jwt      = require('jsonwebtoken');
 
-const { DataModel,
-        ApiModel,
-        Server }  = require('../../index.js');
+const { DataModel }  = require('../../index.js');
 
 const { Rethink } = require('../databases.js');
 
@@ -20,20 +18,6 @@ const tokenB = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3
 async function post(collection, data) {
   return chai.request('http://localhost:3000')
     .post(`/${collection}`)
-    .set('Authorization', tokenB)
-    .send(data);
-}
-
-async function put(collection, id, data) {
-  return chai.request('http://localhost:3000')
-    .put(`/${collection}/` + id)
-    .set('Authorization', tokenB)
-    .send(data);
-}
-
-async function patch(collection, id, data) {
-  return chai.request('http://localhost:3000')
-    .patch(`/${collection}/` + id)
     .set('Authorization', tokenB)
     .send(data);
 }
@@ -74,14 +58,6 @@ const dataModels = {
   }
 };
 
-var options = {
-  transports: ['websocket'],
-  'force new connection': true
-};
-
-var room = 'lobby';
-
-
 
 describe('realTime test suite', async function() {
 
@@ -106,7 +82,6 @@ describe('realTime test suite', async function() {
 
   const admin  = jwt.sign({ role: 'admin' }, env.jwtSecret);
   const user   = jwt.sign({ role: 'user' }, env.jwtSecret);
-  const collab = jwt.sign({ role: 'collab' }, env.jwtSecret);
 
   before(async() => {
     const dataModel = new DataModel(dataModels);
@@ -188,7 +163,7 @@ describe('realTime test suite', async function() {
         expect(socket1.id).to.not.be.null;
       });
 
-      socket1.on('update', function(message) {
+      socket1.on('update', function() {
         socket_1_received = true;
         socket1.disconnect();
       });
@@ -228,7 +203,7 @@ describe('realTime test suite', async function() {
     socket1.on('need authentication', function() {
       socket1.emit('authenticate', {token: user});
 
-      socket1.on('update', function(message) {
+      socket1.on('update', function() {
         socket_1_received = true;
         socket1.disconnect();
       });
@@ -276,7 +251,7 @@ describe('realTime test suite', async function() {
         expect(socket.id).to.not.be.null;
         expect(message).to.not.be.null;
 
-        cpt += 1;
+        cpt = cpt + 1;
         if (cpt === 6) {
           socket.disconnect();
           done();
@@ -333,7 +308,7 @@ describe('realTime test suite', async function() {
         expect(socket.id).to.not.be.null;
         expect(message).to.not.be.null;
 
-        cpt += 1;
+        cpt = cpt + 1;
         if (cpt === 4) {
           socket.disconnect();
           done();

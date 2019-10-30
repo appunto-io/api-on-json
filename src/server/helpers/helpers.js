@@ -221,13 +221,7 @@ const createHandlersChain = (method, model, environment) => {
       await response.sendRaw(res.status, data);
     }
     else {
-      try {
         await response.status(res.status).send(data);
-      }
-      catch(err) {
-        throw(err);
-      }
-
     }
 
     return next();
@@ -237,7 +231,7 @@ const createHandlersChain = (method, model, environment) => {
 function logRequest(req, res, next) {
   const query       = req.query;
   const route       = req.url;
-  const [path, str] = req.url.split('?');
+  const path        = req.url.split('?')[0];
   const method      = req.method;
 
   console.info(`Request: '${method} ${route}'\n`, {
@@ -256,21 +250,6 @@ function logError(err, req, res, next) {
   console.error(err);
   next();
 }
-
-/*
-Log all errors
- */
-const errorLogHandlers = (request, response, error, callback) => {
-  logHandler(request, response, {}, error);
-
-  return callback();
-};
-
-const unhandledExceptionsLogHandler = async(request, response, route, err) => {
-  await response.send(err);
-};
-
-
 
 const recurseModel = (path, model, environment, addRoute) => {
   /*

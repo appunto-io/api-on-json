@@ -1,10 +1,7 @@
 const chai     = require('chai');
 const chaiHTTP = require('chai-http');
-const jwt      = require('jsonwebtoken');
 
-const {
-        ApiModel,
-        Server }            = require('./index.js');
+const { ApiModel }            = require('./index.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);
@@ -25,13 +22,6 @@ async function get(collection) {
 async function getId(collection, id) {
   return chai.request('http://localhost:3000')
     .get(`/${collection}/` + id)
-    .set('Authorization', token);
-}
-
-async function query(collection, query) {
-  return chai.request('http://localhost:3000')
-    .get(`/${collection}`)
-    .query(query)
     .set('Authorization', token);
 }
 
@@ -66,23 +56,23 @@ function get_many() {
   return 'getMany';
 }
 
-function get_id(id) {
+function get_id() {
   return 'getId';
 }
 
-function post() {
+function create() {
   return 'post';
 }
 
-function put(id) {
+function update() {
   return 'put';
 }
 
-function patch(id) {
+function patch_id() {
   return 'patch';
 }
 
-function remove(id) {
+function remove() {
   return 'remove';
 }
 
@@ -95,7 +85,7 @@ function disconnect() {
 }
 
 function message(message) {
-  return 'message';
+  return 'message: ' + message;
 }
 
 const apiModel = {
@@ -117,9 +107,9 @@ const apiModel = {
   "/cars": {
     "handlers": {
       "GET"    : [get_many],
-      "POST"   : [post],
-      "PUT"    : [put],
-      "PATCH"  : [patch],
+      "POST"   : [create],
+      "PUT"    : [update],
+      "PATCH"  : [patch_id],
       "DELETE" : [remove],
     },
     "realTime": {
@@ -141,9 +131,9 @@ const apiModel = {
     "/:id": {
       "handlers": {
         "GET"    : [get_id],
-        "POST"   : [post],
-        "PUT"    : [put],
-        "PATCH"  : [patch],
+        "POST"   : [create],
+        "PUT"    : [update],
+        "PATCH"  : [patch_id],
         "DELETE" : [remove],
       },
       "realTime": {
@@ -174,10 +164,6 @@ describe('realTime test suite', async function() {
     jwtSecret : "--default-jwt-secret--"
   }
 
-  const admin  = jwt.sign({ role: 'admin' }, env.jwtSecret);
-  const user   = jwt.sign({ role: 'user' }, env.jwtSecret);
-  const collab = jwt.sign({ role: 'collab' }, env.jwtSecret);
-
   before(async () => {
 
 
@@ -201,21 +187,21 @@ describe('realTime test suite', async function() {
 
   it('Testing post', async function() {
     const response = await post('cars', 'data');
-    expect(response).to.be.equal('post');
+    expect(response.text).to.be.equal('post');
   });
 
   it('Testing put', async function() {
     const response = await put('cars', 'id', 'data');
-    expect(response).to.be.equal('put');
+    expect(response.text).to.be.equal('put');
   });
 
   it('Testing patch', async function() {
     const response = await patch('cars', 'id', 'data');
-    expect(response).to.be.equal('patch');
+    expect(response.text).to.be.equal('patch');
   });
 
   it('Testing delete', async function() {
-    const response = await delete('id');
-    expect(response).to.be.true;
+    const response = await erase('id');
+    expect(response.status).to.to.be.equal(404);
   });
 });

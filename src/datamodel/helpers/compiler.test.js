@@ -15,7 +15,7 @@ describe('JSON data model compiler', () => {
     it('Declarations with string literals', () => {
 
       ["String", "Number", "Date", "Boolean", "Mixed", "Id"].map(literal => {
-        expect(compileTypeDeclaration(literal)).to.deep.equal({type:literal});
+        return expect(compileTypeDeclaration(literal)).to.deep.equal({type:literal});
       });
       expect(compileTypeDeclaration("Unknown")).to.deep.equal({type:"Mixed"});
       expect(compileTypeDeclaration("String", "__type__")).to.deep.equal({__type__:"String"});
