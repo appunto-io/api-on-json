@@ -35,6 +35,47 @@ db.init(dataModel);
 db.connect();
 ```
 
+### Do a POST request to the database
+
+```js
+db.create(collection, data);
+```
+
+### Do a GET id request to the database
+
+```js
+db.readOne(collection, id);
+```
+
+### Do a GET request with a query to the database
+
+```js
+db.readMany(collection, query);
+```
+
+### Do a PUT request to the database
+
+```js
+db.update(collection, id, data);
+```
+
+### Do a PATCH request to the database
+
+```js
+db.patch(collection, id, data);
+```
+
+### Do a DELETE request to the database
+
+```js
+db.remove(collection, id);
+```
+
+### Activate the realtime in the database
+
+```js
+db.observe(collection, query, socket, callback);
+```
 ## DataModel
 
 ```js
@@ -316,7 +357,7 @@ const apiModel = dataModel.toApi(options);
 ```js
 
 const apiModel = dataModel.toApi({
-  realTime : ['cars', 'trucs', 'boats']
+  realTime : ['cars', 'boats']
 });
 
 const mongo = new Mongo(mongoUri, options);
