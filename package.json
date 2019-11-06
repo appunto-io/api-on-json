@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha './src/**/*.test.js' --timeout 50000 --exit",
-    "single-test": "mocha $1 --timeout 50000 --exit"
+    "single-test": "mocha $1 --timeout 50000 --exit",
+    "lint" : "eslint src"
   },
   "repository": {
     "type": "git",

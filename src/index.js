@@ -3,6 +3,8 @@ const { ApiModel }  = require('./apimodel/apimodel.js');
 const { Server }    = require('./server/server.js');
 
 
-module.exports = { DataModel,
-                   ApiModel,
-                   Server}
+module.exports = {
+  DataModel,
+  ApiModel,
+  Server
+};
