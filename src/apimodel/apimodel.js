@@ -85,7 +85,7 @@ class ApiModel {
     const merged = this.models.reduce(
       (reduced, model) => mergeModels(reduced, model), {}
     );
-    
+
     const compiled = compileApiModel(merged);
 
     return new Server(compiled, env);

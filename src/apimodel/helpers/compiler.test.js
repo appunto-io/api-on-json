@@ -60,7 +60,8 @@ describe('compileAuthRequirements', () => {
       "POST"    : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
       "PUT"     : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
       "PATCH"   : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
-      "DELETE"  : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]}
+      "DELETE"  : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      realTime  : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]}
     }));
 
     expect(fn({
@@ -72,7 +73,8 @@ describe('compileAuthRequirements', () => {
       "POST"    : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "PUT"     : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "PATCH"   : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
-      "DELETE"  : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]}
+      "DELETE"  : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      realTime  : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]}
     }));
 
     expect(fn({
@@ -85,7 +87,8 @@ describe('compileAuthRequirements', () => {
       "POST"    : false,
       "PUT"     : false,
       "PATCH"   : false,
-      "DELETE"  : false
+      "DELETE"  : false,
+      realTime  : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]}
     }));
 
     expect(fn({
@@ -95,6 +98,7 @@ describe('compileAuthRequirements', () => {
     }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "HEAD"    : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
+      realTime  : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "OPTIONS" : {requiresAuth:true, requiresRoles:['role1'], policies : [createAuthHandler]},
       "POST"    : false,
       "PUT"     : {requiresAuth:true, requiresRoles:['dev'], policies : [createAuthHandler]},
@@ -116,7 +120,8 @@ describe('compileAuthRequirements', () => {
     }, def)).to.deep.equal(Object.assign({}, def, {
       "GET"     : false,
       "HEAD"    : false,
-      "OPTIONS" : false
+      "OPTIONS" : false,
+      realTime  : false
     }));
 
     expect(fn({
@@ -129,7 +134,8 @@ describe('compileAuthRequirements', () => {
       "POST"    : false,
       "PUT"     : false,
       "PATCH"   : false,
-      "DELETE"  : false
+      "DELETE"  : false,
+      realTime  : false
     }));
 
     expect(fn({
@@ -143,6 +149,7 @@ describe('compileAuthRequirements', () => {
       "GET"     : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
       "HEAD"    : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
       "OPTIONS" : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]},
+      realTime  : {requiresAuth:false, requiresRoles:false, policies : [createAuthHandler]}
     }));
 
     expect(fn({
@@ -153,6 +160,7 @@ describe('compileAuthRequirements', () => {
       "PUT"     : {requiresAuth:true, requiresRoles:["role1", "role2"], policies : [createAuthHandler]},
       "PATCH"   : false,
       "DELETE"  : false,
+      realTime  : {requiresAuth:true, requiresRoles:false, policies : [createAuthHandler]}
     }));
   });
 });
@@ -232,7 +240,7 @@ describe('compileEndpointModel', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -260,11 +268,11 @@ describe('compileEndpointModel', () => {
         "PUT"     : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
         "PATCH"   : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
         "DELETE"  : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
+        realTime  : {requiresAuth:false, requiresRoles:false, policies:[createAuthHandler]}
       },
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -281,7 +289,7 @@ describe('compileEndpointModel', () => {
             "PUT"     : false,
             "PATCH"   : false,
             "DELETE"  : false,
-            realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
+            realTime  : false
           }
         }
       }
@@ -318,7 +326,7 @@ describe('compileEndpointModel', () => {
       handlers : {
         "GET" : ['::getHandler']
       },
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -351,7 +359,7 @@ describe('compileEndpointModel', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -374,7 +382,7 @@ describe('compileEndpointModel', () => {
         handlers : {
           'GET' : ['::getHandler']
         },
-        realTime : false,
+        realTime : { 'connect'    : [], 'message'    : [], 'disconnect' : [] },
         cors: {
           methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
@@ -409,7 +417,7 @@ describe('compileEndpointModel', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -430,7 +438,7 @@ describe('compileEndpointModel', () => {
         fields : {},
         filters : {},
         handlers : {},
-        realTime  : false,
+        realTime : { 'connect': [], 'message': [], 'disconnect': [] },
         cors: {
           methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
@@ -453,7 +461,7 @@ describe('compileEndpointModel', () => {
           handlers : {
             'GET' : ['::getChildHandler']
           },
-          realTime  : false,
+          realTime : { 'connect': [], 'message': [], 'disconnect': [] },
           cors: {
             methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
             optionsSuccessStatus : 204,
@@ -486,7 +494,7 @@ describe('compileEndpointModel', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -522,7 +530,7 @@ describe('compileEndpointModel', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -543,7 +551,7 @@ describe('compileEndpointModel', () => {
         fields : {},
         filters : {},
         handlers : {},
-        realTime  : false,
+        realTime : { 'connect': [], 'message': [], 'disconnect': [] },
         cors : {
           methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,

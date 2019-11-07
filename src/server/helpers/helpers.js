@@ -7,7 +7,7 @@ const cors                  = require('cors');
 
 const { getAllowedMethods } = require('./methods.js');
 const { testRoles }         = require('../../shared/roles.js');
-const realtimeHandlers      = require('../realtime.js');
+const realtimeHandlers      = require('./realtime.js');
 
 const httpToServerMethod = method => ({
   'GET'     : 'get',
@@ -342,7 +342,7 @@ const createServer = (model, environment) => {
     });
   });
 
-  var http = require('http').Server(app)
+  var http = require('http').Server(app);
   if (model.hasRealtime) {
     realtimeHandlers(model, http, environment);
   }

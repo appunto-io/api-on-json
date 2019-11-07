@@ -63,7 +63,7 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
     socket.emit('need authentication');
 
     socket.on('authenticate', function (data) {
-      if (!auth || !auth.requiresAuth) {
+      if (!auth) {
         socket.authenticated = true;
       }
       else {
@@ -172,7 +172,6 @@ function realtimeHandlers(apiModel, httpServer, env) {
     const model = fields[i];
     if (model[0].includes('/')) {
       const regExpNamespaceSubs = createRegExp(model[0], Object.entries(model[1]));
-
       for (let i = 0; i < regExpNamespaceSubs.length; i++) {
         const reg  = regExpNamespaceSubs[i][0];
         const auth = regExpNamespaceSubs[i][1];

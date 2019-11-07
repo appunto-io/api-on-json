@@ -6,7 +6,7 @@ const { ApiModel }          = require('./apimodel.js');
 
 const carsApiModel = {
   isApiModel: true,
-  hasRealtime: true,
+  hasRealtime: false,
   '/cars': {
     auth : {
       "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -21,7 +21,7 @@ const carsApiModel = {
     fields : {},
     filters : {},
     handlers : {},
-    realTime  : false,
+    realTime : { 'connect': [], 'message': [], 'disconnect': [] },
     cors: {
       methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
@@ -42,7 +42,7 @@ const carsApiModel = {
   fields : {},
   filters : {},
   handlers : {},
-  realTime  : false,
+  realTime : { 'connect': [], 'message': [], 'disconnect': [] },
   cors: {
     methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     optionsSuccessStatus : 204,
@@ -53,7 +53,7 @@ const carsApiModel = {
 
 const appleApiModel = {
   isApiModel: true,
-  hasRealtime: true,
+  hasRealtime: false,
   '/apple': {
     auth : {
       "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -68,7 +68,7 @@ const appleApiModel = {
     fields : {},
     filters : {},
     handlers : {},
-    realTime  : false,
+    realTime : { 'connect': [], 'message': [], 'disconnect': [] },
     cors: {
       methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
@@ -89,7 +89,7 @@ const appleApiModel = {
   fields : {},
   filters : {},
   handlers : {},
-  realTime  : false,
+  realTime : { 'connect': [], 'message': [], 'disconnect': [] },
   cors: {
     methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     optionsSuccessStatus : 204,
@@ -100,7 +100,7 @@ const appleApiModel = {
 
 const usersApiModel = {
   isApiModel: true,
-  hasRealtime: true,
+  hasRealtime: false,
   auth : {
     "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
     "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -125,7 +125,7 @@ const usersApiModel = {
     fields : {},
     filters : {},
     handlers : {},
-    realTime  : false,
+    realTime : { 'connect': [], 'message': [], 'disconnect': [] },
     cors: {
       methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
       optionsSuccessStatus : 204,
@@ -146,7 +146,7 @@ const usersApiModel = {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -158,7 +158,7 @@ const usersApiModel = {
   fields : {},
   filters : {},
   handlers : {},
-  realTime  : false,
+  realTime : { 'connect': [], 'message': [], 'disconnect': [] },
   cors: {
     methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
     optionsSuccessStatus : 204,
@@ -179,7 +179,7 @@ describe('ApiModel test suite', () => {
     expect(apiModel.models).to.be.an('array');
     expect(apiModel.models[0]).to.be.deep.equal({
       isApiModel: true,
-      hasRealtime: true,
+      hasRealtime: false,
       auth : {
         "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -193,7 +193,7 @@ describe('ApiModel test suite', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -228,7 +228,7 @@ describe('ApiModel test suite', () => {
     expect(apiModel.models).to.be.empty;
     expect(merged).to.be.deep.equal({
       isApiModel: true,
-      hasRealtime: true,
+      hasRealtime: false,
       auth : {
         "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -242,7 +242,7 @@ describe('ApiModel test suite', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -259,7 +259,7 @@ describe('ApiModel test suite', () => {
     expect(apiModel.models).to.be.an('array');
     expect(apiModel.models[0]).to.be.deep.equal({
       isApiModel: true,
-      hasRealtime: true,
+      hasRealtime: false,
       '/cars': {
         auth : {
           "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -269,12 +269,12 @@ describe('ApiModel test suite', () => {
           "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
           "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
           "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          realTime  : false
+          realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
         },
         fields : {},
         filters : {},
         handlers : {},
-        realTime  : false,
+        realTime : { 'connect': [], 'message': [], 'disconnect': [] },
         cors: {
           methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
           optionsSuccessStatus : 204,
@@ -290,12 +290,12 @@ describe('ApiModel test suite', () => {
         "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : false
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
       },
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,
@@ -351,7 +351,7 @@ describe('ApiModel test suite', () => {
     const merged2 = apiModel.get();
     expect(merged2).to.be.deep.equal({
       isApiModel: true,
-      hasRealtime: true,
+      hasRealtime: false,
       auth : {
         "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -365,7 +365,7 @@ describe('ApiModel test suite', () => {
       fields : {},
       filters : {},
       handlers : {},
-      realTime  : false,
+      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
       cors: {
         methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
         optionsSuccessStatus : 204,

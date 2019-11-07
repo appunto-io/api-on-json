@@ -10,7 +10,7 @@ const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
 const defaultRequirements = {requiresAuth : true, requiresRoles : false, policies : [createAuthHandler]};
 const defaultAuth         = keysMap(methods, () => defaultRequirements);
-const defaultCorsOptions  = {
+const defaultCors = {
   origin               : "*",
   methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
   preflightContinue    : false,
@@ -48,10 +48,8 @@ const compileRequestRequirements = (requirements) => {
 /*
 Compiles collection or field requirements
  */
-const compileAuthRequirements = (model, defaultAuth, realTime) => {
+const compileAuthRequirements = (model, defaultAuth) => {
   model = model || {};
-
-  model['realTime'] = realTime ? true : false;
 
   /*
   Use defaultAuth as default access rules
@@ -94,9 +92,6 @@ const compileAuthRequirements = (model, defaultAuth, realTime) => {
       compiled[method] = compileRequestRequirements(model[method]);
     }
   });
-
-
-  compiled['realTime'] = defaultRequirements;
 
   return compiled;
 };
@@ -141,35 +136,25 @@ const compileHandlersList = (model) => {
   return compiled;
 };
 
-function compileRealTime(model) {
-  if (model) {
-    var result = {};
-
-    result['connect']    = model['connect'] || [];
-    result['message']    = model['message'] || [];
-    result['disconnect'] = model['disconnect'] || [];
-
-    return result;
-  }
-
-  return false;
+function compileRealTime(model = {}) {
+  return {
+    'connect'    : model['connect'] || [],
+    'message'    : model['message'] || [],
+    'disconnect' : model['disconnect'] || []
+  };
 }
 
-function compileCors(model, defaultCors) {
-  if (model === false) {
-    return false;
+function compileCors(model = {}, parentCors = {} ) {
+  if ( model === false ) {
+    // Disable cors by using 'cors' package options
+    model = { origin : false };
   }
-  if (model && defaultCors) {
-    var options = {
-      origin               : model.origin ? model.origin : defaultCors.origin,
-      methods              : model.methods ? model.methods : defaultCors.methods,
-      preflightContinue    : model.preflightContinue ? model.preflightContinue : defaultCors.preflightContinue,
-      optionsSuccessStatus : model.optionsSuccessStatus ? model.optionsSuccessStatus : defaultCors.optionsSuccessStatus,
-    }
+  else if ( model === true ){
+    // Allow default cors options
+    model = defaultCors;
+  }
 
-    return options;
-  }
-  return defaultCors;
+  return Object.assign({}, defaultCors, parentCors, model);
 }
 
 
@@ -178,31 +163,26 @@ Compile API endpoints recursively
  */
 const compileEndpointModel = (model, parent) => {
   model = model || {};
+
   const parentAuth = parent && parent.auth || defaultAuth;
-  const realTime   = compileRealTime(model.realTime);
-  const auth       = compileAuthRequirements(model.auth || {}, parentAuth, realTime);
+  const auth       = compileAuthRequirements(model.auth || {}, parentAuth);
+
+  const parentCors = parent && parent.cors || defaultCors;
+  const cors       = compileCors(model.cors || {}, parentCors);
+
   const fields     = {};
-  var defaultCors  = defaultCorsOptions;
-
-
-  if (model.cors != undefined) {
-    defaultCors = compileCors(model.cors, defaultCors);
-  }
-  else if (parent) {
-    defaultCors = compileCors(parent.cors, defaultCors);
-  }
 
   Object.entries(model.fields || {}).forEach(([field, fieldModel]) => {
     fields[field] = {
-      auth : compileAuthRequirements(fieldModel.auth || {}, auth, realTime)
+      auth : compileAuthRequirements(fieldModel.auth || {}, auth)
     };
   });
 
   const compiled = {
     handlers : compileHandlersList(model.handlers),
     filters  : compileHandlersList(model.filters),
-    realTime,
-    cors     : compileCors(model.cors, defaultCors),
+    realTime : compileRealTime(model.realTime),
+    cors,
     auth,
     fields
   };
@@ -219,15 +199,39 @@ const compileEndpointModel = (model, parent) => {
   return compiled;
 };
 
+function isRealTime(model) {
+  const realTime = model.realTime;
+  const fields   = Object.entries(model);
+
+  if ((model['auth']['realTime'].requiresAuth === true) && realTime && (realTime['connect'].length > 0 || realTime['disconnect'].length > 0 || realTime['message'].length > 0)) {
+    return true;
+  }
+
+  for (let index = 0; index < fields.length; index++) {
+    const [element, subModel] = fields[index];
+    if (element.startsWith('/')) {
+      if (isRealTime(subModel) === true) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
 
 /*
 Compile the entire api model
  */
-const compileApiModel = apiModel => ({
-  isApiModel  : true,
-  ...compileEndpointModel(apiModel, null),
-  hasRealtime: apiModel.hasRealtime === undefined ? true : apiModel.hasRealtime
-});
+const compileApiModel = apiModel => {
+  const compiledModel = compileEndpointModel(apiModel, null);
+
+  return {
+    isApiModel  : true,
+    hasRealtime : isRealTime(compiledModel),
+    ...compiledModel,
+  };
+};
 
 module.exports = {
   methods,
