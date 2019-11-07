@@ -163,9 +163,11 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
   });
 }
 
-async function realtimeHandlers(apiModel, http, env) {
-  var socket = io(http);
+function realtimeHandlers(apiModel, httpServer, env) {
+  const socket = io(httpServer);
+
   const fields = Object.entries(apiModel);
+
   for (let i = 0; i < fields.length; i++) {
     const model = fields[i];
     if (model[0].includes('/')) {
@@ -181,4 +183,4 @@ async function realtimeHandlers(apiModel, http, env) {
   }
 }
 
-module.exports = realtimeHandlers
+module.exports = realtimeHandlers;

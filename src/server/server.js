@@ -1,8 +1,7 @@
 const { createServer } = require('./helpers/helpers.js')
 
 class Server {
-  constructor(apiModel, env)
-  {
+  constructor(apiModel, env) {
     if (apiModel.hasRealtime && (env.db && typeof env.db.observe != "function")) {
       console.warn('The database you are using can\'t use realTime');
       apiModel.hasRealtime = false;
@@ -19,8 +18,7 @@ class Server {
     this.server = app;
   }
 
-  async listen(port)
-  {
+  async listen(port) {
     this.server = await this.server.listen(port);
   }
 
@@ -31,4 +29,4 @@ class Server {
   }
 }
 
-module.exports = {Server: Server}
+module.exports = { Server };

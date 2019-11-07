@@ -3,23 +3,32 @@ const helmet                = require('helmet');
 const bodyParser            = require('body-parser');
 const queryParser           = require('express-query-parser')
 const jwt                   = require('jsonwebtoken');
+const cors                  = require('cors');
+
 const { getAllowedMethods } = require('./methods.js');
 const { testRoles }         = require('../../shared/roles.js');
 const realtimeHandlers      = require('../realtime.js');
 
-var cors                    = require('cors');
-
 function findCors(route, model) {
+    if (route.includes('/')) {
+      var current = model;
+      var paths   = route.split('/');
 
-  var paths = route.split('/');
-  for (let i = 1; i < paths.length; i++) {
-    paths[i] = '/' + paths[i];
+      paths = paths.filter(value => value != '');
 
-    if (model) {
-      model = model[paths[i]];
+      for (let i = 0; i < paths.length; i++) {
+        var path = '/' + paths[i];
+
+        if (i + 1 === paths.length) {
+          return current.cors;
+        }
+
+        current = current[path];
+      }
     }
-  }
-  return model.cors;
+    else {
+      return model['/' + route].cors;
+    }
 }
 
 const httpToServerMethod = method => ({
@@ -108,12 +117,6 @@ const createAuthHandler = (method, model, environment) => async(request, respons
     accountId,
     roles
   };
-
-  return next();
-};
-
-const justSend200 = async(request, response, next) => {
-  await response.send(200);
 
   return next();
 };
@@ -257,10 +260,11 @@ const recurseModel = (path, model, environment, addRoute) => {
   Adds each method defined in handlers as a new route.
    */
   Object.keys(model['handlers'] || {}).forEach(method => {
+    const corsHandler   = cors(model.cors);
     const authorization = createAuthHandler(method, model, environment);
     const handler       = createHandlersChain(method, model, environment);
 
-    addRoute(path || '/', method, [authorization, handler]);
+    addRoute(path || '/', method, [corsHandler, authorization, handler]);
   });
 
 
@@ -292,16 +296,10 @@ const createServer = (model, environment) => {
   };
 
   /*
-  Goes through model to define restify handlers for each route.
+  Goes through model to define express handlers for each route.
    */
   recurseModel('', model, environment, addRoute);
 
-  /*
-  If not user defined.
-   */
-  Object.values(routes).forEach(methods => {
-    methods['OPTIONS'] = methods['OPTIONS'] || [justSend200];
-  });
 
   /*
   Create server with callbacks
@@ -343,7 +341,6 @@ const createServer = (model, environment) => {
   Deploy routes to server
    */
   Object.entries(routes).forEach(([route, methods]) => {
-
     Object.entries(methods).forEach(([method, callbacks]) => {
       const serverMethod = httpToServerMethod(method);
 
@@ -354,12 +351,13 @@ const createServer = (model, environment) => {
       }
 
       console.info(`createServer(): Adding route '${method} ${route}'`);
-
       app[serverMethod](route, cors(findCors(route, model)), callbacks);
-
     });
   });
 
+  /*
+    Handle real-time
+  */
   var http = require('http').Server(app)
   if (model.hasRealtime) {
     realtimeHandlers(model, http, environment);
