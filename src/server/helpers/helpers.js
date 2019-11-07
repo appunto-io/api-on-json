@@ -9,28 +9,6 @@ const { getAllowedMethods } = require('./methods.js');
 const { testRoles }         = require('../../shared/roles.js');
 const realtimeHandlers      = require('../realtime.js');
 
-function findCors(route, model) {
-    if (route.includes('/')) {
-      var current = model;
-      var paths   = route.split('/');
-
-      paths = paths.filter(value => value != '');
-
-      for (let i = 0; i < paths.length; i++) {
-        var path = '/' + paths[i];
-
-        if (i + 1 === paths.length) {
-          return current.cors;
-        }
-
-        current = current[path];
-      }
-    }
-    else {
-      return model['/' + route].cors;
-    }
-}
-
 const httpToServerMethod = method => ({
   'GET'     : 'get',
   'HEAD'    : 'head',
@@ -259,13 +237,20 @@ const recurseModel = (path, model, environment, addRoute) => {
   If handlers is defined in model, then path is a valid API entry point.
   Adds each method defined in handlers as a new route.
    */
-  Object.keys(model['handlers'] || {}).forEach(method => {
-    const corsHandler   = cors(model.cors);
+
+  const handlersMethods = Object.keys(model['handlers'] || {});
+  const corsHandler     = cors(model.cors);
+
+  handlersMethods.forEach(method => {
     const authorization = createAuthHandler(method, model, environment);
     const handler       = createHandlersChain(method, model, environment);
 
     addRoute(path || '/', method, [corsHandler, authorization, handler]);
   });
+
+  if (handlersMethods.length) {
+    addRoute(path || '/', 'OPTIONS', corsHandler);
+  }
 
 
   /*
@@ -296,10 +281,9 @@ const createServer = (model, environment) => {
   };
 
   /*
-  Goes through model to define express handlers for each route.
+  Goes through model to define restify handlers for each route.
    */
   recurseModel('', model, environment, addRoute);
-
 
   /*
   Create server with callbacks
@@ -341,6 +325,7 @@ const createServer = (model, environment) => {
   Deploy routes to server
    */
   Object.entries(routes).forEach(([route, methods]) => {
+
     Object.entries(methods).forEach(([method, callbacks]) => {
       const serverMethod = httpToServerMethod(method);
 
@@ -351,13 +336,12 @@ const createServer = (model, environment) => {
       }
 
       console.info(`createServer(): Adding route '${method} ${route}'`);
-      app[serverMethod](route, cors(findCors(route, model)), callbacks);
+
+      app[serverMethod](route, callbacks);
+
     });
   });
 
-  /*
-    Handle real-time
-  */
   var http = require('http').Server(app)
   if (model.hasRealtime) {
     realtimeHandlers(model, http, environment);
