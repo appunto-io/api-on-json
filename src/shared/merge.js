@@ -10,10 +10,7 @@ const mergeModels = (...models) => {
       accumulator = Array.isArray(accumulator) ? accumulator : [accumulator];
 
       var merged = accumulator.concat(source);
-
-      if (merged.length > 1) {
-        merged = merged.filter((elem) => elem !== false);
-      }
+      
       return merged
     }
 
