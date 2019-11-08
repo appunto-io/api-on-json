@@ -47,7 +47,7 @@ class ApiModel {
 
       var paths = route.split('/');
 
-      paths = paths.filter(value => value != '');
+      paths = paths.filter(value => value !== '');
 
       for (let i = 0; i < paths.length; i++) {
         var path = '/' + paths[i];

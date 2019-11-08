@@ -2,7 +2,7 @@ const { createServer } = require('./helpers/helpers.js')
 
 class Server {
   constructor(apiModel, env) {
-    if (apiModel.hasRealtime && (env.db && typeof env.db.observe != "function")) {
+    if (apiModel.hasRealtime && (env.db && typeof env.db.observe !== "function")) {
       console.warn('The database you are using can\'t use realTime');
       apiModel.hasRealtime = false;
     }

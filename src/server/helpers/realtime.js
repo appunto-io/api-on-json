@@ -94,7 +94,7 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
         path = path.split('/')[1]; //get the "collection" path, the path use in model
 
         for (let elem in socket.handshake.query) {
-          if (elem != 'EIO' && elem != 'transport' && elem != 't' && elem != 'b64') {
+          if (elem !== 'EIO' && elem !== 'transport' && elem !== 't' && elem !== 'b64') {
             query[elem] = socket.handshake.query[elem];
           }
         }
@@ -152,7 +152,7 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
 function realtimeHandlers(apiModel, httpServer, env) {
   const socket = io(httpServer);
 
-  const fields = Object.entries(apiModel).forEach(([element, content]) => {
+  Object.entries(apiModel).forEach(([element, content]) => {
     if (element.startsWith('/')) {
       const regExpNamespaceSubs = createRegExp(element, content);
       for (let i = 0; i < regExpNamespaceSubs.length; i++) {

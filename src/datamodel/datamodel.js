@@ -76,24 +76,21 @@ class DataModel {
 
     if (options.realTime === false) {
       const apiModelFromDataModel = createApiFromDataModel(merged);
-      const apiModel              = mergeModels(apiModelFromDataModel);
       const dataModelLibrary      = createLibraryFromDataModel(merged);
 
       const hydratedApiModel         = hydrate(apiModelFromDataModel, dataModelLibrary);
 
       return new ApiModel(hydratedApiModel);
     }
-    else {
-      const apiModelFromDataModel         = createApiFromDataModel(merged);
-      const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged);
+    const apiModelFromDataModel         = createApiFromDataModel(merged);
+    const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged);
 
-      const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
-      const dataModelLibrary         = createLibraryFromDataModel(merged);
-      const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(merged);
-      const hydratedApiModel         = hydrate(apiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
+    const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
+    const dataModelLibrary         = createLibraryFromDataModel(merged);
+    const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(merged);
+    const hydratedApiModel         = hydrate(apiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
 
-      return new ApiModel(hydratedApiModel);
-    }
+    return new ApiModel(hydratedApiModel);
   }
 }
 

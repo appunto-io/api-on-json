@@ -145,11 +145,11 @@ function compileRealTime(model = {}) {
 }
 
 function compileCors(model = {}, parentCors = {} ) {
-  if ( model === false ) {
+  if (model === false) {
     // Disable cors by using 'cors' package options
     model = { origin : false };
   }
-  else if ( model === true ){
+  else if (model === true) {
     // Allow default cors options
     model = defaultCors;
   }
@@ -168,7 +168,7 @@ const compileEndpointModel = (model, parent) => {
   const auth       = compileAuthRequirements(model.auth || {}, parentAuth);
 
   const parentCors = parent && parent.cors || defaultCors;
-  const cors       = compileCors(model.cors || {}, parentCors);
+  const cors       = compileCors(model.cors, parentCors);
 
   const fields     = {};
 
@@ -215,7 +215,7 @@ function isRealTime(model) {
       }
     }
   }
-  
+
   return false;
 }
 

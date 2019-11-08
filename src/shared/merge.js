@@ -12,7 +12,7 @@ const mergeModels = (...models) => {
       var merged = accumulator.concat(source);
 
       if (merged.length > 1) {
-        merged = merged.filter((elem) => elem != false);
+        merged = merged.filter((elem) => elem !== false);
       }
       return merged
     }
