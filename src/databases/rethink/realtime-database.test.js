@@ -10,15 +10,16 @@ const { Rethink } = require('../databases.js');
 const expect = chai.expect;
 chai.use(chaiHTTP);
 
-const tokenB = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.1Yv6_KkkdfizAkirOLkPh_xnFGu8B_003xZvu_YxgFY';
+const jwtSecret = "--default-jwt-secret--";
 
+const token_request = 'Bearer ' + jwt.sign({ role: 'admin' }, jwtSecret);
 /**********************************************
   Generic HTTP requests based on chai HTTP
 */
 async function post(collection, data) {
   return chai.request('http://localhost:3000')
     .post(`/${collection}`)
-    .set('Authorization', tokenB)
+    .set('Authorization', token_request)
     .send(data);
 }
 
@@ -68,8 +69,8 @@ describe('realTime test suite', async function() {
   };
 
   const env = {
-    db        : db,
-    jwtSecret : "--default-jwt-secret--"
+    db,
+    jwtSecret
   }
 
   var roleApiModel = {

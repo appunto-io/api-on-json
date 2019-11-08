@@ -1,6 +1,7 @@
 const mongoose              = require('mongoose');
 const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
+const jwt                   = require('jsonwebtoken');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { Mongo, Rethink }    = require('./databases/databases.js');
 
@@ -12,8 +13,9 @@ chai.use(chaiHTTP);
 
 
 // TBD
-const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.1Yv6_KkkdfizAkirOLkPh_xnFGu8B_003xZvu_YxgFY';
+const jwtSecret = "--default-jwt-secret--";
 
+const token = 'Bearer ' + jwt.sign({ role: 'admin' }, jwtSecret);
 
 /**********************************************
   Generic HTTP requests based on chai HTTP
@@ -488,8 +490,8 @@ describe('api-on-json test suite', async function() {
         const apiModel  = dataModel.toApi(opt);
 
         const env = {
-          db        : db,
-          jwtSecret : "--default-jwt-secret--"
+          db,
+          jwtSecret
         }
 
         this.server  = apiModel.toServer(env);
@@ -520,8 +522,8 @@ describe('api-on-json test suite', async function() {
       const apiModel = dataModel.toApi(opt);
 
       const env = {
-        db        : db,
-        jwtSecret : "--default-jwt-secret--"
+        db,
+        jwtSecret
       }
 
       this.server2 = apiModel.toServer(env);
