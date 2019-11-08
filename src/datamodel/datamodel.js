@@ -74,7 +74,7 @@ class DataModel {
       (reduced, model) => mergeModels(reduced, model), {}
     );
 
-    if (options.realTime === false) {
+    if (!options.realTime) {
       const apiModelFromDataModel = createApiFromDataModel(merged);
       const dataModelLibrary      = createLibraryFromDataModel(merged);
 
@@ -83,7 +83,7 @@ class DataModel {
       return new ApiModel(hydratedApiModel);
     }
     const apiModelFromDataModel         = createApiFromDataModel(merged);
-    const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged);
+    const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged, options.realTime);
 
     const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
     const dataModelLibrary         = createLibraryFromDataModel(merged);

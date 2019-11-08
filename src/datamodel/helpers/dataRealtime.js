@@ -22,26 +22,29 @@ function createConnectCallback(data, meta) {
   db.observe(path, query, socket, callback);
 }
 
-const createRealtimeApiFromDataModel = (dataModel) => {
+const createRealtimeApiFromDataModel = (dataModel, realTimePaths) => {
   const apiModel = {};
+  const allRealTime = realTimePaths === true;
 
   Object.keys(dataModel).forEach(name => {
-    const kebabName = kebabCase(name);
+    if (allRealTime || realTimePaths.includes(name)) {
+      const kebabName = kebabCase(name);
 
-    apiModel[`/${kebabName}`] = {
-      realTime : {
-        'connect'    : `::connect`,
-        'message'    : `::message`,
-        'disconnect' : `::disconnect`,
-      },
-      '/:id' : {
+      apiModel[`/${kebabName}`] = {
         realTime : {
           'connect'    : `::connect`,
           'message'    : `::message`,
           'disconnect' : `::disconnect`,
+        },
+        '/:id' : {
+          realTime : {
+            'connect'    : `::connect`,
+            'message'    : `::message`,
+            'disconnect' : `::disconnect`,
+          }
         }
-      }
-    };
+      };
+    }
   });
 
   return apiModel;

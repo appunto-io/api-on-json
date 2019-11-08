@@ -377,7 +377,7 @@ describe('Field type declarations', () => {
       }
     });
 
-    const options = {};
+    const options = {realTime : ['cars', 'boats']};
 
     const apiModel = dataModel.toApi(options);
 
