@@ -2,20 +2,8 @@ const { createServer } = require('./helpers/helpers.js')
 
 class Server {
   constructor(apiModel, env) {
-    if (apiModel.hasRealtime && (env.db && typeof env.db.observe !== "function")) {
-      console.warn('The database you are using can\'t use realTime');
-      apiModel.hasRealtime = false;
-    }
 
-    const app = createServer(
-      apiModel,
-      {
-        jwtSecret : env.jwtSecret,
-        db        : env.db
-      }
-    );
-
-    this.server = app;
+    this.server = createServer(apiModel, env);
   }
 
   async listen(port) {
