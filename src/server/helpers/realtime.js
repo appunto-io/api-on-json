@@ -1,56 +1,44 @@
 const io  = require('socket.io');
 const jwt = require('jsonwebtoken');
 
-function _recCreateRegExp(name, reg, ...subNamespaces) {
+function _recCreateRegExp(name, reg, subNamespaces) {
   var subRegs = [];
-  if (name[1] === ':') {
+  if (name.endsWith(":")) {
     reg = reg + '(/(\\w*\\d*))';
   }
   else {
     reg = reg + `${name}`;
   }
 
-  if (Array.isArray(subNamespaces[0])) {
-    subNamespaces = subNamespaces[0];
+  var auth     = subNamespaces['auth'] && subNamespaces['auth']['realTime'] ? subNamespaces['auth']['realTime'] : false;
+  var realTime = subNamespaces['realTime'];
 
-    var auth = subNamespaces[1]['auth']['realTime'] || false;
-    var realTime = subNamespaces[1]['realTime'] || false;
+  subRegs.push([new RegExp(reg + '$'), auth, realTime]);
 
-    if (subNamespaces[1]['handlers']) {
-      subRegs.push([new RegExp(reg + '$'), auth, realTime]);
+  Object.entries(subNamespaces).forEach(([element, content]) => {
+    if (element.startsWith('/')) {
+      subRegs = subRegs.concat(_recCreateRegExp(element, reg, content));
     }
-    for (let i = 0; i < subNamespaces.length; i++) {
-      if (subNamespaces[i][0]) {
-        subRegs = subRegs.concat(_recCreateRegExp(subNamespaces[i][0], reg, subNamespaces[i]));
-      }
-    }
-  }
+  });
+
   return subRegs;
 }
 
-function createRegExp(name, ...subNamespaces) {
+function createRegExp(name, subNamespaces) {
   var regs = [];
   var reg = `^${name}`;
 
-  if (subNamespaces.length > 0) {
-    subNamespaces = subNamespaces[0];
-    var auth = false;
-    var realTime = false;
-    for (let i = 0; i < subNamespaces.length; i++) {
-      if (subNamespaces[i][0] === 'auth') {
-        auth = subNamespaces[i][1]['realTime'];
-      }
-      if (subNamespaces[i][0] === 'realTime') {
-        realTime = subNamespaces[i][1];
-      }
+  var auth     = subNamespaces['auth'] && subNamespaces['auth']['realTime'] ? subNamespaces['auth']['realTime'] : false;
+  var realTime = subNamespaces['realTime'];
+
+  regs.push([new RegExp(reg + '$'), auth, realTime]);
+
+  Object.entries(subNamespaces).forEach(([element, content]) => {
+    if (element.startsWith('/')) {
+      regs = regs.concat(_recCreateRegExp(element, reg, content));
     }
-    regs[0] = [new RegExp(reg + '$'), auth, realTime];
-    for (let i = 0; i < subNamespaces.length; i++) {
-      if (subNamespaces[i][0] && (subNamespaces[i][0].includes('/') && subNamespaces[i][0].length > 1)) {
-        regs = regs.concat(_recCreateRegExp(subNamespaces[i][0], reg, subNamespaces[i]));
-      }
-    }
-  }
+  });
+
   return regs;
 }
 
@@ -63,15 +51,13 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
     socket.emit('need authentication');
 
     socket.on('authenticate', function (data) {
-      if (!auth) {
-        socket.authenticated = true;
-      }
-      else {
+      if (auth.requiresAuth) {
         if (data) {
           const token = data.token;
 
           try {
             const decoded = jwt.verify(token, env.jwtSecret);
+
             if (decoded) {
               if (auth.requiresRoles) {
                 socket.authenticated = auth.requiresRoles.includes(decoded.role);
@@ -166,20 +152,15 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
 function realtimeHandlers(apiModel, httpServer, env) {
   const socket = io(httpServer);
 
-  const fields = Object.entries(apiModel);
-
-  for (let i = 0; i < fields.length; i++) {
-    const model = fields[i];
-    if (model[0].includes('/')) {
-      const regExpNamespaceSubs = createRegExp(model[0], Object.entries(model[1]));
+  const fields = Object.entries(apiModel).forEach(([element, content]) => {
+    if (element.startsWith('/')) {
+      const regExpNamespaceSubs = createRegExp(element, content);
       for (let i = 0; i < regExpNamespaceSubs.length; i++) {
-        const reg  = regExpNamespaceSubs[i][0];
-        const auth = regExpNamespaceSubs[i][1];
-        const handlers = regExpNamespaceSubs[i][2];
+        const [reg, auth, handlers]  = regExpNamespaceSubs[i];
         connectCallback(reg, socket, auth, handlers, env);
       }
     }
-  }
+  });
 }
 
 module.exports = realtimeHandlers;
