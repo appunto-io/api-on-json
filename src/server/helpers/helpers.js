@@ -223,11 +223,12 @@ function logRequest(req, res, next) {
     remote    : req.headers['x-forwarded-for'] || req.connection.remoteAddress,
     status    : res.statusCode
   });
+
   next();
 }
 
 function logError(err, req, res, next) {
-  logRequest(req, res);
+  logRequest(req, res, next);
   console.error(err);
   next();
 }

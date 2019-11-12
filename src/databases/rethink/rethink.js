@@ -28,6 +28,28 @@ async function dataModelToRethink(model, database) {
   return models;
 }
 
+function findType(data, field) {
+  const value = data[field];
+
+  if (isNaN(value) === false) {
+    data[field] = data[field] - 0;
+    return 'number';
+  }
+  if (value === 'true' || data[field] === 'false') {
+    data[field] = data[field] === 'true';
+    return 'boolean';
+  }
+  if (value === 'null') {
+    data[field] = null;
+    return 'object';
+  }
+  if (value === 'undefined') {
+    data[field] = undefined;
+    return 'undefined';
+  }
+  return 'string';
+}
+
 class Rethink {
   constructor(host, port, dbName, options) {
     this.host     = host;
@@ -57,31 +79,30 @@ class Rethink {
     this.models = models;
   }
 
-  /*------------------------------------------------------------
-    CRUD
-  */
-
-
-  /************
-  Create: Handle POST request
-  */
-  async create(collection, data = {}) {
-    const obj     = {};
+  async isDataValid(collection, data) {
+    const obj = {};
     const model   = this.models[collection]['schema'];
-    const options = this.models[collection]['options'];
     const fields = Object.entries(model);
 
     for (var i = 0; i < fields.length; i = i + 1) {
       const field = fields[i][0];
       const spec  = fields[i][1];
-
-      let { required, unique, default: defaultValue } = spec;
+      let { type, required, unique, default: defaultValue } = spec;
 
       required      = !!required;
       unique        = !!unique;
-
+      type          = type.toLowerCase();
 
       if (field in data) {
+        if (type !== 'string' && typeof data[field] !== type) {
+          const dataType = findType(data, field);
+          if (type !== dataType) {
+            const message = `Bad request: ${field} is expected to be a ${type} and you entered a ${dataType}`;
+
+            console.error(message);
+            throw new Error(message);
+          }
+        }
         obj[field] = data[field];
       }
       else if ('default' in spec) {
@@ -96,8 +117,7 @@ class Rethink {
           throw new Error(message);
         }
       }
-
-      if (unique) {
+      if (unique && obj[field]) {
         var fieldExist = [];
         if (obj[field]) {
           fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
@@ -110,6 +130,22 @@ class Rethink {
         }
       }
     }
+
+    return obj;
+  }
+
+  /*------------------------------------------------------------
+    CRUD
+  */
+
+
+  /************
+  Create: Handle POST request
+  */
+  async create(collection, data = {}) {
+    const options = this.models[collection]['options'];
+
+    var obj = await this.isDataValid(collection, data);
 
     if (options['timestamps']) {
       const createdAt = options['timestamps']['createdAt'] ? options['timestamps']['createdAt'] : 'createdAt';
@@ -293,49 +329,10 @@ class Rethink {
   Update: Handle PUT request
   */
   async update(collection, id, data) {
-    const obj   = {id: id};
-    const model = this.models[collection]['schema'];
     const options = this.models[collection]['options'];
-    const entries = Object.entries(model);
 
-
-    for (var i = 0; i < entries.length; i = i + 1) {
-      const field = entries[i][0];
-      const spec  = entries[i][1];
-
-      let { required, unique, default: default_value } = spec;
-
-      required      = required      ? required      : false;
-      unique        = unique        ? unique        : false;
-      default_value = default_value ? default_value : false;
-
-      if (field in data) {
-        obj[field] = data[field];
-      }
-      else if (default_value) {
-          obj[field] = default_value;
-      }
-      if (required) {
-        if (!obj[field]) {
-          const message = `This field: ${field} is required.`;
-
-          console.error(message);
-          throw new Error(message);
-        }
-      }
-      if (unique) {
-        var fieldExist = [];
-        if (obj[field]) {
-          fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
-        }
-        if (fieldExist.length > 0) {
-          const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
-
-          console.error(message);
-          throw new Error(message);
-        }
-      }
-    }
+    var obj = await this.isDataValid(collection, data);
+    obj.id  = id;
 
     if (options['timestamps']) {
       const createdAt = options['timestamps']['createdAt'] ? options['timestamps']['createdAt'] : 'createdAt';
@@ -358,47 +355,9 @@ class Rethink {
   Patch: Handle PATCH request
   */
   async patch(collection, id, data) {
-    const obj   = {};
-    const model = this.models[collection]['schema'];
     const options = this.models[collection]['options'];
-    const entries = Object.entries(model);
 
-
-    for (var i = 0; i < entries.length; i = i + 1) {
-      const field = entries[i][0];
-      const spec  = entries[i][1];
-
-      let { required, unique, default: default_value } = spec;
-
-      required      = required      ? required      : false;
-      unique        = unique        ? unique        : false;
-      default_value = default_value ? default_value : false;
-
-      if (field in data) {
-        obj[field] = data[field];
-      }
-      else if (default_value) {
-          obj[field] = default_value;
-      }
-
-      if (required) {
-        if (!obj[field]) {
-          const message = `This field: ${field} is required.`;
-
-          console.error(message);
-          throw new Error(message);
-        }
-      }
-      if (unique && obj[field]) {
-        const fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
-        if (fieldExist.length > 0) {
-          const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
-
-          console.error(message);
-          throw new Error(message);
-        }
-      }
-    }
+    var obj = await this.isDataValid(collection, data);
 
     if (options['timestamps']) {
 

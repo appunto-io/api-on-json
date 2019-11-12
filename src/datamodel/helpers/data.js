@@ -2,7 +2,6 @@ var kebabCase = require('lodash.kebabcase');
 
 const writeInputFilter = (data, flow, meta) => flow.continue(meta.request.body);
 
-
 /*
 Create POST callback
 Add a new document in the collection. Document validation

@@ -48,7 +48,7 @@ class Mongo {
     this.models = mongooseModels;
   }
 
-  async _getModel(collection) {
+  async getModel(collection) {
     if(!this.database) {
       const message = `You are not connected to a mongodb server. Please verify that you called connect() and be sure to wait promise resolution.`;
 
@@ -79,7 +79,7 @@ class Mongo {
   */
 
   async create(collection, data = {}) {
-    const Model = await this._getModel(collection);
+    const Model = await this.getModel(collection);
 
     const document = new Model();
 
@@ -95,7 +95,7 @@ class Mongo {
   }
 
   async remove(collection, id) {
-    const Model = await this._getModel(collection);
+    const Model = await this.getModel(collection);
 
     const document = await Model.findByIdAndDelete(id);
 
@@ -106,7 +106,7 @@ class Mongo {
   }
 
   async readOne(collection, id) {
-    const Model = await this._getModel(collection);
+    const Model = await this.getModel(collection);
 
     const document = await Model.findById(id);
 
@@ -118,7 +118,7 @@ class Mongo {
   }
 
   async readMany(collection, query = {}) {
-    const Model = await this._getModel(collection);
+    const Model = await this.getModel(collection);
     let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
@@ -211,7 +211,7 @@ class Mongo {
   }
 
   async update(collection, id, data) {
-    const Model = await this._getModel(collection);
+    const Model = await this.getModel(collection);
 
     const document = {};
 
@@ -233,7 +233,7 @@ class Mongo {
   }
 
   async patch(collection, id, data) {
-    const Model = await this._getModel(collection);
+    const Model = await this.getModel(collection);
 
     const document = {};
 
