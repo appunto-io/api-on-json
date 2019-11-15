@@ -26,6 +26,32 @@ const _convertAPIFieldToMongo = field => {
   }
 };
 
+function findType(data, field) {
+  const value = data[field];
+
+  if (Array.isArray(value)) {
+    return findType(value, 0);
+  }
+
+  if (isNaN(value) === false) {
+    data[field] = data[field] - 0;
+    return 'number';
+  }
+  if (value === 'true' || data[field] === 'false') {
+    data[field] = data[field] === 'true';
+    return 'boolean';
+  }
+  if (value === 'null') {
+    data[field] = null;
+    return 'object';
+  }
+  if (value === 'undefined') {
+    data[field] = undefined;
+    return 'undefined';
+  }
+  return 'string';
+}
+
 class Mongo {
   constructor(url, options) {
     this.url      = url;
@@ -85,6 +111,7 @@ class Mongo {
 
     Model.schema.eachPath(field => {
       if (field in data) {
+        findType(data, field);
         document.set(field, data[field]);
       }
     });
@@ -119,7 +146,7 @@ class Mongo {
 
   async readMany(collection, query = {}) {
     const Model = await this.getModel(collection);
-    let { page, pageSize, sort, order, cursor, ...restOfQuery } = query;
+    let { page, pageSize, sort, order, cursor, filter, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
@@ -217,6 +244,7 @@ class Mongo {
 
     Model.schema.eachPath(field => {
       if (field in data) {
+        findType(data, field);
         document[field] = data[field];
       }
     });
@@ -239,6 +267,7 @@ class Mongo {
 
     Model.schema.eachPath(field => {
       if (field in data) {
+        findType(data, field);
         document[field] = data[field];
       }
     });

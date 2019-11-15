@@ -103,7 +103,7 @@ async function databaseTestSuite() {
           model : 'Model S',
           serial : 'AAAAA',
         });
-
+        
         expect(response).to.have.status(200);
         expect(response.body.brand).to.be.equal('Tesla');
         expect(response.body.model).to.be.equal('Model S');
