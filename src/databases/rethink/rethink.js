@@ -107,7 +107,7 @@ class Rethink {
           obj[field] = [];
           for (let index = 0; index < spec.length; index++) {
             data[field].forEach(async (elem) => {
-              const validated = await this.isDataValid(spec[index], options, elem)
+              const validated = await this.isDataValid(collection, spec[index], options, elem)
               obj[field].push(validated);
             });
           }
