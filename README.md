@@ -90,13 +90,13 @@ const dataModel = new DataModel({
       'name' : 'String'
     }
   }
-})
+});
 
 const apiModel = dataModel.toApi();
 
 const env = {
   db : new Mongo(connectionOptions)    
-}
+};
 
 const server = apiModel.toServer(env);
 server.listen(port);
@@ -117,7 +117,7 @@ const apiModel = mergedDataModel.toApi();
 const env = {
   db,
   secretKey
-}
+};
 
 const server = apiModel.toServer(env);
 server.listen(port);
@@ -141,13 +141,13 @@ const dataModel = new DataModel({
 dataModel.addCollection(collectionName, {
   options : {/* ... */},
   schema  : {/* ... */}
-})
+});
 
 const apiModel = dataModel.toApi();
 
 const env = {
   db : new Mongo(connectionOptions)    
-}
+};
 
 const server = apiModel.toServer(env);
 server.listen(port);
@@ -177,7 +177,7 @@ const apiModel = dataModel.toApi();
 
 const env = {
   db : new Mongo(connectionOptions)    
-}
+};
 
 const server = apiModel.toServer(env);
 server.listen(port);
@@ -207,7 +207,7 @@ const apiModel = dataModel.toApi();
 
 const env = {
   db : new Mongo(connectionOptions)    
-}
+};
 
 const server = apiModel.toServer(env);
 server.listen(port);
@@ -253,7 +253,7 @@ const apiModel = new ApiModel({
 
 const env = {
   max : 10
-}
+};
 
 const server = new Server(apiMode, env);
 server.listen();
@@ -268,8 +268,6 @@ const am1   = new ApiModel({model1: {}});
 const am2   = new ApiModel({model2: {}});
 const am3n4 = new ApiModel({model3: {}}, {model4: {}});
 const mergedApiModel = new ApiModel(am1, am2, am3n4);
-
-//...
 
 ```
 
@@ -288,8 +286,6 @@ const am1 = new ApiModel({model3});
 const am2 = new ApiModel({model4});
 
 const mergedApiModel = new ApiModel(amFromDm, am1, am2);
-
-//...
 
 ```
 
@@ -363,6 +359,6 @@ const apiModel = dataModel.toApi({
 const mongo = new Mongo(mongoUri, options);
 
 const server = apiModel.toServer({db: mongo});
-server.listen(port)
+server.listen(port);
 
 ```

@@ -23,6 +23,7 @@ function createConnectCallback(data, meta) {
 }
 
 const createRealtimeApiFromDataModel = (dataModel, realTimePaths) => {
+
   const apiModel = {};
   const allRealTime = realTimePaths === true;
 

@@ -284,6 +284,10 @@ class Mongo {
 
     return _convertDocumentToObject(saved);
   }
+
+  async observe() {
+    
+  }
 }
 
 module.exports = { Mongo : Mongo}

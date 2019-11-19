@@ -177,38 +177,15 @@ describe('ApiModel test suite', () => {
   it('Test the creation of a api model with one model', () => {
     const apiModel = new ApiModel({});
     expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({
-      isApiModel: true,
-      hasRealtime: false,
-      auth : {
-        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
-      },
-      fields : {},
-      filters : {},
-      handlers : {},
-      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
-      cors: {
-        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
-        optionsSuccessStatus : 204,
-        origin               : "*",
-        preflightContinue    : false
-      }
-    });
+    expect(apiModel.models[0]).to.be.deep.equal({});
   });
 
   it('Test the creation of a api model with multiple models', () => {
     const apiModel = new ApiModel({'/cars' : {}}, {'/apple' : {}});
     expect(apiModel.models).to.be.an('array');
 
-    expect(apiModel.models[0]).to.be.deep.equal(carsApiModel);
-    expect(apiModel.models[1]).to.be.deep.equal(appleApiModel);
+    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
+    expect(apiModel.models[1]).to.be.deep.equal({'/apple' : {}});
   });
 
   it('Test adding Model method', () => {
@@ -216,7 +193,7 @@ describe('ApiModel test suite', () => {
     apiModel.addApiModel({'/apple' : {}})
 
     expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal(carsApiModel);
+    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
     expect(apiModel.models[1]).to.be.deep.equal({'/apple' : {}});
   });
 
@@ -257,52 +234,7 @@ describe('ApiModel test suite', () => {
     const merged = apiModel.get();
 
     expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({
-      isApiModel: true,
-      hasRealtime: false,
-      '/cars': {
-        auth : {
-          "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-          realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
-        },
-        fields : {},
-        filters : {},
-        handlers : {},
-        realTime : { 'connect': [], 'message': [], 'disconnect': [] },
-        cors: {
-          methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
-          optionsSuccessStatus : 204,
-          origin               : "*",
-          preflightContinue    : false
-        }
-      },
-      auth : {
-        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
-        realTime  : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]}
-      },
-      fields : {},
-      filters : {},
-      handlers : {},
-      realTime : { 'connect': [], 'message': [], 'disconnect': [] },
-      cors: {
-        methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
-        optionsSuccessStatus : 204,
-        origin               : "*",
-        preflightContinue    : false
-      }
-    });
+    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
 
     expect(merged).to.be.deep.equal(carsApiModel);
 
@@ -317,7 +249,7 @@ describe('ApiModel test suite', () => {
     const apiModel = new ApiModel({'/cars': {}});
 
     expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal(carsApiModel);
+    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
 
     apiModel.addRoute('cars/users', {});
     const merged = apiModel.get();
@@ -329,7 +261,7 @@ describe('ApiModel test suite', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
     expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal(carsApiModel);
+    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
 
     apiModel.addRoute('apple', {});
     const merged = apiModel.get();
@@ -379,7 +311,7 @@ describe('ApiModel test suite', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
     expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal(carsApiModel);
+    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
 
     const options = {};
 

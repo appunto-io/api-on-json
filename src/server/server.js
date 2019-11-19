@@ -2,7 +2,6 @@ const { createServer } = require('./helpers/helpers.js')
 
 class Server {
   constructor(apiModel, env) {
-
     this.server = createServer(apiModel, env);
   }
 

@@ -577,7 +577,7 @@ describe('compileRealTime', () => {
     expect(fn({
       'connect' : '::connect'
     })).to.deep.equal({
-      'connect'    : '::connect',
+      'connect'    : ['::connect'],
       'message'    : [],
       'disconnect' : []
     });
@@ -587,14 +587,14 @@ describe('compileRealTime', () => {
     })).to.deep.equal({
       'connect'    : [],
       'message'    : [],
-      'disconnect' : '::disconnect'
+      'disconnect' : ['::disconnect']
     });
 
     expect(fn({
       'message' : '::message'
     })).to.deep.equal({
       'connect'    : [],
-      'message'    : '::message',
+      'message'    : ['::message'],
       'disconnect' : []
     });
 
@@ -602,19 +602,19 @@ describe('compileRealTime', () => {
       'connect' : '::connect',
       'message' : '::message'
     })).to.deep.equal({
-      'connect'    : '::connect',
-      'message'    : '::message',
+      'connect'    : ['::connect'],
+      'message'    : ['::message'],
       'disconnect' : []
     });
 
     expect(fn({
-      'connect'    : '::connect',
-      'message'    : '::message',
-      'disconnect' : '::disconnect'
+      'connect'    : ['::connect'],
+      'message'    : ['::message'],
+      'disconnect' : ['::disconnect']
     })).to.deep.equal({
-      'connect'    : '::connect',
-      'message'    : '::message',
-      'disconnect' : '::disconnect'
+      'connect'    : ['::connect'],
+      'message'    : ['::message'],
+      'disconnect' : ['::disconnect']
     });
   });
 });

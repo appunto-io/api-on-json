@@ -137,10 +137,13 @@ const compileHandlersList = (model) => {
 };
 
 function compileRealTime(model = {}) {
+  model['connect']    = model['connect'] || [];
+  model['message']    = model['message'] || [];
+  model['disconnect'] = model['disconnect'] || [];
   return {
-    'connect'    : model['connect'] || [],
-    'message'    : model['message'] || [],
-    'disconnect' : model['disconnect'] || []
+    'connect'    : Array.isArray(model['connect'])    ? model['connect']    : [model['connect']],
+    'message'    : Array.isArray(model['message'])    ? model['message']    : [model['message']],
+    'disconnect' : Array.isArray(model['disconnect']) ? model['disconnect'] : [model['disconnect']]
   };
 }
 
@@ -202,17 +205,16 @@ const compileEndpointModel = (model, parent) => {
 function isRealTime(model) {
   const realTime = model.realTime;
   const fields   = Object.entries(model);
-
-  if ((model['auth']['realTime'].requiresAuth === true) && realTime && (realTime['connect'].length > 0 || realTime['disconnect'].length > 0 || realTime['message'].length > 0)) {
+  
+  if ((model['auth']['realTime']) && realTime && (realTime['connect'].length > 0 || realTime['disconnect'].length > 0 || realTime['message'].length > 0)) {
     return true;
   }
 
   for (let index = 0; index < fields.length; index++) {
     const [element, subModel] = fields[index];
+
     if (element.startsWith('/')) {
-      if (isRealTime(subModel) === true) {
-        return true;
-      }
+      return isRealTime(subModel);
     }
   }
 

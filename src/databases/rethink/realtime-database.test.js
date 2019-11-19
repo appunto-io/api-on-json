@@ -53,8 +53,7 @@ const dataModels = {
   'flowers' : {
     schema : {
       name : {type: 'String', 'required': true},
-      age_in_days: 'Number',
-      serial : {type: 'String', 'unique': true}
+      age_in_days: 'Number'
     }
   }
 };
@@ -77,6 +76,16 @@ describe('realTime test suite', async function() {
     '/cars': {
       auth: {
         realTime: {requiresRoles: ['admin']}
+      }
+    },
+    '/flowers': {
+      auth: {
+        realTime: {requiresAuth:false}
+      }
+    },
+    '/users': {
+      auth: {
+        realTime: false
       }
     }
   };
@@ -291,6 +300,21 @@ describe('realTime test suite', async function() {
     });
   });
 
+  it('Testing if no authentication needed when requiresAuth is false', function(done) {
+    var socket = io.connect('http://localhost:3000/flowers?name=sunflower', {forceNew: true});
+
+    socket.on('update', function(message) {
+      expect(socket.connected).to.be.true;
+      expect(socket.id).to.not.be.null;
+      expect(message).to.not.be.null;
+      done();
+    });
+
+    post('flowers', {
+      name : 'sunflower'
+    });
+  });
+
   it('Testing if the client can observe multiple fields and gets updates', function(done) {
     var socket = io.connect('http://localhost:3000/cars?brand=tesla;renault&model=S;X', {forceNew: true});
 
@@ -345,6 +369,15 @@ describe('realTime test suite', async function() {
         brand : 'renault',
         model : 'Z'
       });
+    });
+  });
+
+  it('Testing if realTime is no available when auth is false', function(done) {
+    var socket = io.connect('http://localhost:3000/users?name=Hugo', {forceNew: true});
+
+    socket.on('unauthorized', function(data) {
+      expect(data.message).to.be.equal('realTime is not available on this collection');
+      done();
     });
   });
 

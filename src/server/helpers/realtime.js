@@ -1,57 +1,77 @@
 const io  = require('socket.io');
 const jwt = require('jsonwebtoken');
 
-function _recCreateRegExp(name, reg, subNamespaces) {
-  var subRegs = [];
-  if (name.endsWith(":")) {
-    reg = reg + '(/(\\w*\\d*))';
-  }
-  else {
-    reg = reg + `${name}`;
-  }
-
-  var auth     = subNamespaces['auth'] && subNamespaces['auth']['realTime'] ? subNamespaces['auth']['realTime'] : false;
-  var realTime = subNamespaces['realTime'];
-
-  subRegs.push([new RegExp(reg + '$'), auth, realTime]);
-
-  Object.entries(subNamespaces).forEach(([element, content]) => {
-    if (element.startsWith('/')) {
-      subRegs = subRegs.concat(_recCreateRegExp(element, reg, content));
-    }
-  });
-
-  return subRegs;
-}
-
-function createRegExp(name, subNamespaces) {
+function createRegExp(name, subNamespaces, regex = '^') {
   var regs = [];
-  var reg = `^${name}`;
+  if (name !== '') {
+    if (name.includes(':')) {
+      regex = regex + '(/(\\w*\\d*))';
+    }
+    else {
+      regex = regex + name;
+    }
+  }
 
   var auth     = subNamespaces['auth'] && subNamespaces['auth']['realTime'] ? subNamespaces['auth']['realTime'] : false;
   var realTime = subNamespaces['realTime'];
 
-  regs.push([new RegExp(reg + '$'), auth, realTime]);
+  regs.push({
+    regexp : new RegExp(regex + '$'),
+    auth,
+    realTime}
+  );
 
   Object.entries(subNamespaces).forEach(([element, content]) => {
     if (element.startsWith('/')) {
-      regs = regs.concat(_recCreateRegExp(element, reg, content));
+      regs = [...regs, ...createRegExp(element, content, regex)]
     }
   });
 
   return regs;
 }
 
-async function connectCallback(regExp, socket, auth, handlers, env) {
+async function execConnectHandlers(socket, handlers, env) {
   var roomId = 0;
+  var path   = socket.nsp.name;
 
+  path = path.split('/')[1]; //get the "collection" path, the path use in model
+
+  // LINT
+  const { EIO, transport, t, b64, ...sanitizedQuery } = socket.handshake.query;
+
+  socket.join(roomId); //create a unique room for the socket
+
+
+  /*******
+  Connection handling
+  */
+
+  const meta = {
+    env,
+    query: sanitizedQuery,
+    socket,
+    path
+  }
+
+  handlers.connect.reduce(
+    (res, handler) => handler(res, meta),
+    null
+  );
+}
+
+async function connectCallback(regExp, socket, auth, handlers, env) {
   socket.of(regExp).on('connection', function (socket) {
-    socket.authenticated = false;
+    if (!auth) {
+      socket.emit('unauthorized', {
+        message: 'realTime is not available on this collection'
+      });
+    }
+    if (auth.requiresAuth) {
+      socket.authenticated = false;
 
-    socket.emit('need authentication');
+      socket.emit('need authentication');
 
-    socket.on('authenticate', function (data) {
-      if (auth.requiresAuth) {
+      socket.on('authenticate', function (data) {
         if (data) {
           const token = data.token;
 
@@ -74,77 +94,43 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
             }
           }
         }
-      }
 
-      setTimeout(function () {
-        if (!socket.authenticated) {
-          socket.emit('unauthorized', {
-            message: 'failed to authenticate'
-          });
+        setTimeout(function () {
+          if (!socket.authenticated) {
+            socket.emit('unauthorized', {
+              message: 'failed to authenticate'
+            });
 
-          socket.disconnect(); //if the user takes to much time to authenticate
-        }
-      }, 5000);
-
-      if (socket.authenticated) {
-        socket.emit('succeed');
-        var query = {};
-        var path  = socket.nsp.name;
-
-        path = path.split('/')[1]; //get the "collection" path, the path use in model
-
-        for (let elem in socket.handshake.query) {
-          if (elem !== 'EIO' && elem !== 'transport' && elem !== 't' && elem !== 'b64') {
-            query[elem] = socket.handshake.query[elem];
+            socket.disconnect(); //if the user takes to much time to authenticate
           }
+        }, 5000);
+
+        if (socket.authenticated) {
+          socket.emit('succeed');
+          execConnectHandlers(socket, handlers, env);
         }
-
-        socket.join(roomId); //create a unique room for the socket
-
-        var sockets = [];
-        sockets.push(socket); //the socket needs to be in an array to be used in an extern callback
-
-        /*******
-        Connection handling
-        */
-
-        const meta = {
-          env,
-          query,
-          socket,
-          path
-        }
-
-        if (handlers['connect']) {
-          var res;
-          for (let i = 0; i < handlers['connect'].length; i++) {
-            res = handlers['connect'][i](res, meta);
-          }
-        }
-      }
-    });
+      });
+    }
+    else {
+      execConnectHandlers(socket, handlers, env);
+    }
 
     /*******
     Message handling
     */
-    if (handlers['message']) {
-      var message = '';
-      for (let i = 0; i < handlers['message'].length; i++) {
-        message = handlers['message'][i](message);
-      }
-    }
+    handlers.message.reduce(
+      (res, handler) => handler(res),
+      ''
+    );
 
     /*******
     Disconnection handling
     */
     socket.on('disconnect', () => {
-      if (handlers['disconnect']) {
-        var res;
-
-        for (let i = 0; i < handlers['disconnect'].length; i++) {
-          res = handlers['disconnect'][i](res);
-        }
-      }
+      handlers.disconnect.reduce(
+        (res, handler) => handler(res),
+        null
+      );
     });
   });
 }
@@ -152,15 +138,11 @@ async function connectCallback(regExp, socket, auth, handlers, env) {
 function realtimeHandlers(apiModel, httpServer, env) {
   const socket = io(httpServer);
 
-  Object.entries(apiModel).forEach(([element, content]) => {
-    if (element.startsWith('/')) {
-      const regExpNamespaceSubs = createRegExp(element, content);
-      for (let i = 0; i < regExpNamespaceSubs.length; i++) {
-        const [reg, auth, handlers]  = regExpNamespaceSubs[i];
-        connectCallback(reg, socket, auth, handlers, env);
-      }
-    }
-  });
+  const realTimeDefs = createRegExp('', apiModel);
+
+  realTimeDefs.forEach(
+    ({regexp, auth, realTime}) => connectCallback(regexp, socket, auth, realTime, env)
+  );
 }
 
 module.exports = realtimeHandlers;
