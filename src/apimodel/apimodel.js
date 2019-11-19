@@ -53,12 +53,22 @@ class ApiModel {
     this.addRoute(route, null);
   }
 
-  addHandler(route, handler) {
-    this.addRoute(route, {handlers : [handler]});
+  addHandler(route, method, handler) {
+    var obj = {};
+    handler = Array.isArray(handler) ? handler : [handler];
+
+    obj[method] = handler;
+
+    this.addRoute(route, {handlers : obj});
   }
 
-  addFilter(route, filter) {
-    this.addRoute(route, {filters : [filter]});
+  addFilter(route, method, filter) {
+    var obj = {};
+    filter = Array.isArray(filter) ? filter : [filter];
+
+    obj[method] = filter;
+
+    this.addRoute(route, {filters : obj});
   }
 
   setAuth(route, auth) {
@@ -66,15 +76,28 @@ class ApiModel {
   }
 
   setRequiresAuth(route, value) {
-    this.addRoute(route, {auth : {requireAuth : !!value}});
+    this.addRoute(route, {auth : {requiresAuth : !!value}});
   }
 
   setRequiresRoles(route, roles) {
-    roles = Array.isArray(roles) ? roles : [roles];
-    // ...
+    if (roles) {
+      roles = Array.isArray(roles) ? roles : [roles];
+      this.addRoute(route, {auth : {requiresAuth: true, requiresRoles: roles}});
+    }
   }
-  // policies
-  //
+
+  addPolicies(route, policies) {
+    if (policies) {
+      policies = Array.isArray(policies) ? policies : [policies];
+      this.addRoute(route, {auth: {policies}});
+    }
+  }
+
+  addRealTimeHandler(route, realTimeHandlers) {
+    if (realTimeHandlers) {
+      this.addRoute(route, {realTime: realTimeHandlers});
+    }
+  }
 
   toServer(env) {
     const compiled = this.get();

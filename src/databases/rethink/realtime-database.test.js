@@ -23,6 +23,13 @@ async function post(collection, data) {
     .send(data);
 }
 
+async function patch(collection, id, data) {
+  return chai.request('http://localhost:3000')
+    .patch(`/${collection}/` + id)
+    .set('Authorization', token_request)
+    .send(data);
+}
+
 const dataModels = {
   'cars': {
     schema: {
@@ -154,6 +161,36 @@ describe('realTime test suite', async function() {
       post('cars', {
         brand : 'tesla',
         model : 'S'
+      });
+    });
+  });
+
+  it('Testing if the socket receives a message on update', async function() {
+    const response = await post('cars', {
+      brand : 'tesla',
+      model : 'S'
+    });
+
+    var socket = io.connect('http://localhost:3000/cars/' + response.body.id, {forceNew: true});
+
+    socket.on('need authentication', function() {
+      socket.emit('authenticate', {token: admin});
+
+      socket.on('succeed', function() {
+        expect(socket.connected).to.be.true;
+        expect(socket.id).to.not.be.null;
+      });
+
+      socket.on('update', function(message) {
+        expect(socket.connected).to.be.true;
+        expect(socket.id).to.not.be.null;
+        expect(message).to.not.be.null;
+        socket.disconnect();
+      });
+
+      patch('cars', {
+        brand : 'tesla',
+        model : 'X'
       });
     });
   });

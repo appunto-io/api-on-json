@@ -16,10 +16,10 @@ function callback(socket, item) {
 }
 
 function createConnectCallback(data, meta) {
-  const { query, socket, env, path } = meta;
+  const { query, socket, env, path, params } = meta;
   const { db } = env;
 
-  db.observe(path, query, socket, callback);
+  db.observe(path, query, params, socket, callback);
 }
 
 const createRealtimeApiFromDataModel = (dataModel, realTimePaths) => {

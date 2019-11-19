@@ -307,6 +307,255 @@ describe('ApiModel test suite', () => {
     });
   });
 
+  it('Test adding a new handler at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function getBrand() {}
+
+    apiModel.addHandler('/cars/brand', 'GET', getBrand);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/brand']['handlers']['GET']).to.be.deep.equal([getBrand]);
+  });
+
+  it('Test adding multiple handler at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function getBrand1() {};
+    function getBrand2() {};
+
+    apiModel.addHandler('/cars/brand', 'GET', [getBrand1, getBrand2]);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/brand']['handlers']['GET']).to.be.deep.equal([getBrand1, getBrand2]);
+  });
+
+  it('Test adding a new filter at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function filterBrand() {}
+
+    apiModel.addFilter('/cars/brand', 'POST', filterBrand);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/brand']['filters']['POST']).to.be.deep.equal([filterBrand]);
+  });
+
+  it('Test adding multiple filter at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function filterBrand1() {};
+    function filterBrand2() {};
+
+    apiModel.addFilter('/cars/brand', 'POST', [filterBrand1, filterBrand2]);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/brand']['filters']['POST']).to.be.deep.equal([filterBrand1, filterBrand2]);
+  });
+
+  it('Test setting auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    apiModel.setAuth('/cars/user', {requiresAuth: true, requiresRoles: ['admin']});
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "POST"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        realTime  : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]}
+    });
+  });
+
+  it('Test setting false auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    apiModel.setAuth('/cars/user', false);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : false,
+        "HEAD"    : false,
+        "OPTIONS" : false,
+        "POST"    : false,
+        "PUT"     : false,
+        "PATCH"   : false,
+        "DELETE"  : false,
+        realTime  : false
+    });
+  });
+
+  it('Test setting only requiresRoles of auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    apiModel.setRequiresRoles('/cars/user', 'admin');
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "POST"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
+        realTime  : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]}
+    });
+  });
+
+  it('Test setting multiples roles only in auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    apiModel.setRequiresRoles('/cars/user', ['admin', 'user']);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        "POST"    : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
+        realTime  : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]}
+    });
+  });
+
+  it('Test setting only requiresAuth to true of auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    apiModel.setRequiresAuth('/cars/user', true);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]}
+    });
+  });
+
+  it('Test setting only requiresAuth to false of auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    apiModel.setRequiresAuth('/cars/user', false);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        "HEAD"    : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        "OPTIONS" : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        "POST"    : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        "PUT"     : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        "PATCH"   : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        "DELETE"  : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
+        realTime  : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]}
+    });
+  });
+
+  it('Test adding one policy to auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function policy() {};
+
+    apiModel.addPolicies('/cars/user', policy);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        "POST"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        "PUT"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
+        realTime  : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]}
+    });
+  });
+
+  it('Test adding one policy to auth at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function policy1() {};
+    function policy2() {};
+
+    apiModel.addPolicies('/cars/user', [policy1, policy2]);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+        "GET"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        "POST"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        "PUT"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
+        realTime  : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]}
+    });
+  });
+
+  it('Test adding a new connect realTime handler at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function doSomeConnection() {};
+
+    apiModel.addRealTimeHandler('/cars/user', {connect: doSomeConnection});
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+      connect: [doSomeConnection],
+      message: [],
+      disconnect: []
+    })
+  });
+
+  it('Test adding multiple connect realTime handler at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function doSomeConnection1() {};
+    function doSomeConnection2() {};
+
+    apiModel.addRealTimeHandler('/cars/user', {connect: [doSomeConnection1, doSomeConnection2]});
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+      connect: [doSomeConnection1, doSomeConnection2],
+      message: [],
+      disconnect: []
+    })
+  });
+
+  it('Test adding multiple connect, message and disconnect realTime handler at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function doSomeConnection1() {};
+    function doSomeConnection2() {};
+
+    function doSomeMessage1() {};
+    function doSomeMessage2() {};
+
+    function doSomeDisconnection() {};
+
+    apiModel.addRealTimeHandler('/cars/user', {connect:    [doSomeConnection1, doSomeConnection2],
+                                               message:    [doSomeMessage1, doSomeMessage2],
+                                               disconnect: [doSomeDisconnection]});
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+      connect:    [doSomeConnection1, doSomeConnection2],
+      message:    [doSomeMessage1, doSomeMessage2],
+      disconnect: [doSomeDisconnection]
+    });
+  });
+
   it('Test creating a server from a api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 

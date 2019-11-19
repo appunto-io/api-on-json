@@ -26,9 +26,9 @@ const compileRequestRequirements = (requirements) => {
   }
   else if (typeof requirements === 'object') {
     var policies = [createAuthHandler];
-
+    
     if (requirements.policies) {
-      policies = requirements.policies;
+      policies = requirements.policies.includes(createAuthHandler) ? requirements.policies : [createAuthHandler, ...requirements.policies];
     }
 
     return {
@@ -49,7 +49,7 @@ const compileRequestRequirements = (requirements) => {
 Compiles collection or field requirements
  */
 const compileAuthRequirements = (model, defaultAuth) => {
-  model = model || {};
+  model = model !== undefined ? model : {};
 
   /*
   Use defaultAuth as default access rules
@@ -90,6 +90,9 @@ const compileAuthRequirements = (model, defaultAuth) => {
   methods.forEach(method => {
     if (model[method] !== undefined) {
       compiled[method] = compileRequestRequirements(model[method]);
+    }
+    else if (model === false) {
+      compiled[method] = false;
     }
   });
 
@@ -168,7 +171,7 @@ const compileEndpointModel = (model, parent) => {
   model = model || {};
 
   const parentAuth = parent && parent.auth || defaultAuth;
-  const auth       = compileAuthRequirements(model.auth || {}, parentAuth);
+  const auth       = compileAuthRequirements(model.auth, parentAuth);
 
   const parentCors = parent && parent.cors || defaultCors;
   const cors       = compileCors(model.cors, parentCors);
@@ -205,7 +208,7 @@ const compileEndpointModel = (model, parent) => {
 function isRealTime(model) {
   const realTime = model.realTime;
   const fields   = Object.entries(model);
-  
+
   if ((model['auth']['realTime']) && realTime && (realTime['connect'].length > 0 || realTime['disconnect'].length > 0 || realTime['message'].length > 0)) {
     return true;
   }

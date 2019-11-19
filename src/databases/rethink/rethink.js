@@ -416,7 +416,7 @@ class Rethink {
   /************
   Observe: Allow to get changes on a selection in realtime
   */
-  async observe(collection, query = {}, socket, callback) {
+  async observe(collection, query = {}, params, socket, callback) {
     const model = this.models[collection]['schema'];
 
     var filters = [];
@@ -435,7 +435,18 @@ class Rethink {
       }
     }
 
-    if (filters.length > 0) {
+    if (params.id) {
+      await this.database.table(collection)
+        .get(params.id)
+        .changes()
+        .run(function(err, iterator) {
+          iterator.each(function (err, item) {
+            callback(socket, item);
+          });
+        });
+    }
+
+    else if (filters.length > 0) {
       for (let i = 1; i < filters.length; i++) {
         filters[0] = filters[0].and(filters[i]);
       }
@@ -449,7 +460,7 @@ class Rethink {
         });
     }
 
-    if (Object.entries(query).length === 0) {
+    else {
       await this.database.table(collection)
         .changes()
         .run(function(err, iterator) {
