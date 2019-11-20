@@ -321,8 +321,8 @@ describe('ApiModel test suite', () => {
   it('Test adding multiple handler at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function getBrand1() {};
-    function getBrand2() {};
+    function getBrand1() {}
+    function getBrand2() {}
 
     apiModel.addHandler('/cars/brand', 'GET', [getBrand1, getBrand2]);
 
@@ -344,8 +344,8 @@ describe('ApiModel test suite', () => {
   it('Test adding multiple filter at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function filterBrand1() {};
-    function filterBrand2() {};
+    function filterBrand1() {}
+    function filterBrand2() {}
 
     apiModel.addFilter('/cars/brand', 'POST', [filterBrand1, filterBrand2]);
 
@@ -464,7 +464,7 @@ describe('ApiModel test suite', () => {
   it('Test adding one policy to auth at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function policy() {};
+    function policy() {}
 
     apiModel.addPolicies('/cars/user', policy);
 
@@ -484,8 +484,8 @@ describe('ApiModel test suite', () => {
   it('Test adding one policy to auth at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function policy1() {};
-    function policy2() {};
+    function policy1() {}
+    function policy2() {}
 
     apiModel.addPolicies('/cars/user', [policy1, policy2]);
 
@@ -505,7 +505,7 @@ describe('ApiModel test suite', () => {
   it('Test adding a new connect realTime handler at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function doSomeConnection() {};
+    function doSomeConnection() {}
 
     apiModel.addRealTimeHandler('/cars/user', {connect: doSomeConnection});
 
@@ -520,8 +520,8 @@ describe('ApiModel test suite', () => {
   it('Test adding multiple connect realTime handler at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function doSomeConnection1() {};
-    function doSomeConnection2() {};
+    function doSomeConnection1() {}
+    function doSomeConnection2() {}
 
     apiModel.addRealTimeHandler('/cars/user', {connect: [doSomeConnection1, doSomeConnection2]});
 
@@ -536,13 +536,13 @@ describe('ApiModel test suite', () => {
   it('Test adding multiple connect, message and disconnect realTime handler at route in the api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    function doSomeConnection1() {};
-    function doSomeConnection2() {};
+    function doSomeConnection1() {}
+    function doSomeConnection2() {}
 
-    function doSomeMessage1() {};
-    function doSomeMessage2() {};
+    function doSomeMessage1() {}
+    function doSomeMessage2() {}
 
-    function doSomeDisconnection() {};
+    function doSomeDisconnection() {}
 
     apiModel.addRealTimeHandler('/cars/user', {connect:    [doSomeConnection1, doSomeConnection2],
                                                message:    [doSomeMessage1, doSomeMessage2],

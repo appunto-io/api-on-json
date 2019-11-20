@@ -102,11 +102,6 @@ class ApiModel {
   toServer(env) {
     const compiled = this.get();
 
-    if (compiled.hasRealtime && (env.db && typeof env.db.observe !== "function")) {
-      console.warn('The database you are using can\'t use realTime');
-      compiled.hasRealtime = false;
-    }
-
     return new Server(compiled, env);
   }
 }

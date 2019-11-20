@@ -1,13 +1,13 @@
 const io  = require('socket.io');
 const jwt = require('jsonwebtoken');
 
-function createRegExp(name, subNamespaces, regex = '^') {
-  var regs    = [];
+function createRegExp(name, subNamespaces, regex = '^', paramNames = []) {
+  let regs = [];
 
   if (name !== '') {
     if (name.includes(':')) {
       regex = regex + '/([A-Za-z0-9-]+)';
-      var nameId = name.split(':')[1];
+      paramNames = [...paramNames, name.split(':')[1]];
     }
     else {
       regex = regex + name;
@@ -20,35 +20,35 @@ function createRegExp(name, subNamespaces, regex = '^') {
       regexp : new RegExp(regex + '$'),
       auth,
       realTime,
-      nameId}
-    );
+      paramNames
+    });
   }
 
   Object.entries(subNamespaces).forEach(([element, content]) => {
     if (element.startsWith('/')) {
-      regs = [...regs, ...createRegExp(element, content, regex)]
+      regs = [...regs, ...createRegExp(element, content, regex, paramNames)]
     }
   });
 
   return regs;
 }
 
-async function execConnectHandlers(regExp, namesId, socket, handlers, env) {
-  var roomId    = 0;
-  var params    = {};
+async function connectCallback(regExp, paramNames, socket, handlers, env) {
+  let roomId    = 0;
+  let params    = {};
   const paths   = socket.nsp.name;
 
-  var path = paths.split('/')
+  let path = paths.split('/')
     .map(v => v.trim())
     .filter(v => v !== '')[0];
 
-  var ids = regExp.exec(paths);
+  let ids = regExp.exec(paths);
 
   for (let index = 1; index < ids.length; index++) {
-    params[namesId[index - 1]] = ids[index];
+    params[paramNames[index - 1]] = ids[index];
   }
 
-  // LINT
+  /* eslint no-unused-vars: 0 */
   const { EIO, transport, t, b64, ...sanitizedQuery } = socket.handshake.query;
 
   socket.join(roomId); //create a unique room for the socket
@@ -70,7 +70,7 @@ async function execConnectHandlers(regExp, namesId, socket, handlers, env) {
   );
 }
 
-async function connectCallback(regExp, namesId, socket, auth, handlers, env) {
+async function realTimeHandling(regExp, paramNames, socket, auth, handlers, env) {
   socket.of(regExp).on('connection', function (socket) {
     if (!auth) {
       socket.emit('unauthorized', {
@@ -118,12 +118,12 @@ async function connectCallback(regExp, namesId, socket, auth, handlers, env) {
 
         if (socket.authenticated) {
           socket.emit('succeed');
-          execConnectHandlers(regExp, namesId, socket, handlers, env);
+          connectCallback(regExp, paramNames, socket, handlers, env);
         }
       });
     }
     else {
-      execConnectHandlers(regExp, namesId, socket, handlers, env);
+      connectCallback(regExp, paramNames, socket, handlers, env);
     }
 
     /*******
@@ -151,27 +151,8 @@ function realtimeHandlers(apiModel, httpServer, env) {
 
   const realTimeDefs = createRegExp('', apiModel);
 
-  var namesId = [];
-  var reg  = '';
-
   realTimeDefs.forEach(
-    ({regexp, auth, realTime, nameId}) => {
-      if (reg === '') {
-        reg = regexp.toString().split('$')[0];
-      }
-
-      if (regexp.toString().includes(reg)) {
-        if (nameId) {
-          namesId.push(nameId);
-        }
-      }
-      else {
-        namesId = [];
-        reg = regexp.toString().split('$')[0];
-      }
-
-      return connectCallback(regexp, namesId, socket, auth, realTime, env);
-    }
+    ({regexp, auth, realTime, paramNames}) => realTimeHandling(regexp, paramNames, socket, auth, realTime, env)
   );
 }
 

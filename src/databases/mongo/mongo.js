@@ -146,6 +146,8 @@ class Mongo {
 
   async readMany(collection, query = {}) {
     const Model = await this.getModel(collection);
+
+    /* eslint no-unused-vars: 0 */
     let { page, pageSize, sort, order, cursor, filter, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
@@ -286,7 +288,8 @@ class Mongo {
   }
 
   async observe() {
-    
+    console.warn('The database you are using can\'t use realTime');
+    return this;
   }
 }
 
