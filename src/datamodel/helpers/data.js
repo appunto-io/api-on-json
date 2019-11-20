@@ -54,7 +54,7 @@ Create PATCH callback
 const createPatchCallback = (name) => async (data = {}, flow, meta) => {
   const { emit = ()=>{}} = meta.environment || {};
   const { db } = meta.environment;
-  const id   = meta.request.params['id'];
+  const id     = meta.request.params['id'];
 
   try {
     const saved = await db.patch(name, id, data);

@@ -6,7 +6,134 @@
 npm install @appunto/api-on-json
 ```
 
-# Library usage examples
+# Introduction
+
+Create an API quickly
+
+## Structures
+
+The idea behind API on JSON is to build an entire API service via a JSON configuration file. JSON files can be used to configure API endpoints and datamodel.
+
+The library is structured around three main classes: `Server`, `ApiModel` and `DataModel`.
+
+`Server` creates an ExpressJS server.
+
+`ApiModel` describes the structure of the API. This is passed to server to create API routes.
+
+`DataModel` is used for the particular (yet common) case where you need to create a API that access data stored in a DB.
+
+## Example
+```js
+const { DataModel } = require('@appunto/rigatoni');
+const { Mongo }     = require('@appunto/rigatoni');
+
+const mongoUri = 'http://localhost:27017';
+
+const connectionOptions = { useNewUrlParser : true ,
+                  useUnifiedTopology: true,
+                  useFindAndModify: false};
+
+const db = new Mongo(mongoUri, options);
+
+const opt = {
+  realTime: true
+};
+
+const dataModel = new DataModel(/* your dataModel in JSON */);
+
+await db.connect();
+await db.init(dataModel.get());
+
+const apiModel = dataModel.toApi(opt);
+
+const env = {
+  db        : db,
+  jwtSecret : "--your-jwt-secret-key--"
+}
+
+const server = apiModel.toServer(env);
+await server.listen(8081);
+```
+
+# Library API
+
+# Server
+
+## `new Server(apiModel, [environment])`
+
+Creates a new `Server` instance. In practice you will probably prefer to use `ApiModel.toServer(...)`.
+
+### Aguments
+
+- `apiModel` is a instance of `ApiModel`
+- `environment` (optional) is an object that can be used to hold environment variables. `environment` object is passed to all Api handlers (see XXX)
+
+### Example
+
+```js
+import { Server } from '@appunto/api-on-json';
+
+const apiModel = new ApiModel(/* see ApiModel doc */);
+const environment = {
+  VARIABLE : 'value'
+};
+
+const server = new Server(apiModel, environment);
+
+```
+
+## `Server.listen(port)`
+
+Starts a server.
+
+### Aguments
+
+- `port` the port to which the server listen to
+
+### Example
+
+```js
+const server = new Server(apiModel, environment);
+server.listen(80);
+```
+
+## `Server.close()`
+
+Stops a server.
+
+### Aguments
+
+### Example
+
+```js
+const server = new Server(apiModel, environment);
+server.listen(80);
+server.close();x
+```
+
+# Api
+
+## JSON model
+
+JSON Api model describes the behaviour of the API.
+
+A JSON Api model is composed by a set of route definitions
+
+```js
+const model = {
+  '/route1' : {/* definition */},
+  '/route2' : {/* definition */},
+};
+```
+
+Each route should begin with a `'/'`.
+
+Route can contain :
+
+- `isApiModel`
+- `handlers`
+-
+
 
 ## Database
 
