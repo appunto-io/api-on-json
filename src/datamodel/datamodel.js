@@ -17,7 +17,7 @@ class DataModel {
           this.models = [...this.models, ...model.models];
         }
         else {
-          this.models.push(compileDataModel(model))
+          this.models.push(model)
         }
       }
     );
@@ -69,26 +69,29 @@ class DataModel {
     this.addCollection(collection, options);
   }
 
+  setType(collection, field, type) {
+    this.addField(collection, field, {type: type})
+  }
+
+  setRequired(collection, field, value) {
+    this.addField(collection, field, {required: !!value})
+  }
+
   toApi(options) {
-    const merged = this.models.reduce(
-      (reduced, model) => mergeModels(reduced, model), {}
-    );
+    const merged = this.get();
 
-    if (!options.realTime) {
-      const apiModelFromDataModel = createApiFromDataModel(merged);
-      const dataModelLibrary      = createLibraryFromDataModel(merged);
+    const apiModelFromDataModel = createApiFromDataModel(merged);
+    const dataModelLibrary      = createLibraryFromDataModel(merged);
+    let hydratedApiModel        = hydrate(apiModelFromDataModel, dataModelLibrary);
 
-      const hydratedApiModel         = hydrate(apiModelFromDataModel, dataModelLibrary);
+    if (options.realTime) {
+      const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged, options.realTime);
 
-      return new ApiModel(hydratedApiModel);
+      const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
+      const dataModelLibrary         = createLibraryFromDataModel(merged);
+      const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(merged);
+      hydratedApiModel               = hydrate(apiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
     }
-    const apiModelFromDataModel         = createApiFromDataModel(merged);
-    const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged, options.realTime);
-
-    const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);
-    const dataModelLibrary         = createLibraryFromDataModel(merged);
-    const realTimeDataModelLibrary = createRealtimeLibraryFromDataModel(merged);
-    const hydratedApiModel         = hydrate(apiModel, {...dataModelLibrary, ...realTimeDataModelLibrary});
 
     return new ApiModel(hydratedApiModel);
   }

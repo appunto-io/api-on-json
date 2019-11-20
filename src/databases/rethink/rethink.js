@@ -218,7 +218,7 @@ class Rethink {
   */
   async readMany(collection, query = {}) {
     const model = this.models[collection]['schema'];
-    let { page, pageSize, sort, order, cursor, ...restOfquery } = query;
+    let { page, pageSize, sort, order, cursor, q, ...restOfquery } = query;
 
     order      = (order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
     sort       = sort ? sort : [];
@@ -250,6 +250,19 @@ class Rethink {
     }
     else {
       filters[0] = true;
+    }
+
+    if (q) {
+      Object.entries(model).forEach(([fieldName, fieldDef]) => {
+        if (fieldDef.type === 'String') {
+          if (typeof filters[0] === 'boolean') {
+            filters[0] = this.database.row(fieldName).match(q);
+          }
+          else {
+            filters[0] = filters[0].or(this.database.row(fieldName).match(q))
+          }
+        }
+      });
     }
 
     var elem_sort;

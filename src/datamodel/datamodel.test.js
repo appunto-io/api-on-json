@@ -35,10 +35,6 @@ describe('Field type declarations', () => {
         schema: {
           'brand' : {type : 'String', 'required' : true},
           'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
@@ -52,10 +48,6 @@ describe('Field type declarations', () => {
         schema: {
           'brand' : {type : 'String', 'required' : true},
           'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
@@ -63,10 +55,6 @@ describe('Field type declarations', () => {
       'apple': {
         schema: {
           'color' : {type : 'String', 'required' : true}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
@@ -82,10 +70,6 @@ describe('Field type declarations', () => {
         schema: {
           'brand' : {type : 'String', 'required' : true},
           'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
@@ -117,14 +101,9 @@ describe('Field type declarations', () => {
         schema: {
           'brand' : {type : 'String', 'required' : true},
           'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
-    expect(dataModel.models[0]).to.be.deep.equal(merged);
 
     dataModel.addDataModel(model2);
     const merged2 = dataModel.get();
@@ -162,10 +141,6 @@ describe('Field type declarations', () => {
         schema: {
           'brand' : {type : 'String', 'required' : true},
           'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
@@ -208,10 +183,6 @@ describe('Field type declarations', () => {
         schema: {
           'brand' : {type : 'String', 'required' : true},
           'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
         }
       }
     });
@@ -242,11 +213,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand' : {type : 'String', 'required' : true},
-          'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
+          'model' : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         }
       }
     });
@@ -258,7 +226,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand'  : {type : 'String', 'required' : true},
-          'model'  : {type: 'String', 'default' : 'Default Model'}
+          'model'  : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         },
         options: {
           'timestamps' : true,
@@ -286,11 +255,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand' : {type : 'String', 'required' : true},
-          'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
+          'model' : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         }
       }
     });
@@ -302,7 +268,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand'  : {type : 'String', 'required' : true},
-          'model'  : {type: 'String', 'default' : 'Default Model'}
+          'model'  : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         },
         options: {
           'timestamps' : true,
@@ -326,11 +293,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand' : {type : 'String', 'required' : true},
-          'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
+          'model' : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         }
       }
     });
@@ -342,7 +306,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand'  : {type : 'String', 'required' : true},
-          'model'  : {type: 'String', 'default' : 'Default Model'}
+          'model'  : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         },
         options: {
           'timestamps' : true,
@@ -368,11 +333,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand' : {type : 'String', 'required' : true},
-          'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
+          'model' : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         }
       }
     });
@@ -397,11 +359,8 @@ describe('Field type declarations', () => {
       'cars': {
         schema: {
           'brand' : {type : 'String', 'required' : true},
-          'model' : {type: 'String', 'default' : 'Default Model'}
-        },
-        options: {
-          'timestamps' : true,
-          'typeKey'   : 'type'
+          'model' : {type: 'String', 'default' : 'Default Model'},
+          'serial' : {type : 'String', 'required' : true}
         }
       }
     });

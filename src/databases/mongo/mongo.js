@@ -148,7 +148,7 @@ class Mongo {
     const Model = await this.getModel(collection);
 
     /* eslint no-unused-vars: 0 */
-    let { page, pageSize, sort, order, cursor, filter, ...restOfQuery } = query;
+    let { page, pageSize, sort, order, cursor, filter, q, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
@@ -193,6 +193,16 @@ class Mongo {
             decodeURIComponent(values);
             mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
       });
+    }
+
+    if (q) {
+      const searchArray = [];
+      Object.entries(Model.schema.obj).forEach(([fieldName, fieldDef]) => {
+        if (fieldDef.type === 'String') {
+            searchArray.push({[fieldName]: {$regex: `.*${q}.*` }});
+          }
+      });
+      mongoQuery = {$or: searchArray};
     }
 
     /*
