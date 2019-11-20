@@ -99,6 +99,33 @@ class ApiModel {
     }
   }
 
+  addConnectHandler(route, connect) {
+    var obj = {};
+    connect = Array.isArray(connect) ? connect : [connect];
+
+    obj['connect'] = connect;
+
+    this.addRoute(route, {realTime : obj});
+  }
+
+  addMessageHandler(route, message) {
+    var obj = {};
+    message = Array.isArray(message) ? message : [message];
+
+    obj['message'] = message;
+
+    this.addRoute(route, {realTime : obj});
+  }
+
+  addDisconnectHandler(route, disconnect) {
+    var obj = {};
+    disconnect = Array.isArray(disconnect) ? disconnect : [disconnect];
+
+    obj['disconnect'] = disconnect;
+
+    this.addRoute(route, {realTime : obj});
+  }
+
   toServer(env) {
     const compiled = this.get();
 

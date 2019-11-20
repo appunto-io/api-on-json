@@ -103,7 +103,7 @@ async function databaseTestSuite() {
           model : 'Model S',
           serial : 'AAAAA',
         });
-        
+
         expect(response).to.have.status(200);
         expect(response.body.brand).to.be.equal('Tesla');
         expect(response.body.model).to.be.equal('Model S');
@@ -328,11 +328,11 @@ async function databaseTestSuite() {
         expect(response).to.have.status(200);
         expect(response.body.data).to.be.an('array');
         if (response.body.data[0]) {
-          expect(response.body.data[0].name < createdDocuments[1].name).to.be.true;
+          expect(response.body.data[0].name <= createdDocuments[1].name).to.be.true;
         }
 
         if (response.body.data[1]) {
-          expect(response.body.data[1].name < response.body.data[0].name).to.be.true;
+          expect(response.body.data[1].name <= response.body.data[0].name).to.be.true;
         }
       });
     });

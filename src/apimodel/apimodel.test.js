@@ -556,6 +556,29 @@ describe('ApiModel test suite', () => {
     });
   });
 
+  it('Test adding multiple connect, message and disconnect realTime handler at route in the api model', () => {
+    const apiModel = new ApiModel({'/cars' : {}});
+
+    function doSomeConnection1() {}
+    function doSomeConnection2() {}
+
+    function doSomeMessage1() {}
+    function doSomeMessage2() {}
+
+    function doSomeDisconnection() {}
+
+    apiModel.addConnectHandler('/cars/user', [doSomeConnection1, doSomeConnection2]);
+    apiModel.addMessageHandler('/cars/user', [doSomeMessage1, doSomeMessage2]);
+    apiModel.addDisconnectHandler('/cars/user', doSomeDisconnection);
+
+    const merged = apiModel.get();
+    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+      connect:    [doSomeConnection1, doSomeConnection2],
+      message:    [doSomeMessage1, doSomeMessage2],
+      disconnect: [doSomeDisconnection]
+    });
+  });
+
   it('Test creating a server from a api model', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
