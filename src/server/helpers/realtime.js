@@ -82,6 +82,16 @@ async function realTimeHandling(regExp, paramNames, socket, auth, handlers, env)
 
       socket.emit('need authentication');
 
+      var t = setTimeout(function () {
+        if (!socket.authenticated) {
+          socket.emit('unauthorized', {
+            message: 'failed to authenticate'
+          });
+
+          socket.disconnect(); //if the user takes to much time to authenticate
+        }
+      }, 5000);
+
       socket.on('authenticate', function (data) {
         if (data) {
           const token = data.token;
@@ -105,19 +115,10 @@ async function realTimeHandling(regExp, paramNames, socket, auth, handlers, env)
             }
           }
         }
-
-        setTimeout(function () {
-          if (!socket.authenticated) {
-            socket.emit('unauthorized', {
-              message: 'failed to authenticate'
-            });
-
-            socket.disconnect(); //if the user takes to much time to authenticate
-          }
-        }, 5000);
-
+        
         if (socket.authenticated) {
           socket.emit('succeed');
+          clearTimeout(t);
           connectCallback(regExp, paramNames, socket, handlers, env);
         }
       });
