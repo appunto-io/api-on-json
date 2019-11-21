@@ -174,7 +174,9 @@ function compileSchemaDeclaration(schema, typeKey) {
  * @return {Object}         - Parsed options declaration object
  */
 function compileOptionsDeclaration(options) {
-  let {timestamps, typeKey} = options;
+  let {timestamps, typeKey, searchableFields} = options;
+
+  searchableFields = Array.isArray(searchableFields) ? searchableFields : [];
 
   /*
   Compile timestamps option
@@ -199,7 +201,8 @@ function compileOptionsDeclaration(options) {
 
   return {
     timestamps,
-    typeKey
+    typeKey,
+    searchableFields
   };
 }
 

@@ -73,103 +73,110 @@ class Rethink {
   }
 
   async init(dataModel) {
+    if (!this.database) {
+      console.error("Trying to call Rethink.init() without connection: did you forget to call Rethink.connect()?");
+      return;
+    }
+
     const dbList = await this.database.dbList().run();
 
     if (!dbList.includes(this.dbName)) {
       await this.database.dbCreate(this.dbName).run();
     }
 
-    var models = await dataModelToRethink(dataModel, this.database);
-    this.models = models;
+    this.models = await dataModelToRethink(dataModel, this.database);
   }
 
-  async isDataValid(collection, model, options, data) {
-    const obj = {};
 
-    const fields = Object.entries(model);
+  async validate(data, collection, model) {
+    const dbRequests = [];
+    const { schema, options } = model;
 
-    for (var i = 0; i < fields.length; i++) {
-      const field = fields[i][0];
-      var spec  = fields[i][1];
+    const validateRec = (data, spec) => {
+      const obj = {};
 
-      if (Array.isArray(spec) && spec[0].type) {
-        spec = spec[0];
-      }
-
-      if (Array.isArray(spec)) {
-        if (field in data) {
-          if (!Array.isArray(data[field])) {
-            let message = `Bad request: ${field} is expected to be an array`;
+      Object.entries(spec).forEach(([fieldName, fieldOptions]) => {
+        if (Array.isArray(fieldOptions)) {
+          if (!Array.isArray(data[fieldName])) {
+            const message = `Bad request: ${fieldName} is expected to be an array`;
 
             console.error(message);
-            throw new Error(message);
+            throw new Error(message)
           }
-          obj[field] = [];
-          for (let index = 0; index < spec.length; index++) {
-            data[field].forEach(async (elem) => {
-              const validated = await this.isDataValid(collection, spec[index], options, elem)
-              obj[field].push(validated);
-            });
-          }
+
+          data[fieldName].forEach(elem => {
+            const validatedElem = validateRec(elem, fieldOptions[0])
+            obj[fieldName].push(validatedElem);
+          });
         }
-      }
-      else {
+        else {
+          let { type, required, unique, default: defaultValue } = fieldOptions;
 
-        let { type, required, unique, default: defaultValue } = spec;
+          required = !!required;
+          unique   = !!unique;
+          type     = type.toLowerCase();
 
-        required      = !!required;
-        unique        = !!unique;
-        type          = type.toLowerCase();
+          if (fieldName in data) {
+            if (type !== 'string' && type !== 'id' && typeof data[fieldName] !== type) {
+              const dataType = findType(data, fieldName);
+              if (type !== dataType) {
+                const message = `Bad request: ${fieldName} is expected to be a ${type} and you entered a ${dataType}`;
 
-        if (field in data) {
-          if (type !== 'string' && type !== 'id' && typeof data[field] !== type) {
-            const dataType = findType(data, field);
-            if (type !== dataType) {
-              let message = `Bad request: ${field} is expected to be a ${type} and you entered a ${dataType}`;
+                console.error(message);
+                throw new Error(message);
+              }
+            }
+            obj[fieldName] = data[fieldName];
+          }
+          else if ('default' in fieldOptions) {
+              obj[fieldName] = defaultValue;
+          }
+
+          if (required) {
+            if (!obj[fieldName]) {
+              const message = `This field: ${fieldName} is required.`;
 
               console.error(message);
               throw new Error(message);
             }
           }
-          obj[field] = data[field];
-        }
-        else if ('default' in spec) {
-            obj[field] = defaultValue;
-        }
 
-        if (required) {
-          if (!obj[field]) {
-            const message = `This field: ${field} is required.`;
-
-            console.error(message);
-            throw new Error(message);
+          if (unique && obj[fieldName]) {
+            dbRequests.push(this.database.table(collection).getAll(obj[fieldName], { index: fieldName }).run());
           }
         }
+      });
 
-        if (unique && obj[field]) {
-
-          var fieldExist = [];
-          if (obj[field]) {
-            fieldExist = await this.database.table(collection).getAll(obj[field], { index: field }).run();
-          }
-          if (fieldExist.length > 0) {
-            const message = `This field: ${field} already exist with this value: ${obj[field]} and is meant to be unique.`;
-
-            console.error(message);
-            throw new Error(message);
-          }
-        }
-      }
+      return obj;
     }
+
+    const validated = validateRec(data, schema);
 
     if (options['timestamps']) {
       const createdAt = options['timestamps']['createdAt'] ? options['timestamps']['createdAt'] : 'createdAt';
       const updatedAt = options['timestamps']['updatedAt'] ? options['timestamps']['updatedAt'] : 'updatedAt';
-      obj[createdAt] = new Date();
-      obj[updatedAt] = new Date();
+      validated[createdAt] = new Date();
+      validated[updatedAt] = new Date();
     }
 
-    return obj;
+    if(dbRequests.length) {
+      const loadedFields = await Promise.all(dbRequests);
+
+      const unique = loadedFields.reduce(
+        (unique, next) => next.length === 0 && unique,
+        true
+      )
+
+
+      if (!unique) {
+        const message = `Duplicate unique field.`;
+
+        console.error(message);
+        throw new Error(message);
+      }
+    }
+
+    return validated;
   }
 
   /*------------------------------------------------------------
@@ -181,11 +188,10 @@ class Rethink {
   Create: Handle POST request
   */
   async create(collection, data = {}) {
-
-    const model   = this.models[collection]['schema'];
+    const model   = this.models[collection];
     const options = this.models[collection]['options'];
 
-    var obj = await this.isDataValid(collection, model, options, data);
+    var obj = await this.validate(data, collection, model);
 
     var changes = await this.database.table(collection)
       .changes({ includeInitial: false })
@@ -218,6 +224,8 @@ class Rethink {
   */
   async readMany(collection, query = {}) {
     const model = this.models[collection]['schema'];
+    const options = this.models[collection]['options'];
+
     let { page, pageSize, sort, order, cursor, q, ...restOfquery } = query;
 
     order      = (order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
@@ -254,7 +262,7 @@ class Rethink {
 
     if (q) {
       Object.entries(model).forEach(([fieldName, fieldDef]) => {
-        if (fieldDef.type === 'String') {
+        if (options.searchableFields.includes(fieldName)) {
           if (typeof filters[0] === 'boolean') {
             filters[0] = this.database.row(fieldName).match(q);
           }
@@ -376,10 +384,10 @@ class Rethink {
   Update: Handle PUT request
   */
   async update(collection, id, data) {
-    const model   = this.models[collection]['schema'];
+    const model   = this.models[collection];
     const options = this.models[collection]['options'];
 
-    var obj = await this.isDataValid(collection, model, options, data);
+    var obj = await this.validate(data, collection, model);
     obj.id  = id;
 
     if (options['timestamps']) {
@@ -403,13 +411,12 @@ class Rethink {
   Patch: Handle PATCH request
   */
   async patch(collection, id, data) {
-    const model   = this.models[collection]['schema'];
+    const model   = this.models[collection];
     const options = this.models[collection]['options'];
 
-    var obj = await this.isDataValid(collection, model, options, data);
+    var obj = await this.validate(data, collection, model);
 
     if (options['timestamps']) {
-
       const createdAt = options['timestamps']['createdAt'] ? options['timestamps']['createdAt'] : 'createdAt';
       const updatedAt = options['timestamps']['updatedAt'] ? options['timestamps']['updatedAt'] : 'updatedAt';
       obj[createdAt] = obj[createdAt] ? obj[createdAt] : new Date();

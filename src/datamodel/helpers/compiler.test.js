@@ -281,14 +281,14 @@ describe('JSON data model compiler', () => {
       expect(compileCollection({
         schema : {field1:"String", field2:{type:"Number"}}
       })).to.deep.equal({
-        options : {typeKey:"type", timestamps : true},
+        options : {typeKey:"type", timestamps : true, searchableFields : []},
         schema  : {field1 : {type:"String"}, field2:{type:"Number"}}
       });
       expect(compileCollection({
         options : {typeKey : "__type__"},
         schema  : {field1:"String", field2:{type:"Number"}}
       })).to.deep.equal({
-        options : {typeKey:"__type__", timestamps : true},
+        options : {typeKey:"__type__", timestamps : true, searchableFields : []},
         schema  : {field1 : {__type__:"String"}, field2:{type:{__type__:"Number"}}}
       });
     });
@@ -305,7 +305,8 @@ describe('JSON data model compiler', () => {
         },
         "login" : {
           options : {
-            timestamps : false
+            timestamps : false,
+            searchableFields : []
           },
           schema : {
             "token" : "String",
@@ -316,7 +317,8 @@ describe('JSON data model compiler', () => {
         "user" : {
           options : {
             timestamps : true,
-            typeKey : 'type'
+            typeKey : 'type',
+            searchableFields : []
           },
           schema : {
             "username" : {type : "String"},
@@ -326,7 +328,8 @@ describe('JSON data model compiler', () => {
         "login" : {
           options : {
             timestamps : false,
-            typeKey : 'type'
+            typeKey : 'type',
+            searchableFields : []
           },
           schema : {
             "token" : {type : "String"},

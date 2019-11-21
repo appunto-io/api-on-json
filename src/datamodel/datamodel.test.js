@@ -117,7 +117,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       },
       'apple': {
@@ -126,7 +127,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       }
     });
@@ -159,7 +161,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       },
       'users': {
@@ -168,7 +171,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       }
     });
@@ -199,7 +203,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       }
     });
@@ -231,7 +236,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       },
       'users': {
@@ -240,7 +246,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       }
     });
@@ -273,7 +280,8 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       }
     });
@@ -311,14 +319,16 @@ describe('Field type declarations', () => {
         },
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       },
       'apple': {
         schema: {},
         options: {
           'timestamps' : true,
-          'typeKey'   : 'type'
+          'typeKey'   : 'type',
+          'searchableFields' : []
         }
       }
     });
