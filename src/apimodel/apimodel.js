@@ -28,55 +28,77 @@ class ApiModel {
         }
       }
     );
+
+    return this;
   }
 
-  addRoute(route, definition) {
-    let pathParts = route.split('/')
-      .map(v => v.trim())
-      .filter(v => v !== '');
+  addRoute(route, definition = {}) {
+    if (route) {
+      let pathParts = route.split('/')
+        .map(v => v.trim())
+        .filter(v => v !== '');
 
-    if (!pathParts.length) {return;}
+      if (!pathParts.length) {return;}
 
-    function iterate(pathParts, model) {
-      const part    = pathParts.pop();
-      const partDef = {[`/${part}`] : model};
+      function iterate(pathParts, model) {
+        const part    = pathParts.pop();
+        const partDef = {[`/${part}`] : model};
 
-      return pathParts.length ? iterate(pathParts, partDef) : partDef
+        return pathParts.length ? iterate(pathParts, partDef) : partDef
+      }
+
+      const model = iterate(pathParts, definition);
+
+      this.models.push(model);
     }
 
-    const model = iterate(pathParts, definition);
-
-    this.models.push(model);
+    return this;
   }
 
   removeRoute(route) {
-    this.addRoute(route, null);
+    if (route) {
+      this.addRoute(route, null);
+    }
+
+    return this;
   }
 
   addHandler(route, method, handler) {
-    var obj = {};
-    handler = Array.isArray(handler) ? handler : [handler];
+    if (route && method && handler) {
+      var obj = {};
+      handler = Array.isArray(handler) ? handler : [handler];
 
-    obj[method] = handler;
+      obj[method] = handler;
 
-    this.addRoute(route, {handlers : obj});
+      this.addRoute(route, {handlers : obj});
+    }
+
+    return this;
   }
 
   addFilter(route, method, filter) {
-    var obj = {};
-    filter = Array.isArray(filter) ? filter : [filter];
+    if (method && filter) {
+      var obj = {};
+      filter = Array.isArray(filter) ? filter : [filter];
 
-    obj[method] = filter;
+      obj[method] = filter;
 
-    this.addRoute(route, {filters : obj});
+      this.addRoute(route, {filters : obj});
+    }
+
+    return this;
   }
 
   setAuth(route, auth) {
     this.addRoute(route, {auth});
+
+    return this;
   }
 
   setRequiresAuth(route, value) {
     this.addRoute(route, {auth : {requiresAuth : !!value}});
+
+    return this;
   }
 
   setRequiresRoles(route, roles) {
@@ -84,6 +106,8 @@ class ApiModel {
       roles = Array.isArray(roles) ? roles : [roles];
       this.addRoute(route, {auth : {requiresAuth: true, requiresRoles: roles}});
     }
+
+    return this;
   }
 
   addPolicies(route, policies) {
@@ -91,12 +115,16 @@ class ApiModel {
       policies = Array.isArray(policies) ? policies : [policies];
       this.addRoute(route, {auth: {policies}});
     }
+
+    return this;
   }
 
   addRealTimeHandler(route, realTimeHandlers) {
     if (realTimeHandlers) {
       this.addRoute(route, {realTime: realTimeHandlers});
     }
+
+    return this;
   }
 
   addConnectHandler(route, connect) {
@@ -106,6 +134,8 @@ class ApiModel {
     obj['connect'] = connect;
 
     this.addRoute(route, {realTime : obj});
+
+    return this;
   }
 
   addMessageHandler(route, message) {
@@ -115,6 +145,8 @@ class ApiModel {
     obj['message'] = message;
 
     this.addRoute(route, {realTime : obj});
+
+    return this;
   }
 
   addDisconnectHandler(route, disconnect) {
@@ -124,6 +156,8 @@ class ApiModel {
     obj['disconnect'] = disconnect;
 
     this.addRoute(route, {realTime : obj});
+
+    return this;
   }
 
   toServer(env) {

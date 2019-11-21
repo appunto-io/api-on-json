@@ -70,8 +70,11 @@ class Mongo {
   }
 
   async init(dataModel) {
-    const mongooseModels = dataModelToMongoose(dataModel, this.database);
-    this.models = mongooseModels;
+    if (!this.database) {
+      console.error("Trying to call Mongo.init() without connection: did you forget to call Mongo.connect()?");
+      return;
+    }
+    this.models = dataModelToMongoose(dataModel, this.database);
   }
 
   async getModel(collection) {
@@ -82,13 +85,7 @@ class Mongo {
       throw new Error(message);
     }
 
-    var Model;
-    if (this.models) {
-      Model = this.models[collection];
-    }
-    else {
-      Model = this.database.model(collection);
-    }
+    var Model = this.models ? this.models[collection] : this.database.model(collection);
 
     if(!Model) {
       const message = `Collection ${collection} is not defined in the database`;
@@ -199,7 +196,7 @@ class Mongo {
       const searchArray = [];
       Object.entries(Model.schema.obj).forEach(([fieldName, fieldDef]) => {
         if (fieldDef.type === 'String') {
-            searchArray.push({[fieldName]: {$regex: `.*${q}.*` }});
+            searchArray.push({[fieldName]: {$regex: `.*${q}.*`, $options: 'i'}});
           }
       });
       mongoQuery = {$or: searchArray};

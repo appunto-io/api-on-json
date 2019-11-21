@@ -167,7 +167,6 @@ class Rethink {
         true
       )
 
-
       if (!unique) {
         const message = `Duplicate unique field.`;
 
@@ -264,10 +263,10 @@ class Rethink {
       Object.entries(model).forEach(([fieldName, fieldDef]) => {
         if (options.searchableFields.includes(fieldName)) {
           if (typeof filters[0] === 'boolean') {
-            filters[0] = this.database.row(fieldName).match(q);
+            filters[0] = this.database.row(fieldName).match('(?i)' + q);
           }
           else {
-            filters[0] = filters[0].or(this.database.row(fieldName).match(q))
+            filters[0] = filters[0].or(this.database.row(fieldName).match('(?i)' + q));
           }
         }
       });
