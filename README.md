@@ -130,362 +130,168 @@ Each route should begin with a `'/'`.
 
 Route can contain :
 
-- `isApiModel`
-- `handlers`
--
+- `auth` multiple authentication rules for each method:
+  - `requiresAuth` boolean, true if an authentication is needed or else if not
+  - `requiresRoles` list of string enumerating the roles that can be authenticated
+  - `policies` list of function called at the server creation
 
 
-## Database
+- `handlers` multiple callbacks executed for each method
+- `filters` multiple callbacks executed before each method
+- `realTime` multiple handlers needed for real time api:
+  - `connect` list of function called at socket connection
+  - `message` list of function called at socket update
+  - `disconnect` list of function called at socket disconnection
 
-### Create a database
 
-```js
-const { Mongo } = require('@appunto/rigatoni');
+- `cors` multiple options pass to HelmetJS (see Helmet doc for more information)
 
-const mongoUri = 'http://localhost:27017'
-const connectionOptions = { useNewUrlParser : true ,
-                  useUnifiedTopology: true,
-                  useFindAndModify: false};
-
-const db = new Mongo(mongoUri, options);
-```
-
-### Init the database
+### Example
 
 ```js
-db.init(dataModel);
-```
-
-### Connect to the database
-
-```js
-db.connect();
-```
-
-### Do a POST request to the database
-
-```js
-db.create(collection, data);
-```
-
-### Do a GET id request to the database
-
-```js
-db.readOne(collection, id);
-```
-
-### Do a GET request with a query to the database
-
-```js
-db.readMany(collection, query);
-```
-
-### Do a PUT request to the database
-
-```js
-db.update(collection, id, data);
-```
-
-### Do a PATCH request to the database
-
-```js
-db.patch(collection, id, data);
-```
-
-### Do a DELETE request to the database
-
-```js
-db.remove(collection, id);
-```
-
-### Activate the realtime in the database
-
-```js
-db.observe(collection, query, socket, callback);
-```
-## DataModel
-
-```js
-const { Server, DataModel, Mongo } = require('@appunto/rigatoni');
-
-const dataModel = new DataModel({
-  'example' : {
-    options : {
-      timestamps : false
-    },
-    schema : {
-      'name' : 'String'
-    }
-  }
-});
-
-const apiModel = dataModel.toApi();
-
-const env = {
-  db : new Mongo(connectionOptions)    
-};
-
-const server = apiModel.toServer(env);
-server.listen(port);
-```
-
-### Multiple data model definitions
-
-```js
-const { Server, DataModel, Mongo } = require('@appunto/rigatoni');
-
-const dm1   = new DataModel({model1: {}});
-const dm2   = new DataModel({model2: {}});
-const dm3n4 = new DataModel({model3: {}}, {model4: {}});
-const mergedDataModel = new DataModel(dm1, dm2, dm3n4);
-
-const apiModel = mergedDataModel.toApi();
-
-const env = {
-  db,
-  secretKey
-};
-
-const server = apiModel.toServer(env);
-server.listen(port);
-```
-
-### Add a new collection
-```js
-const { Server, DataModel, Mongo } = require('@appunto/rigatoni');
-
-const dataModel = new DataModel({
-  'example' : {
-    options : {
-      timestamps : false
-    },
-    schema : {
-      'name' : 'String'
-    }
-  }
-});
-
-dataModel.addCollection(collectionName, {
-  options : {/* ... */},
-  schema  : {/* ... */}
-});
-
-const apiModel = dataModel.toApi();
-
-const env = {
-  db : new Mongo(connectionOptions)    
-};
-
-const server = apiModel.toServer(env);
-server.listen(port);
-```
-
-### Add a new field at a given collection
-```js
-const { Server, DataModel, Mongo } = require('@appunto/rigatoni');
-
-const dataModel = new DataModel({
-  'example' : {
-    options : {
-      timestamps : false
-    },
-    schema : {
-      'name' : 'String'
-    }
-  }
-});
-
-dataModel.addField(collectionName, fieldName, {
-  type     : 'String',
-  required : true
-});
-
-const apiModel = dataModel.toApi();
-
-const env = {
-  db : new Mongo(connectionOptions)    
-};
-
-const server = apiModel.toServer(env);
-server.listen(port);
-```
-
-### Add a new field at a given collection
-```js
-const { Server, DataModel, Mongo } = require('@appunto/rigatoni');
-
-const dataModel = new DataModel({
-  'example' : {
-    options : {
-      timestamps : false
-    },
-    schema : {
-      'name' : 'String'
-    }
-  }
-});
-
-dataModel.addField(collectionName, fieldName, {
-  type     : 'String',
-  required : true
-});
-
-const apiModel = dataModel.toApi();
-
-const env = {
-  db : new Mongo(connectionOptions)    
-};
-
-const server = apiModel.toServer(env);
-server.listen(port);
-```
-
-### Remove a collection
-```js
-
-dataModel.removeCollection(collectionName);
-
-```
-
-### Remove a field
-```js
-
-dataModel.removeField(collectionName, fieldName);
-
-```
-
-### Add Options
-```js
-
-dataModel.removeField(collectionName, options);
-
-```
-
-
-## ApiModel
-```js
-const { Server, ApiModel } = require('@appunto/rigatoni');
-
-const apiModel = new ApiModel({
-  '/random-numbers' : {
-    auth : {
-      'READ'  : {requiresAuth : true, requiresRoles : ['user']},
-      'WRITE' : false
+const model = {
+  '/route1' : {
+    auth     : {
+      "GET"     : {requiresAuth:false, requiresRoles:false, policies:[policy1]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:['role1'], policies:[policy1]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[policy1]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[policy1]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[policy1]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[policy1]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[policy1]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[policy1]}
     },
     handlers : {
-      'GET' : (data, flow, meta) => {return flow.continue(Math.random() * meta.env.max);}
+      "GET" : [handler1]
+    },
+    filters  : {
+      "POST" : [filter1]
+    },
+    realTime : {
+      "connect" : [connectHandler1, connectHandler2],
+      "message" : [messageHandler1, messageHandler2],
+      "disconnect" : [disconnectHandler1, disconnectHandler2]
+    },
+    cors     : {
+      methods              : "GET, HEAD, PUT, PATCH, POST, DELETE",
+      optionsSuccessStatus : 204,
+      origin               : "*",
+      preflightContinue    : false
     }
   }
-});
-
-const env = {
-  max : 10
 };
-
-const server = new Server(apiMode, env);
-server.listen();
 ```
 
 
-### ApiModel from multiple models
-```js
-const { ApiModel } = require('@appunto/rigatoni');
+## `new ApiModel(...apiModels)`
 
-const am1   = new ApiModel({model1: {}});
-const am2   = new ApiModel({model2: {}});
-const am3n4 = new ApiModel({model3: {}}, {model4: {}});
-const mergedApiModel = new ApiModel(am1, am2, am3n4);
+Creates a new `ApiModel` instance.
 
-```
+### Arguments
 
-### DataModels and Custom Api
-```js
-const { Server, DataModel, ApiModel, Mongo } = require('@appunto/rigatoni');
-
-const dm1 = new DataModel({model1});
-const dm2 = new DataModel({model2});
-const mergedDataModel = new DataModel(dm1, dm2);
+- `apiModels` 0 or more apiModels, either in JSON or of ApiModel class
 
 
-const amFromDm = mergedDataModel.toApi();
+## `ApiModel.get()`
 
-const am1 = new ApiModel({model3});
-const am2 = new ApiModel({model4});
+### Arguments
 
-const mergedApiModel = new ApiModel(amFromDm, am1, am2);
+- None
 
-```
+### Returns
 
-### Add a new route in an Api Model
-```js
-const { ApiModel } = require('@appunto/rigatoni');
-
-const apiModel = new ApiModel({model1: {}});
-
-apiModel.addRoute('/path/of/the/route', {
-  auth : {/* ... */}
-  handlers : {/* ... */}
-});
-```
-
-### Remove route in an Api Model
-```js
-const { ApiModel } = require('@appunto/rigatoni');
-
-const apiModel = new ApiModel({model1: {}});
-
-apiModel.removeRoute('/path');
-```
-
-### Add handlers in a route in an Api Model
-```js
-const { ApiModel } = require('@appunto/rigatoni');
-
-const apiModel = new ApiModel({model1: {}});
-
-apiModel.addHandlers('/path', {
-  'GET' : handler
-});
-```
-
-### Add filters in a route in an Api Model
-```js
-const { ApiModel } = require('@appunto/rigatoni');
-
-const apiModel = new ApiModel({model1: {}});
-
-apiModel.addFilters('/path', {
-  'GET' : handler
-});
-```
-
-## RealTime
-
-### Global RealTime
-```js
-const { Server, DataModel, Mongo } = require('@appunto/rigatoni');
-
-const dataModel = new DataModel({model1});
-
-const options = {
-  realTime: true
-};
-
-const apiModel = dataModel.toApi(options);
+- Returns a merged and compiled apiModel of current state
 
 
-```
+## `ApiModel.addApiModel(...apiModels)`
 
-### Partial RealTime
-```js
+Adds apiModels to the ApiModel instance.
 
-const apiModel = dataModel.toApi({
-  realTime : ['cars', 'boats']
-});
+### Arguments
 
-const mongo = new Mongo(mongoUri, options);
+- `apiModels` 0 or more apiModels, either in JSON or of ApiModel class
 
-const server = apiModel.toServer({db: mongo});
-server.listen(port);
 
-```
+
+## `ApiModel.addRoute(route, definition)`
+
+Add a new route or modify current route's definition.
+
+### Arguments
+
+- `route` path to the location to add
+- `definition` object to place at route
+
+
+
+## `ApiModel.removeRoute(route)`
+
+Remove the route in the ApiModel instance.
+
+### Arguments
+
+- `route` path to the location to remove
+
+
+## `ApiModel.addHandler(route, method, handlers)`
+
+Adds one or more `handlers` to the `route` for the `method`
+
+### Arguments
+
+- `route` path to the location
+- `method` method in which the `handlers` will go
+- `handlers` a function or an array of functions to add at route for method
+
+
+## `ApiModel.addFilter(route, method, filters)`
+
+Adds one or more `filters` to the `route` for the `method`
+
+### Arguments
+
+- `route` path to the location
+- `method` the `method` in which the `filters` will go
+- `filters` a function or an array of functions to add at `route` for `method`
+
+
+
+## `ApiModel.setAuth(route, auth)`
+
+### Arguments
+
+- `route` path to the location
+- `auth` definition of the authentication you need
+
+## `ApiModel.setRequiresAuth(route, value)`
+
+### Arguments
+
+- `route` path to the location
+- `value` boolean to able authentication or disable it
+
+## `ApiModel.setRequiresRoles(route, roles)`
+
+### Arguments
+
+- `route` path to the location
+- `roles` boolean to able authentication or disable it
+
+## `ApiModel.setRequiresRoles(route, roles)`
+
+### Arguments
+
+- `route` path to the location
+- `roles` boolean to able authentication or disable it
+
+## `ApiModel.toServer(env)`
+
+Merges and compiles the model to create a `Server` from an ApiModel instance.
+
+### Arguments
+
+- `env` object which contains if needed the db and a secret key for JWT
+
+### Returns
+
+- `Server` Returns the server created
