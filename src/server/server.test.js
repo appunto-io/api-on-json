@@ -1,7 +1,7 @@
 const chai     = require('chai');
 const chaiHTTP = require('chai-http');
 
-const { ApiModel }            = require('./index.js');
+const { ApiModel } = require('../index.js');
 
 const expect = chai.expect;
 chai.use(chaiHTTP);

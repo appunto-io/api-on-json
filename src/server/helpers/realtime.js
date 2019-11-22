@@ -115,7 +115,7 @@ async function realTimeHandling(regExp, paramNames, socket, auth, handlers, env)
             }
           }
         }
-        
+
         if (socket.authenticated) {
           socket.emit('succeed');
           clearTimeout(t);

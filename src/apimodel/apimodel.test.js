@@ -168,41 +168,10 @@ const usersApiModel = {
 };
 
 describe('ApiModel test suite', () => {
-  it('Test the creation of a api model without model', () => {
-    const apiModel = new ApiModel();
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models).to.be.empty;
-  });
-
-  it('Test the creation of a api model with one model', () => {
-    const apiModel = new ApiModel({});
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({});
-  });
-
-  it('Test the creation of a api model with multiple models', () => {
-    const apiModel = new ApiModel({'/cars' : {}}, {'/apple' : {}});
-    expect(apiModel.models).to.be.an('array');
-
-    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
-    expect(apiModel.models[1]).to.be.deep.equal({'/apple' : {}});
-  });
-
-  it('Test adding Model method', () => {
-    const apiModel = new ApiModel({'/cars' : {}});
-    apiModel.addApiModel({'/apple' : {}})
-
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
-    expect(apiModel.models[1]).to.be.deep.equal({'/apple' : {}});
-  });
-
   it('Test getting the merged api model from an empty api model', () => {
     const apiModel = new ApiModel();
     const merged = apiModel.get();
 
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models).to.be.empty;
     expect(merged).to.be.deep.equal({
       isApiModel: true,
       hasRealtime: false,
@@ -229,59 +198,41 @@ describe('ApiModel test suite', () => {
     })
   });
 
-  it('Test getting the merged api model', () => {
+  it('addApiModel', () => {
     const apiModel = new ApiModel({'/cars' : {}});
-    const merged = apiModel.get();
 
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
-
-    expect(merged).to.be.deep.equal(carsApiModel);
+    expect(apiModel.get()).to.be.deep.equal(carsApiModel);
 
     apiModel.addApiModel({'/apple' : {}});
-    const merged2 = apiModel.get();
 
-    expect(apiModel.models).to.be.an('array');
-    expect(merged2).to.be.deep.equal({...carsApiModel, ...appleApiModel});
+    expect(apiModel.get()).to.be.deep.equal({...carsApiModel, ...appleApiModel});
   });
 
-  it('Test adding a new route to an existing path in the api model', () => {
-    const apiModel = new ApiModel({'/cars': {}});
-
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
-
-    apiModel.addRoute('cars/users', {});
-    const merged = apiModel.get();
-
-    expect(merged).to.be.deep.equal(usersApiModel);
-  });
-
-  it('Test adding a new route in the api model', () => {
+  it('addRoute', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
-    expect(apiModel.models).to.be.an('array');
-    expect(apiModel.models[0]).to.be.deep.equal({'/cars' : {}});
-
     apiModel.addRoute('apple', {});
-    const merged = apiModel.get();
 
-    expect(merged).to.be.deep.equal({...carsApiModel, ...appleApiModel});
+    expect(apiModel.get()).to.be.deep.equal({...carsApiModel, ...appleApiModel});
+  });
+
+  it('addRoute - nested routes', () => {
+    const apiModel = new ApiModel({'/cars': {}});
+
+    apiModel.addRoute('/cars/users', {});
+
+    expect(apiModel.get()).to.be.deep.equal(usersApiModel);
   });
 
   it('Test removing a route in the api model', () => {
     const apiModel = new ApiModel({});
     apiModel.addApiModel({'/cars' : {}});
 
-    expect(apiModel.models).to.be.an('array');
-
-    const merged = apiModel.get();
-    expect(merged).to.be.deep.equal(carsApiModel);
+    expect(apiModel.get()).to.be.deep.equal(carsApiModel);
 
     apiModel.removeRoute('/cars');
 
-    const merged2 = apiModel.get();
-    expect(merged2).to.be.deep.equal({
+    expect(apiModel.get()).to.be.deep.equal({
       isApiModel: true,
       hasRealtime: false,
       auth : {
@@ -314,8 +265,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addHandler('/cars/brand', 'GET', getBrand);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/brand']['handlers']['GET']).to.be.deep.equal([getBrand]);
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/brand']['handlers']['GET']).to.be.deep.equal([getBrand]);
   });
 
   it('Test adding multiple handler at route in the api model', () => {
@@ -326,8 +277,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addHandler('/cars/brand', 'GET', [getBrand1, getBrand2]);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/brand']['handlers']['GET']).to.be.deep.equal([getBrand1, getBrand2]);
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/brand']['handlers']['GET']).to.be.deep.equal([getBrand1, getBrand2]);
   });
 
   it('Test adding a new filter at route in the api model', () => {
@@ -337,8 +288,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addFilter('/cars/brand', 'POST', filterBrand);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/brand']['filters']['POST']).to.be.deep.equal([filterBrand]);
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/brand']['filters']['POST']).to.be.deep.equal([filterBrand]);
   });
 
   it('Test adding multiple filter at route in the api model', () => {
@@ -349,8 +300,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addFilter('/cars/brand', 'POST', [filterBrand1, filterBrand2]);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/brand']['filters']['POST']).to.be.deep.equal([filterBrand1, filterBrand2]);
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/brand']['filters']['POST']).to.be.deep.equal([filterBrand1, filterBrand2]);
   });
 
   it('Test setting auth at route in the api model', () => {
@@ -358,8 +309,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.setAuth('/cars/user', {requiresAuth: true, requiresRoles: ['admin']});
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
         "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
@@ -376,8 +327,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.setAuth('/cars/user', false);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : false,
         "HEAD"    : false,
         "OPTIONS" : false,
@@ -394,8 +345,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.setRequiresRoles('/cars/user', 'admin');
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
         "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin'], policies:[createAuthHandler]},
@@ -412,8 +363,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.setRequiresRoles('/cars/user', ['admin', 'user']);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
         "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[createAuthHandler]},
@@ -430,8 +381,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.setRequiresAuth('/cars/user', true);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
         "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler]},
@@ -448,8 +399,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.setRequiresAuth('/cars/user', false);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
         "OPTIONS" : {requiresAuth: false, requiresRoles: false, policies:[createAuthHandler]},
@@ -468,8 +419,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addPolicies('/cars/user', policy);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
         "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
         "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy]},
@@ -489,8 +440,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addPolicies('/cars/user', [policy1, policy2]);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['auth']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
         "GET"     : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
         "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
         "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[createAuthHandler, policy1, policy2]},
@@ -509,8 +460,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addRealTimeHandler('/cars/user', {connect: doSomeConnection});
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['realTime']).to.be.deep.equal({
       connect: [doSomeConnection],
       message: [],
       disconnect: []
@@ -525,8 +476,8 @@ describe('ApiModel test suite', () => {
 
     apiModel.addRealTimeHandler('/cars/user', {connect: [doSomeConnection1, doSomeConnection2]});
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['realTime']).to.be.deep.equal({
       connect: [doSomeConnection1, doSomeConnection2],
       message: [],
       disconnect: []
@@ -548,8 +499,8 @@ describe('ApiModel test suite', () => {
                                                message:    [doSomeMessage1, doSomeMessage2],
                                                disconnect: [doSomeDisconnection]});
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['realTime']).to.be.deep.equal({
       connect:    [doSomeConnection1, doSomeConnection2],
       message:    [doSomeMessage1, doSomeMessage2],
       disconnect: [doSomeDisconnection]
@@ -571,8 +522,8 @@ describe('ApiModel test suite', () => {
     apiModel.addMessageHandler('/cars/user', [doSomeMessage1, doSomeMessage2]);
     apiModel.addDisconnectHandler('/cars/user', doSomeDisconnection);
 
-    const merged = apiModel.get();
-    expect(merged['/cars']['/user']['realTime']).to.be.deep.equal({
+    const compiled = apiModel.get();
+    expect(compiled['/cars']['/user']['realTime']).to.be.deep.equal({
       connect:    [doSomeConnection1, doSomeConnection2],
       message:    [doSomeMessage1, doSomeMessage2],
       disconnect: [doSomeDisconnection]
