@@ -97,17 +97,19 @@ class Rethink {
 
       Object.entries(spec).forEach(([fieldName, fieldOptions]) => {
         if (Array.isArray(fieldOptions)) {
-          if (!Array.isArray(data[fieldName])) {
-            const message = `Bad request: ${fieldName} is expected to be an array`;
+          if (data[fieldName]) {
+            if (!Array.isArray(data[fieldName])) {
+              const message = `Bad request: ${fieldName} is expected to be an array`;
 
-            console.error(message);
-            throw new Error(message)
+              console.error(message);
+              throw new Error(message)
+            }
+
+            data[fieldName].forEach(elem => {
+              const validatedElem = validateRec(elem, fieldOptions[0])
+              obj[fieldName].push(validatedElem);
+            });
           }
-
-          data[fieldName].forEach(elem => {
-            const validatedElem = validateRec(elem, fieldOptions[0])
-            obj[fieldName].push(validatedElem);
-          });
         }
         else {
           let { type, required, unique, default: defaultValue } = fieldOptions;
@@ -132,6 +134,7 @@ class Rethink {
               obj[fieldName] = defaultValue;
           }
 
+
           if (required) {
             if (!obj[fieldName]) {
               const message = `This field: ${fieldName} is required.`;
@@ -146,6 +149,7 @@ class Rethink {
           }
         }
       });
+
 
       return obj;
     }
