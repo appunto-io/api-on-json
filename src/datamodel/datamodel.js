@@ -48,6 +48,8 @@ class DataModel {
     newModel[collection] = definition;
 
     this.models.push(newModel);
+
+    return this;
   }
 
   addField(collection, field, definition) {
@@ -55,26 +57,44 @@ class DataModel {
     newModel[field] = definition;
 
     this.addCollection(collection, {schema: newModel});
+
+    return this;
   }
 
-  removeColleciton(collection) {
-    this.addCollection(collection, null)
+  removeCollection(collection) {
+    this.addCollection(collection, null);
+
+    return this;
   }
 
   removeField(collection, field) {
     this.addField(collection, field, null);
+
+    return this;
   }
 
   setOptions(collection, options) {
-    this.addCollection(collection, options);
+    this.addCollection(collection, {options});
+
+    return this;
   }
 
   setType(collection, field, type) {
-    this.addField(collection, field, {type: type})
+    this.addField(collection, field, {type: type});
+
+    return this;
   }
 
   setRequired(collection, field, value) {
-    this.addField(collection, field, {required: !!value})
+    this.addField(collection, field, {required: !!value});
+
+    return this;
+  }
+
+  setUnique(collection, field, value) {
+    this.addField(collection, field, {unique: !!value});
+
+    return this;
   }
 
   toApi(options) {

@@ -168,7 +168,7 @@ function compileSchemaDeclaration(schema, typeKey) {
 /**
  * Compile collection options.
  *
- * Currently only `timestamps` and `typeKey` are available.
+ * Currently only `timestamps`, `typeKey` and `searchableFields` are available.
  *
  * @param  {Object} options - Options declaration object
  * @return {Object}         - Parsed options declaration object
