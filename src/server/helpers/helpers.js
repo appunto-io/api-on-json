@@ -264,7 +264,7 @@ const recurseModel = (path, model, environment, addRoute) => {
   });
 };
 
-const createServer = (model, environment) => {
+const createServer = (model, environment, serv) => {
   if (!model || !model.isApiModel) {
     console.warn(
       'createServer(): "model" parameter does not seem to be a valid API model. ' +
@@ -348,6 +348,8 @@ const createServer = (model, environment) => {
     realtimeHandlers(model, http, environment);
   }
 
+  serv.app = app;
+  
   return http;
 };
 
