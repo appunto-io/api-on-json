@@ -1,6 +1,6 @@
 const { _ } = require('lodash');
 
-const isNestedArray     = (field)                   => _.isArray(field);
+const isNestedArray     = (field)                   => Array.isArray(field);
 const isNestedObject    = (field, typeKey = 'type') => _.isPlainObject(field) && !field[typeKey];
 
 const convertDate = (declaration, typeKey) => {
