@@ -1,0 +1,41 @@
+name: Appunto Publish
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '*version*'
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm ci
+      - run: npm test
+
+  publish-npm:
+    name: Publish NPM
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm ci
+      - run: |
+          npm config set //registry.stage.appunto.io/:_authToken=$NPM_TOKEN
+          npm publish
+        env:
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+          npm_config_registry: http://registry.stage.appunto.io

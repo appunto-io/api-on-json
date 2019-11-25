@@ -74,11 +74,6 @@ describe('realTime test suite', async function() {
     realTime: true
   };
 
-  const env = {
-    db,
-    jwtSecret
-  }
-
   var roleApiModel = {
     '/cars': {
       auth: {
@@ -104,17 +99,25 @@ describe('realTime test suite', async function() {
     const dataModel = new DataModel(dataModels);
 
     await db.connect();
-    await db.init(dataModel.get());
-    const apiModel  = dataModel.toApi(opt);
-    apiModel.addApiModel(roleApiModel);
+    if (db.database) {
+      await db.init(dataModel.get());
+      const apiModel  = dataModel.toApi(opt);
+      apiModel.addApiModel(roleApiModel);
 
+      const env = {
+        db,
+        jwtSecret
+      }
 
-    this.server  = apiModel.toServer(env);
-    await this.server.listen(3000);
+      this.server  = apiModel.toServer(env);
+      await this.server.listen(3000);
+    }
   });
 
   after(async () => {
-    await this.server.close();
+    if {
+      await this.server.close();
+    }
   });
 
   it('Testing connection', function(done) {

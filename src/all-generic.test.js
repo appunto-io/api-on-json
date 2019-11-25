@@ -518,23 +518,26 @@ describe('api-on-json test suite', async function() {
       const dataModel = new DataModel(dataModels);
 
       await db.connect();
-      await db.init(dataModel.get());
-      const apiModel = dataModel.toApi(opt);
+      if (db.database) {
+        await db.init(dataModel.get());
+        const apiModel = dataModel.toApi(opt);
 
-      const env = {
-        db,
-        jwtSecret
+        const env = {
+          db,
+          jwtSecret
+        }
+
+        this.server2 = apiModel.toServer(env);
+        await this.server2.listen(3000);
       }
-
-      this.server2 = apiModel.toServer(env);
-      await this.server2.listen(3000);
-
     });
 
     after(async () => {
       await this.server2.close();
     });
 
-    databaseTestSuite();
+    if (this.server2) {
+      databaseTestSuite();
+    }
   });
 });

@@ -31,6 +31,8 @@ describe('rethink database class test suite', async function() {
 
 
   describe('generic tests', async function() {
-    await databaseGenericTestSuite(db);
+    if (db.database) {
+      await databaseGenericTestSuite(db);
+    }
   });
 });
