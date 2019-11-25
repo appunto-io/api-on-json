@@ -348,9 +348,7 @@ const createServer = (model, environment, serv) => {
     realtimeHandlers(model, http, environment);
   }
 
-  serv.app = app;
-  
-  return http;
+  return {app, http};
 };
 
 module.exports = {

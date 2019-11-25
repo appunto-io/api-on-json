@@ -2,8 +2,10 @@ const { createServer } = require('./helpers/helpers.js')
 
 class Server {
   constructor(apiModel, env) {
-    this.server = createServer(apiModel, env, this);
-    this.app = null;
+    const { app, http } = createServer(apiModel, env);
+    console.log(app);
+    this.server = http;
+    this.app = app;
   }
 
   async listen(port) {
