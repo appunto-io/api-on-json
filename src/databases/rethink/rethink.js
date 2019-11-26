@@ -105,8 +105,9 @@ class Rethink {
               throw new Error(message)
             }
 
+            obj[fieldName] = [];
             data[fieldName].forEach(elem => {
-              const validatedElem = validateRec(elem, fieldOptions[0])
+              const validatedElem = validateRec(elem, fieldOptions[0]);
               obj[fieldName].push(validatedElem);
             });
           }
@@ -149,7 +150,6 @@ class Rethink {
           }
         }
       });
-
 
       return obj;
     }
