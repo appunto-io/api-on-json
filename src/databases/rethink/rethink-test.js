@@ -1,6 +1,6 @@
 const { Rethink } = require('./rethink.js');
 
-const databaseGenericTestSuite = require('../database-generic.test.js');
+const databaseGenericTestSuite = require('../database-generic.js');
 
 /**********************************************
   Testsuite
@@ -31,8 +31,6 @@ describe('rethink database class test suite', async function() {
 
 
   describe('generic tests', async function() {
-    if (db.database) {
       await databaseGenericTestSuite(db);
-    }
   });
 });

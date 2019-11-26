@@ -343,12 +343,12 @@ const createServer = (model, environment, serv) => {
     });
   });
 
-  var http = require('http').Server(app);
+  var server = require('http').Server(app);
   if (model.hasRealtime) {
-    realtimeHandlers(model, http, environment);
+    realtimeHandlers(model, server, environment);
   }
 
-  return {app, http};
+  return {app, server};
 };
 
 module.exports = {

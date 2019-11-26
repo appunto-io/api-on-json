@@ -115,9 +115,7 @@ describe('realTime test suite', async function() {
   });
 
   after(async () => {
-    if {
       await this.server.close();
-    }
   });
 
   it('Testing connection', function(done) {

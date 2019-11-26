@@ -536,8 +536,6 @@ describe('api-on-json test suite', async function() {
       await this.server2.close();
     });
 
-    if (this.server2) {
-      databaseTestSuite();
-    }
+    databaseTestSuite();
   });
 });
