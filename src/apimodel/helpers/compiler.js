@@ -26,7 +26,7 @@ const compileRequestRequirements = (requirements) => {
   }
   else if (typeof requirements === 'object') {
     var policies = [createAuthHandler];
-    
+
     if (requirements.policies) {
       policies = requirements.policies.includes(createAuthHandler) ? requirements.policies : [createAuthHandler, ...requirements.policies];
     }
@@ -234,6 +234,7 @@ const compileApiModel = apiModel => {
   return {
     isApiModel  : true,
     hasRealtime : isRealTime(compiledModel),
+    security    : apiModel.security || false,
     ...compiledModel,
   };
 };

@@ -160,6 +160,16 @@ class ApiModel {
     return this;
   }
 
+  addSecurity(name, options) {
+    this.addApiModel({
+      security: {
+        [name]: options
+      }
+    });
+
+    return this;
+  }
+
   toServer(env) {
     const compiled = this.get();
 
