@@ -7,6 +7,7 @@ const { ApiModel }          = require('./apimodel.js');
 const carsApiModel = {
   isApiModel: true,
   hasRealtime: false,
+  security: false,
   '/cars': {
     auth : {
       "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -54,6 +55,7 @@ const carsApiModel = {
 const appleApiModel = {
   isApiModel: true,
   hasRealtime: false,
+  security: false,
   '/apple': {
     auth : {
       "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -101,6 +103,7 @@ const appleApiModel = {
 const usersApiModel = {
   isApiModel: true,
   hasRealtime: false,
+  security: false,
   auth : {
     "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
     "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -175,6 +178,7 @@ describe('ApiModel test suite', () => {
     expect(merged).to.be.deep.equal({
       isApiModel: true,
       hasRealtime: false,
+      security: false,
       auth : {
         "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
@@ -235,6 +239,7 @@ describe('ApiModel test suite', () => {
     expect(apiModel.get()).to.be.deep.equal({
       isApiModel: true,
       hasRealtime: false,
+      security: false,
       auth : {
         "GET"     : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
         "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[createAuthHandler]},
