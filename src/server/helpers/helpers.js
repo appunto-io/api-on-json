@@ -46,60 +46,57 @@ const createAuthHandler = (method, model, environment) => async(request, respons
 
   const { requiresAuth, requiresRoles } = methodAuth;
 
-  if (requiresAuth) {
-    /*
-    Take JWT token, validate it and extract payload
-     */
-    const secret     = environment.jwtSecret || '-- Unknown token - verification side --';
-    const authHeader = request.header('Authorization', '');
-    const token      = authHeader.startsWith('Bearer ') && authHeader.split(' ')[1] || '';
-    let payload      = null;
-    let accountId    = null;
-    let roles        = [];
-    let isAuthenticated;
+  /*
+  Take JWT token, validate it and extract payload
+  */
+  const secret     = environment.jwtSecret || '-- Unknown token - verification side --';
+  const authHeader = request.header('Authorization', '') || '';
+  const token      = authHeader.startsWith('Bearer ') && authHeader.split(' ')[1] || '';
+  let payload      = null;
+  let accountId    = null;
+  let roles        = [];
+  let isAuthenticated;
 
-    try {
-      payload   = jwt.verify(token, secret);
-      accountId = payload.accountId || null;
-      roles     = payload.roles || [];
-      isAuthenticated = true;
-    }
-    catch (error) {
-      isAuthenticated = false;
-    }
-
-    /*
-    If no authorization is required, then continue. Otherwise
-    test authentication and roles
-     */
-
-
-    if (requiresAuth !== false) {
-      if (!isAuthenticated) {
-        await response.status(401).send('Invalid token');
-        return next(false);
-      }
-
-      if (!testRoles(requiresRoles || [], roles)) {
-        await response.status(401).send('Missing required role');
-        return next(false);
-      }
-    }
-
-    /*
-    Everthing went fine: we are either authenticated or the
-    request does not need authentication. If authenticated, roles have
-    been checked and are ok.
-     */
-    request.authorization = {
-      token,
-      payload,
-      isAuthenticated,
-      accountId,
-      roles
-    };
+  try {
+    payload   = jwt.verify(token, secret);
+    accountId = payload.accountId || null;
+    roles     = payload.roles || [];
+    isAuthenticated = true;
+  }
+  catch (error) {
+    isAuthenticated = false;
   }
 
+  /*
+  If no authorization is required, then continue. Otherwise
+  test authentication and roles
+  */
+
+
+  if (requiresAuth !== false) {
+    if (!isAuthenticated) {
+      await response.status(401).send('Invalid token');
+      return next(false);
+    }
+
+    if (!testRoles(requiresRoles || [], roles)) {
+      await response.status(401).send('Missing required role');
+      return next(false);
+    }
+  }
+
+  /*
+  Everthing went fine: we are either authenticated or the
+  request does not need authentication. If authenticated, roles have
+  been checked and are ok.
+  */
+  request.authorization = {
+    token,
+    payload,
+    isAuthenticated,
+    accountId,
+    roles
+  };
   return next();
 };
 
