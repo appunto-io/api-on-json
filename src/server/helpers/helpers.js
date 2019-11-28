@@ -51,7 +51,7 @@ const createAuthHandler = (method, model, environment) => async(request, respons
     Take JWT token, validate it and extract payload
      */
     const secret     = environment.jwtSecret || '-- Unknown token - verification side --';
-    const authHeader = request.header('Authorization', '') || '';
+    const authHeader = request.header('Authorization', '');
     const token      = authHeader.startsWith('Bearer ') && authHeader.split(' ')[1] || '';
     let payload      = null;
     let accountId    = null;
