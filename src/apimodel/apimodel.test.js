@@ -202,12 +202,12 @@ describe('ApiModel test suite', () => {
     })
   });
 
-  it('addApiModel', () => {
+  it('addModel', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
     expect(apiModel.get()).to.be.deep.equal(carsApiModel);
 
-    apiModel.addApiModel({'/apple' : {}});
+    apiModel.addModel({'/apple' : {}});
 
     expect(apiModel.get()).to.be.deep.equal({...carsApiModel, ...appleApiModel});
   });
@@ -230,7 +230,7 @@ describe('ApiModel test suite', () => {
 
   it('Test removing a route in the api model', () => {
     const apiModel = new ApiModel({});
-    apiModel.addApiModel({'/cars' : {}});
+    apiModel.addModel({'/cars' : {}});
 
     expect(apiModel.get()).to.be.deep.equal(carsApiModel);
 

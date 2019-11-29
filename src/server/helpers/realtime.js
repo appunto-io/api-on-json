@@ -101,7 +101,11 @@ async function realTimeHandling(regExp, paramNames, socket, auth, handlers, env)
 
             if (decoded) {
               if (auth.requiresRoles) {
-                socket.authenticated = auth.requiresRoles.includes(decoded.role);
+                if (decoded.roles) {
+                  for (let i = 0; i < decoded.roles.length; i++) {
+                    socket.authenticated = socket.authenticated || auth.requiresRoles.includes(decoded.roles[i]);
+                  }
+                }
               }
               else {
                 socket.authenticated = true;

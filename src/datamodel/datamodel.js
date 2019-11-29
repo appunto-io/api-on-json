@@ -30,7 +30,7 @@ class DataModel {
     return compileDataModel(merged);
   }
 
-  addDataModel(...dataModels) {
+  addModel(...dataModels) {
     dataModels.forEach(
       model => {
         if (model instanceof DataModel) {

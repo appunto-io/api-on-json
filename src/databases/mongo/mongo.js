@@ -74,7 +74,7 @@ class Mongo {
       console.error("Trying to call Mongo.init() without connection: did you forget to call Mongo.connect()?");
       return;
     }
-    this.models = dataModelToMongoose(dataModel, this.database);
+    this.models = dataModelToMongoose(dataModel.get(), this.database);
   }
 
   async getModel(collection) {

@@ -6,7 +6,7 @@ class ApiModel {
   constructor(...apiModels) {
     this.models = [];
 
-    this.addApiModel(...apiModels);
+    this.addModel(...apiModels);
   }
 
   get() {
@@ -17,7 +17,7 @@ class ApiModel {
     return compileApiModel(merged);
   }
 
-  addApiModel(...apiModels) {
+  addModel(...apiModels) {
     apiModels.forEach(
       model => {
         if (model instanceof ApiModel) {
@@ -161,7 +161,7 @@ class ApiModel {
   }
 
   addSecurity(name, options) {
-    this.addApiModel({
+    this.addModel({
       security: {
         [name]: options
       }

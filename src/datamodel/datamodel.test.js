@@ -30,7 +30,7 @@ describe('Field type declarations', () => {
   it('Test getting the merged data model', () => {
     const dataModel = new DataModel(model1);
 
-    dataModel.addDataModel(model2);
+    dataModel.addModel(model2);
 
     expect(dataModel.get()).to.be.deep.equal({
       'cars': {
@@ -143,7 +143,7 @@ describe('Field type declarations', () => {
 
   it('Test removing a collection in the data model', () => {
     const dataModel = new DataModel(model1);
-    dataModel.addDataModel(model2);
+    dataModel.addModel(model2);
 
     dataModel.removeCollection('apple');
 
@@ -169,7 +169,7 @@ describe('Field type declarations', () => {
 
   it('Test removing a collection in the data model', () => {
     const dataModel = new DataModel(model1);
-    dataModel.addDataModel(model2);
+    dataModel.addModel(model2);
 
     dataModel.removeField('apple', 'color');
 
@@ -199,7 +199,7 @@ describe('Field type declarations', () => {
 
   it('Test creating an api model from a data model', () => {
     const dataModel = new DataModel(model1);
-    dataModel.addDataModel(model2);
+    dataModel.addModel(model2);
 
     const options = {realTime : ['cars', 'boats']};
 
@@ -213,7 +213,7 @@ describe('Field type declarations', () => {
 
   it('Test creating an api model from a data model', () => {
     const dataModel = new DataModel(model1);
-    dataModel.addDataModel(model2);
+    dataModel.addModel(model2);
 
     const options = {
       realTime: false

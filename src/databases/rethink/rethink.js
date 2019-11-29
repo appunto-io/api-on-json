@@ -84,7 +84,7 @@ class Rethink {
       await this.database.dbCreate(this.dbName).run();
     }
 
-    this.models = await dataModelToRethink(dataModel, this.database);
+    this.models = await dataModelToRethink(dataModel.get(), this.database);
   }
 
 

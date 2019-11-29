@@ -1,6 +1,6 @@
 {
   "name": "@appunto/api-on-json",
-  "version": "0.0.4-9",
+  "version": "0.0.5",
   "description": "API generator",
   "main": "src/index.js",
   "scripts": {
