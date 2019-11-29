@@ -481,7 +481,7 @@ describe('api-on-json test suite', async function() {
         const dataModel = new DataModel(dataModels);
 
         await db.connect();
-        await db.init(dataModel.get());
+        await db.init(dataModel);
 
         const opt = {
           realTime: false
@@ -519,7 +519,7 @@ describe('api-on-json test suite', async function() {
 
       await db.connect();
       if (db.database) {
-        await db.init(dataModel.get());
+        await db.init(dataModel);
         const apiModel = dataModel.toApi(opt);
 
         const env = {

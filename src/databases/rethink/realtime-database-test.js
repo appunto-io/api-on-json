@@ -12,7 +12,7 @@ chai.use(chaiHTTP);
 
 const jwtSecret = "--default-jwt-secret--";
 
-const token_request = 'Bearer ' + jwt.sign({ role: 'admin' }, jwtSecret);
+const token_request = 'Bearer ' + jwt.sign({ roles: ['admin'] }, jwtSecret);
 /**********************************************
   Generic HTTP requests based on chai HTTP
 */
@@ -92,8 +92,13 @@ describe('realTime test suite', async function() {
     }
   };
 
-  const admin  = jwt.sign({ role: 'admin' }, env.jwtSecret);
-  const user   = jwt.sign({ role: 'user' }, env.jwtSecret);
+  const env = {
+    db,
+    jwtSecret
+  }
+
+  const admin  = jwt.sign({ roles: ['admin'] }, env.jwtSecret);
+  const user   = jwt.sign({ roles: ['user'] }, env.jwtSecret);
 
   before(async() => {
     const dataModel = new DataModel(dataModels);
@@ -102,12 +107,8 @@ describe('realTime test suite', async function() {
     if (db.database) {
       await db.init(dataModel.get());
       const apiModel  = dataModel.toApi(opt);
-      apiModel.addApiModel(roleApiModel);
+      apiModel.addModel(roleApiModel);
 
-      const env = {
-        db,
-        jwtSecret
-      }
 
       this.server  = apiModel.toServer(env);
       await this.server.listen(3000);
