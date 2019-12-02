@@ -42,7 +42,7 @@ const opt = {
 const dataModel = new DataModel(/* your dataModel in JSON */);
 
 await db.connect();
-await db.init(dataModel.get());
+await db.init(dataModel);
 
 const apiModel = dataModel.toApi(opt);
 
@@ -207,7 +207,7 @@ Creates a new `ApiModel` instance.
 - Returns a merged and compiled apiModel of current state
 
 
-## `ApiModel.addApiModel(...apiModels)`
+## `ApiModel.addModel(...apiModels)`
 
 Adds apiModels to the ApiModel instance.
 
@@ -222,7 +222,7 @@ Adds apiModels to the ApiModel instance.
 ### Example
 ```js
 const apiModel = new ApiModel();
-apiModel.addApiModel(/* your models */);
+apiModel.addModel(/* your models */);
 ```
 
 
@@ -617,7 +617,7 @@ const merged = dataModel.get();
 ```
 
 
-## `DataModel.addDataModel(...dataModels)`
+## `DataModel.addModel(...dataModels)`
 
 Adds data models to the `DataModel` instance.
 
@@ -632,7 +632,7 @@ Adds data models to the `DataModel` instance.
 ### Example
 ```js
 const dataModel = new DataModel(/* your models */);
-dataModel.addDataModel(/* your models */);
+dataModel.addModel(/* your models */);
 ```
 
 
