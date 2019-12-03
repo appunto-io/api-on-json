@@ -117,4 +117,7 @@ class DataModel {
   }
 }
 
-module.exports = { DataModel : DataModel }
+module.exports = {
+  DataModel : DataModel,
+  hydrate
+}

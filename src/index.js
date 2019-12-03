@@ -1,4 +1,4 @@
-const { DataModel } = require('./datamodel/datamodel.js');
+const { DataModel, hydrate } = require('./datamodel/datamodel.js');
 const { ApiModel }  = require('./apimodel/apimodel.js');
 const { Server }    = require('./server/server.js');
 const { Rethink,
@@ -11,4 +11,5 @@ module.exports = {
   Server,
   Rethink,
   Mongo,
+  hydrate
 };
