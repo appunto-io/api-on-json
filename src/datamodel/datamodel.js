@@ -104,7 +104,7 @@ class DataModel {
     const dataModelLibrary      = createLibraryFromDataModel(merged);
     let hydratedApiModel        = hydrate(apiModelFromDataModel, dataModelLibrary);
 
-    if (options.realTime) {
+    if (options && options.realTime) {
       const realTimeApiModelFromDataModel = createRealtimeApiFromDataModel(merged, options.realTime);
 
       const apiModel                 = mergeModels(apiModelFromDataModel, realTimeApiModelFromDataModel);

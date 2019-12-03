@@ -125,7 +125,7 @@ class Rethink {
           type     = type.toLowerCase();
 
           if (fieldName in data) {
-            if (type !== 'string' && type !== 'id' && typeof data[fieldName] !== type) {
+            if (type !== 'string' && type !== 'id' && type != 'mixed' && typeof data[fieldName] !== type) {
               const dataType = findType(data, fieldName);
               if (type !== dataType) {
                 const message = `Bad request: ${fieldName} is expected to be a ${type} and you entered a ${dataType}`;
