@@ -93,7 +93,7 @@ class Rethink {
   }
 
 
-  async validate(data, collection, model) {
+  async validate(data, collection, model, method) {
     const dbRequests = [];
     const { schema, options } = model;
 
@@ -141,7 +141,7 @@ class Rethink {
           }
 
 
-          if (required) {
+          if (required && method != 'patch') {
             if (!obj[fieldName]) {
               const message = `This field: ${fieldName} is required.`;
 
@@ -199,7 +199,7 @@ class Rethink {
     const model   = this.models[collection];
     const options = this.models[collection]['options'];
 
-    var obj = await this.validate(data, collection, model);
+    var obj = await this.validate(data, collection, model, 'post');
 
     var changes = await this.database.table(collection)
       .changes({ includeInitial: false })
@@ -395,7 +395,7 @@ class Rethink {
     const model   = this.models[collection];
     const options = this.models[collection]['options'];
 
-    var obj = await this.validate(data, collection, model);
+    var obj = await this.validate(data, collection, model, 'put');
     obj.id  = id;
 
     if (options['timestamps']) {
@@ -422,7 +422,7 @@ class Rethink {
     const model   = this.models[collection];
     const options = this.models[collection]['options'];
 
-    var obj = await this.validate(data, collection, model);
+    var obj = await this.validate(data, collection, model, 'patch');
 
     if (options['timestamps']) {
       const createdAt = options['timestamps']['createdAt'] ? options['timestamps']['createdAt'] : 'createdAt';
