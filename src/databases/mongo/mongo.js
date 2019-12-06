@@ -145,13 +145,16 @@ class Mongo {
     const Model = await this.getModel(collection);
 
     /* eslint no-unused-vars: 0 */
-    let { page, pageSize, sort, order, cursor, filter, q, ...restOfQuery } = query;
+    let { page, pageSize, sort, order, cursor, filter, q, f, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
     sort       = Array.isArray(sort) ? sort : _convertAPIFieldToMongo(sort) || null;
     order      = (order + '').toLowerCase() === 'desc' ? '-1' : '1';
     const comp =  order === '1' ? '$gt' : '$lt';
+
+    f = f || [];
+    f = Array.isArray(f) ? f : [f];
 
     const delimiter = ';';
 
@@ -200,6 +203,33 @@ class Mongo {
           }
       });
       mongoQuery = {$or: searchArray};
+    }
+
+    if (f) {
+      const comparators = ['gt', 'ge', 'lt', 'le'];
+      const filterQuery = {};
+
+      f.forEach(elem => {
+        let [fieldName, comparator, val, ...restOfFilter] = elem.split(delimiter);
+
+        if (fieldName in Model.schema.obj) {
+          if (!filterQuery[fieldName]) {
+            filterQuery[fieldName] = {};
+          }
+          if (comparators.includes(comparator) && val) {
+            if (comparator === 'ge') {
+              comparator = 'gte';
+            }
+            if (comparator === 'le') {
+              comparator = 'lte'
+            }
+            comparator = '$' + comparator;
+            filterQuery[fieldName][comparator] = val;
+          }
+        }
+      });
+
+      mongoQuery = filterQuery;
     }
 
     /*

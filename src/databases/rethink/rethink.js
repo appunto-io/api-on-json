@@ -234,12 +234,15 @@ class Rethink {
     const model = this.models[collection]['schema'];
     const options = this.models[collection]['options'];
 
-    let { page, pageSize, sort, order, cursor, q, ...restOfquery } = query;
+    let { page, pageSize, sort, order, cursor, q, f, ...restOfquery } = query;
 
     order      = (order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
     sort       = sort ? sort : [];
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;
+
+    f = f || [];
+    f = Array.isArray(f) ? f : [f];
 
     const delimiter = ';';
     let results;
@@ -276,6 +279,25 @@ class Rethink {
           }
           else {
             filters[0] = filters[0].or(this.database.row(fieldName).match('(?i)' + q));
+          }
+        }
+      });
+    }
+
+    if (f) {
+      const comparators = ['gt', 'ge', 'lt', 'le'];
+
+      f.forEach(elem => {
+        let [fieldName, comparator, val, ...restOfFilter] = elem.split(delimiter);
+
+        if (fieldName in model) {
+          if (comparators.includes(comparator) && val) {
+            if (typeof filters[0] === 'boolean') {
+              filters[0] = this.database.row(fieldName)[comparator](val);
+            }
+            else {
+              filters[0] = filters[0].and(this.database.row(fieldName)[comparator](val));
+            }
           }
         }
       });
