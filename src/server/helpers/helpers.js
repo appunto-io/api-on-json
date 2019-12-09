@@ -161,7 +161,8 @@ const createHandlersChain = (method, model, environment) => {
       };
 
       try {
-        return {...data, ...(await handler(data, flow, meta))};
+        const newData = await handler(data, flow, meta);
+        return {...data, ...newData};
       }
       catch (error) {
         console.error(
