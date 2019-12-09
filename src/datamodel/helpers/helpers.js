@@ -1,11 +1,13 @@
-const { _ } = require('lodash');
+const lodashIsString      = require('lodash.isstring');
+const lodashIsNumber      = require('lodash.isnumber');
+const lodashIsBoolean     = require('lodash.isboolean');
+const lodashIsPlainObject = require('lodash.isplainobject');
 
-
-const isString  = (value) => _.isString(value);
-const isNumber  = (value) => _.isNumber(value);
+const isString  = (value) => lodashIsString(value);
+const isNumber  = (value) => lodashIsNumber(value);
 const isDate    = (value) => value === 'now' || !isNaN(Date.parse(value));
-const isBoolean = (value) => _.isBoolean(value);
-const isId      = (value) => _.isString(value);
+const isBoolean = (value) => lodashIsBoolean(value);
+const isId      = (value) => lodashIsString(value);
 
 const isDefaultValue = (value, type) => {
   return ({
@@ -50,10 +52,10 @@ const validProperties = {
   'Mixed'   : {}
 };
 
-const isNestedArray     = (field)                   => _.isArray(field);
-const isNestedObject    = (field, typeKey = 'type') => _.isPlainObject(field) && !field[typeKey];
-const isTypeDeclaration = (field, typeKey = 'type') => _.isPlainObject(field) && !!field[typeKey];
-const isTypeName        = (field)                   => _.isString(field) && typeConstants.indexOf(field) !== -1;
+const isNestedArray     = (field)                   => Array.isArray(field);
+const isNestedObject    = (field, typeKey = 'type') => lodashIsPlainObject(field) && !field[typeKey];
+const isTypeDeclaration = (field, typeKey = 'type') => lodashIsPlainObject(field) && !!field[typeKey];
+const isTypeName        = (field)                   => lodashIsString(field) && typeConstants.indexOf(field) !== -1;
 
 module.exports = {
   isString,

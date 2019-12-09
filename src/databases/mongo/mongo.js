@@ -168,6 +168,7 @@ class Mongo {
         const nextSort  = decodeURIComponent(nextSort_encoded);
 
         mongoQuery = {
+          ...mongoQuery,
           $or: [
             {
               [fieldSort]: { [comp] : nextSort }
@@ -181,6 +182,7 @@ class Mongo {
       }
       else {
         mongoQuery = {
+          ...mongoQuery,
           _id: { [comp] : cursor}
         };
       }
@@ -202,7 +204,7 @@ class Mongo {
             searchArray.push({[fieldName]: {$regex: `.*${q}.*`, $options: 'i'}});
           }
       });
-      mongoQuery = {$or: searchArray};
+      mongoQuery = {...mongoQuery, $or: searchArray};
     }
 
     if (f) {
@@ -229,7 +231,7 @@ class Mongo {
         }
       });
 
-      mongoQuery = filterQuery;
+      mongoQuery = {...mongoQuery, ...filterQuery};
     }
 
     /*

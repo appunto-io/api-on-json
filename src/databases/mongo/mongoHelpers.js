@@ -1,7 +1,8 @@
-const { _ } = require('lodash');
+const isPlainObject = require('lodash.isplainobject');
+const mapValues     = require('lodash.mapvalues');
 
 const isNestedArray     = (field)                   => Array.isArray(field);
-const isNestedObject    = (field, typeKey = 'type') => _.isPlainObject(field) && !field[typeKey];
+const isNestedObject    = (field, typeKey = 'type') => isPlainObject(field) && !field[typeKey];
 
 const convertDate = (declaration, typeKey) => {
   const converted = {...declaration};
@@ -41,7 +42,7 @@ Converts dataModel properties to mongoose properties.
 function dataModelSchemaToMongooseSchema(schema, options) {
   const { typeKey } = options;
 
-  return _.mapValues(schema, (value, key) => {
+  return mapValues(schema, (value, key) => {
     let wrapWithArray = val => val;
 
     if (isNestedArray(value)) {
