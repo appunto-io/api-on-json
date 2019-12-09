@@ -152,12 +152,7 @@ const createHandlersChain = (method, model, environment) => {
   const chain = allHandlers.reduceRight(
     (next, handler) => async (data, meta) => {
       const flow = {
-        continue : data => {
-          const newData = next(data, meta);
-          console.log('chain', data, newData, {...data, ...newData});
-
-          return {...data, ...newData};
-        },
+        continue : data => next(data, meta),
         stop     : (status, data) => {
           meta.response.status  = status;
           meta.response.sendRaw = false;
@@ -166,7 +161,7 @@ const createHandlersChain = (method, model, environment) => {
       };
 
       try {
-        return await handler(data, flow, meta);
+        return {...data, ...(await handler(data, flow, meta))};
       }
       catch (error) {
         console.error(

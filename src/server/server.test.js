@@ -53,35 +53,35 @@ async function erase(collection, id) {
 }
 
 function get_many() {
-  return 'getMany';
+  return {data: 'getMany'};
 }
 
 function get_id() {
-  return 'getId';
+  return {data: 'getId'};
 }
 
 function create() {
-  return 'post';
+  return {data: 'post'};
 }
 
 function update() {
-  return 'put';
+  return {data: 'put'};
 }
 
 function patch_id() {
-  return 'patch';
+  return {data: 'patch'};
 }
 
 function remove() {
-  return 'remove';
+  return {data: 'remove'};
 }
 
 function connect() {
-  return 'connect';
+  return {data: 'connect'};
 }
 
 function disconnect() {
-  return 'disconnect';
+  return {data: 'disconnect'};
 }
 
 function message(message) {
@@ -177,27 +177,28 @@ describe('realTime test suite', async function() {
 
   it('Testing get route', async function() {
     const response = await get('cars');
-    expect(response.text).to.be.equal('getMany');
+    console.log(response);
+    expect(response.body.data).to.be.equal('getMany');
   });
 
   it('Testing get id', async function() {
     const response = await getId('cars', 'id');
-    expect(response.text).to.be.equal('getId');
+    expect(response.body.data).to.be.equal('getId');
   });
 
   it('Testing post', async function() {
     const response = await post('cars', 'data');
-    expect(response.text).to.be.equal('post');
+    expect(response.body.data).to.be.equal('post');
   });
 
   it('Testing put', async function() {
     const response = await put('cars', 'id', 'data');
-    expect(response.text).to.be.equal('put');
+    expect(response.body.data).to.be.equal('put');
   });
 
   it('Testing patch', async function() {
     const response = await patch('cars', 'id', 'data');
-    expect(response.text).to.be.equal('patch');
+    expect(response.body.data).to.be.equal('patch');
   });
 
   it('Testing delete', async function() {
