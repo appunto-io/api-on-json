@@ -152,7 +152,12 @@ const createHandlersChain = (method, model, environment) => {
   const chain = allHandlers.reduceRight(
     (next, handler) => async (data, meta) => {
       const flow = {
-        continue : data => ({...data, ...next(data, meta)}),
+        continue : data => {
+          const newData = next(data, meta);
+          console.log('chain', data, newData, {...data, ...newData});
+
+          return {...data, ...newData};
+        },
         stop     : (status, data) => {
           meta.response.status  = status;
           meta.response.sendRaw = false;
