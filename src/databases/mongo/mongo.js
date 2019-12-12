@@ -55,7 +55,7 @@ function findType(data, field) {
 class Mongo {
   constructor(url, options) {
     this.url      = url;
-    this.options  = { ...options, useNewUrlParser : true};
+    this.options  = { ...options, useNewUrlParser : true, useUnifiedTopology : true, useFindAndModify : false};
     this.database = null;
     this.models   = null;
   }
