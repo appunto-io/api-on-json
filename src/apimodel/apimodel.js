@@ -23,6 +23,7 @@ class ApiModel {
       model => {
         if (model instanceof ApiModel) {
           this.models = [...this.models, ...model.models];
+          this.middlewares = [...this.middlewares , ...model.middlewares]
         }
         else {
           this.models.push(model);
