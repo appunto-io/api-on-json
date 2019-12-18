@@ -5,6 +5,7 @@ const { Server }                             = require('../server/server.js');
 class ApiModel {
   constructor(...apiModels) {
     this.models = [];
+    this.middlewares = [];
 
     this.addModel(...apiModels);
   }
@@ -170,10 +171,18 @@ class ApiModel {
     return this;
   }
 
-  toServer(env) {
-    const compiled = this.get();
+  addMiddleware(middleware, route = '/') {
+    this.middlewares.push({middleware, route});
+  }
 
-    return new Server(compiled, env);
+  applyMiddleware(app) {
+    this.middlewares.forEach(({middleware, route}) => {
+      app.use(route, middleware);
+    });
+  }
+
+  toServer(env) {
+    return new Server(this, env);
   }
 }
 

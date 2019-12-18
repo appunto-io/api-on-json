@@ -265,7 +265,8 @@ const recurseModel = (path, model, environment, addRoute) => {
   });
 };
 
-const createServer = (model, environment, serv) => {
+const createServer = (apiModel, environment, serv) => {
+  const model = apiModel.get();
   if (!model || !model.isApiModel) {
     console.warn(
       'createServer(): "model" parameter does not seem to be a valid API model. ' +
@@ -293,35 +294,36 @@ const createServer = (model, environment, serv) => {
   var app = express();
 
   /*
+  Setting up parsing middleware for request and response
+  */
+  apiModel.addMiddleware(bodyParser.json());
+  apiModel.addMiddleware(bodyParser.urlencoded({ extended: true }));
+  apiModel.addMiddleware(queryParser({ parseNull: true, parseBoolean: true }));
+
+  /*
+  Catch all errors and log them
+  */
+  apiModel.addMiddleware(logRequest);
+
+  /*
+  Log requests
+  */
+  apiModel.addMiddleware(logError);
+
+  /*
   Setting up Helmet for HTTP security
   */
   if (model.security) {
     Object.entries(model.security).forEach(
       ([name, options]) => {
         if( helmet[name] ) {
-           app.use(helmet[name](options));
+          apiModel.addMiddleware(helmet[name](options));
         }
       }
     );
   }
 
-  /*
-  Setting up parsing middleware for request and response
-  */
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(queryParser({ parseNull: true, parseBoolean: true }));
-
-  /*
-  Catch all errors and log them
-  */
-  app.use(logRequest);
-
-  /*
-  Log requests
-  */
-  app.use(logError);
-
+  apiModel.applyMiddleware(app);
 
   /*
   Deploy routes to server
