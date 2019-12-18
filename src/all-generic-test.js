@@ -15,7 +15,7 @@ chai.use(chaiHTTP);
 // TBD
 const jwtSecret = "--default-jwt-secret--";
 
-const token = 'Bearer ' + jwt.sign({ role: 'admin' }, jwtSecret);
+const token = 'Bearer ' + jwt.sign({ roles: ['admin'] }, jwtSecret);
 
 /**********************************************
   Generic HTTP requests based on chai HTTP
