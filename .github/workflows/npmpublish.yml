@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm test
+      - run: npm test:mongo
       - run: |
           npm config set //registry.stage.appunto.io/:_authToken=$NPM_TOKEN
           npm publish

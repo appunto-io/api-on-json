@@ -4,8 +4,9 @@
   "description": "API generator",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha './src/**/*.test.js' --timeout 50000 --exit",
-    "tests": "mocha './src/**/*test.js' --timeout 50000 --exit",
+    "test": "mocha './{,!(node_modules)/**/}*.test.js' --timeout 50000 --exit",
+    "test:mongo": "mocha './**/*.mongo.test.js' --timeout 50000 --exit",
+    "test:rethink": "mocha './**/*.rethink.test.js' --timeout 50000 --exit",
     "single-test": "mocha $1 --timeout 50000 --exit",
     "lint": "eslint src"
   },
@@ -45,7 +46,6 @@
     "mocha": "^6.2.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "nodemon": "^1.19.3",
     "mongodb-memory-server": "^5.2.3"
   }
 }

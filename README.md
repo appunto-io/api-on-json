@@ -22,10 +22,17 @@ The library is structured around three main classes: `Server`, `ApiModel` and `D
 
 `DataModel` is used for the particular (yet common) case where you need to create a API that access data stored in a DB.
 
-## Example
+## Other libraries
+
+- Extensible
+- upload-models
+- accounts-models
+- aoj-admin
+
+## Full features example
 ```js
-const { DataModel } = require('@appunto/rigatoni');
-const { Mongo }     = require('@appunto/rigatoni');
+const { DataModel } = require('@appunto/api-on-json');
+const { Mongo }     = require('@appunto/api-on-json');
 
 const mongoUri = 'http://localhost:27017';
 
@@ -55,7 +62,14 @@ const server = apiModel.toServer(env);
 await server.listen(8081);
 ```
 
-# Library API
+
+# Recipes
+
+## Simple MongoDB Api
+
+## Extending Api
+
+# References
 
 # Server
 

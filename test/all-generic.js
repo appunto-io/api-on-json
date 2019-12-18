@@ -1,18 +1,12 @@
-const mongoose              = require('mongoose');
 const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const jwt                   = require('jsonwebtoken');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const { Mongo, Rethink }    = require('./databases/databases.js');
-
-const { DataModel }         = require('./index.js');
 
 
 const expect = chai.expect;
 chai.use(chaiHTTP);
 
 
-// TBD
 const jwtSecret = "--default-jwt-secret--";
 
 const token = 'Bearer ' + jwt.sign({ roles: ['admin'] }, jwtSecret);
@@ -419,7 +413,6 @@ async function databaseTestSuite() {
   });
 }
 
-
 const dataModels = {
   'cars': {
     schema: {
@@ -456,86 +449,8 @@ const dataModels = {
   }
 };
 
-describe('api-on-json test suite', async function() {
-
-  /**********************************************
-  Initialization of an in-memory MongoDB server
-  that backs the API to be tested
-  */
-  describe('api-on-json test suite mongoose', async function() {
-    let db;
-    let mongoServer;
-
-    const options = { useNewUrlParser : true,
-                      useUnifiedTopology: true,
-                      useFindAndModify: false};
-    before((done) => {
-      mongoServer = new MongoMemoryServer();
-      mongoServer
-      .getConnectionString()
-      .then((mongoUri) => {
-        db = new Mongo(mongoUri, options);
-        return db.connect();
-      })
-      .then(async() => {
-        const dataModel = new DataModel(dataModels);
-
-        await db.connect();
-        await db.init(dataModel);
-
-        const opt = {
-          realTime: false
-        };
-
-        const apiModel  = dataModel.toApi(opt);
-
-        const env = {
-          db,
-          jwtSecret
-        }
-
-        this.server  = apiModel.toServer(env);
-        await this.server.listen(3000);
-        done()});
-    });
-    after(async () => {
-      await this.server.close();
-      await mongoose.disconnect();
-      await mongoServer.stop();
-    });
-
-    databaseTestSuite();
-  });
-
-  describe('api-on-json test suite rethinkdb', async function() {
-    let db = new Rethink("localhost", "28015", "db");
-
-    const opt = {
-      realTime: false
-    };
-
-    before(async() => {
-      const dataModel = new DataModel(dataModels);
-
-      await db.connect();
-      if (db.database) {
-        await db.init(dataModel);
-        const apiModel = dataModel.toApi(opt);
-
-        const env = {
-          db,
-          jwtSecret
-        }
-
-        this.server2 = apiModel.toServer(env);
-        await this.server2.listen(3000);
-      }
-    });
-
-    after(async () => {
-      await this.server2.close();
-    });
-
-    databaseTestSuite();
-  });
-});
+module.exports = {
+  databaseTestSuite,
+  dataModels,
+  jwtSecret
+}
