@@ -1,3 +1,5 @@
+const isNumber = require('lodash.isnumber');
+
 async function dataModelToRethink(model, database) {
   const models = {};
   const tableList = await database.tableList().run();
@@ -28,28 +30,84 @@ async function dataModelToRethink(model, database) {
   return models;
 }
 
-function findType(data, field) {
-  const value = data[field];
+function findType(data, field, fieldOptions = {}) {
+  if (fieldOptions.type.toLowerCase() !== 'string') {
+    const value = data[field];
 
-  if (Array.isArray(value)) {
-    return findType(value, 0);
+    if (!value) {
+      return 'undefined';
+    }
+
+    if (Array.isArray(value)) {
+      return findType(value, 0, fieldOptions = {});
+    }
+
+    if (isNaN(value) === false) {
+      data[field] = data[field] - 0;
+
+      const {min, max} = fieldOptions;
+
+      if (min && data[field] < min) {
+        let message = `The value for ${field} is below the minimum. Please enter a value greater than ${min}`;
+
+        console.error(message);
+        throw new Error(message);
+      }
+
+      if (max && data[field] > max) {
+        let message = `The value for ${field} is greater than the maximum. Please enter a value lower than ${max}`;
+
+        console.error(message);
+        throw new Error(message);
+      }
+      return 'number';
+    }
+    if (value === 'true' || data[field] === 'false') {
+      data[field] = data[field] === 'true';
+      return 'boolean';
+    }
+    if (value === 'null') {
+      data[field] = null;
+      return 'object';
+    }
   }
 
-  if (isNaN(value) === false) {
-    data[field] = data[field] - 0;
-    return 'number';
+  const {lowercase, uppercase, trim, match, minlength, maxlength} = fieldOptions;
+
+  if (lowercase) {
+    data[field] = data[field].toLowerCase();
   }
-  if (value === 'true' || data[field] === 'false') {
-    data[field] = data[field] === 'true';
-    return 'boolean';
+
+  if (uppercase) {
+    data[field] = data[field].toUpperCase();
   }
-  if (value === 'null') {
-    data[field] = null;
-    return 'object';
+
+  if (trim) {
+    data[field] = data[field].trim();
   }
-  if (value === 'undefined') {
-    data[field] = undefined;
-    return 'undefined';
+
+  if (match) {
+    const [regex, message] = match;
+    const test = regex.test(data[field]);
+
+    if (!test) {
+      console.error(message);
+      throw new Error(message);
+    }
+  }
+
+  if (minlength && data[field].length < minlength) {
+    let message = `The string for ${field} is to small. Please enter a string with at least ${minlength} characters`;
+
+    console.error(message);
+    throw new Error(message);
+  }
+
+  if (maxlength && data[field].length > maxlength) {
+    let message = `The string for ${field} is to big. Please enter a string with at most ${maxlength} characters`;
+
+    console.error(message);
+    throw new Error(message);
   }
   return 'string';
 }
@@ -125,9 +183,10 @@ class Rethink {
           type     = type.toLowerCase();
 
           if (fieldName in data) {
-            if (type !== 'string' && type !== 'id' && type != 'mixed' && typeof data[fieldName] !== type) {
-              const dataType = findType(data, fieldName);
+            if (type !== 'id' && type != 'mixed') {
+              const dataType = findType(data, fieldName, fieldOptions);
               if (type !== dataType) {
+                console.log(`zezrze ${data[fieldName]}`)
                 const message = `Bad request: ${fieldName} is expected to be a ${type} and you entered a ${dataType}`;
 
                 console.error(message);

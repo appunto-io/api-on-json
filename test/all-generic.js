@@ -2,7 +2,6 @@ const chai                  = require('chai');
 const chaiHTTP              = require('chai-http');
 const jwt                   = require('jsonwebtoken');
 
-
 const expect = chai.expect;
 chai.use(chaiHTTP);
 
@@ -401,13 +400,64 @@ async function databaseTestSuite() {
       });
     });
 
-    describe('OPTIONS request', async function() {
-      it('custom cors', async function() {
-        const response = await options('users');
 
-        expect(response).to.have.status(204);
-        expect(response.headers['access-control-allow-origin']).to.be.equal('*');
-        expect(response.headers['access-control-allow-methods']).to.be.equal('GET, HEAD, PUT, PATCH, POST, DELETE');
+
+    /********
+    TYPES
+    */
+    describe('Types options', async function() {
+      it('should test min and max and pass', async function() {
+        const response = await post('types', {number: 6});
+
+        expect(response).to.have.status(200);
+        expect(response.body.number).to.be.equal(6);
+      });
+
+      it('should test min and max and fail', async function() {
+        const response = await post('types', {number: 10});
+
+        expect(response).to.have.status(400);
+      });
+
+      it('should test lowercase and pass', async function() {
+        const response = await post('types', {lower: 'LoWer'});
+
+        expect(response).to.have.status(200);
+        expect(response.body.lower).to.be.equal('lower');
+      });
+
+      it('should test uppercase and pass', async function() {
+        const response = await post('types', {upper: 'uppEr'});
+
+        expect(response).to.have.status(200);
+        expect(response.body.upper).to.be.equal('UPPER');
+      });
+
+      it('should test trim and pass', async function() {
+        const response = await post('types', {trim: '     Please need a trim     '});
+
+        expect(response).to.have.status(200);
+        expect(response.body.trim).to.be.equal('Please need a trim');
+      });
+
+      it('should test match and pass', async function() {
+        const response = await post('types', {email: 'good.email@hotmail.com'});
+
+        expect(response).to.have.status(200);
+        expect(response.body.email).to.be.equal('good.email@hotmail.com');
+      });
+
+      it('should test minlength and maxlength and pass', async function() {
+        const response = await post('types', {minmax: 'abcd'});
+
+        expect(response).to.have.status(200);
+        expect(response.body.minmax).to.be.equal('abcd');
+      });
+
+      it('should test minlength and maxlength and fail', async function() {
+        const response = await post('types', {minmax: 'abcdefghijklmno'});
+
+        expect(response).to.have.status(400);
       });
     });
   });
@@ -445,6 +495,16 @@ const dataModels = {
       name : {type: 'String', 'required': true},
       age_in_days: 'Number',
       serial : {type: 'String', 'unique': true}
+    }
+  },
+  'types' : {
+    schema: {
+      number : {type: 'Number', 'min': 0, 'max': 9},
+      lower  : {type: 'String', 'lowercase': true},
+      upper  : {type: 'String', 'uppercase': true},
+      trim   : {type: 'String', 'trim': true},
+      email  : {type: 'String', 'match': [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']},
+      minmax : {type: 'String', 'minlength': 3, 'maxlength': 5}
     }
   }
 };
