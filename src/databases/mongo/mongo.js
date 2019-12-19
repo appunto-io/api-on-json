@@ -145,7 +145,7 @@ class Mongo {
     const Model = await this.getModel(collection);
 
     /* eslint no-unused-vars: 0 */
-    let { page, pageSize, sort, order, cursor, filter, q, f, ...restOfQuery } = query;
+    let { page, pageSize, sort, order, cursor, q, f, ...restOfQuery } = query;
 
     page       = page * 1     || 0;
     pageSize   = pageSize * 1 || 30;

@@ -36,17 +36,42 @@ const { Mongo }     = require('@appunto/api-on-json');
 
 const mongoUri = 'http://localhost:27017';
 
-const connectionOptions = { useNewUrlParser : true ,
-                  useUnifiedTopology: true,
-                  useFindAndModify: false};
+const dataModels = {
+    'cars': {
+      schema: {
+        'brand' : {type : 'String', 'required' : true},
+        'model' : {type: 'String', 'default' : 'Default Model'},
+        'speed' : {type: 'Number', 'min': 0, 'max': 300},
+        'buyable' : {type: 'Boolean'},
+        'constructor_id' : {type : 'Id', collection : 'factories'}
+      },
+      options: {
+        searchableFields: ['brand']
+      }
+    },
+    'apples': {
+      schema: {
+        'color' : {type: 'String'},
+        'friends' : [{type : "String"}]
+      }
+    },
+    'factories': {
+      schema: {
+        'name': {type: "String"},
+        'cars_made': [
+          {'cars_id': {type: 'Id', collection: 'cars'}}
+        ]
+      }
+    }
+};
 
 const db = new Mongo(mongoUri, options);
 
 const opt = {
-  realTime: true
+  realTime: false
 };
 
-const dataModel = new DataModel(/* your dataModel in JSON */);
+const dataModel = new DataModel(dataModels);
 
 await db.connect();
 await db.init(dataModel);
@@ -531,29 +556,27 @@ Specifications can contain:
   - `default` an object of the same type that in `type`, use when no value is set for this field
   - `unique` indicates that this field can't have duplicate value
   - `index` indicates that the field can be used as an index in the database
-  - `sparse`
+
+- For `String`:
+  - `lowercase` apply toLowerCase() to the string value
+  - `uppercase` apply toUpperCase() to the string value
+  - `trim` apply trim() to the string value
+  - `match` add a validator to the string value and a regex
+  - `minlength` add a minimum validator to the string length
+  - `maxlength` add a maximum validator to the string length
 
 
-- For `String` only:
-  - `lowercase`
-  - `uppercase`
-  - `trim`
-  - `match`
-  - `minlength`
-  - `maxlength`
-
-
-- For `Number` only:
+- For `Number`:
   - `min` : indicates the minimum valid number
   - `max` : indicates the maximum valid number
 
 
-- For `Date` only:
+- For `Date`:
   - `min` : indicates the minimum valid date
   - `max` : indicates the maximum valid date
 
 
-- For `Id` only:
+- For `Id`:
   - `collection` : string which indicates the collection in which the id is pointing
 
 
@@ -860,11 +883,6 @@ The class which handles mongoDB Api
 
 ### Example
 ```js
-const options = {
-                  useNewUrlParser : true,
-                  useUnifiedTopology: true,
-                  useFindAndModify: false};
-
 const db = new Mongo(/*mongoUri*/, options);
 ```
 
@@ -876,6 +894,127 @@ The class which handles rethinkDB Api
 ```js
 const db = new Rethink("localhost", "28015", "G");
 ```
+
+## How to create a new database class
+
+Later on, you might want to use your favorite database for your api,
+and if we didn't implement it, you will need to add it yourself!
+
+But don't worry, here is how to do it!
+
+### First Step: Make a constructor
+
+First you will need a constructor to create your db instance
+
+You will need 3 things:
+- all the parameters you need to connect to your db (an url, options ...)
+- a database field where you will put your db object (for mongoDB: mongoose, for rethinkDB: r)
+- a models list we will use it later, this will be the array where all the models used in your api will be
+
+```js
+class YourDB {
+  constructor(url, options) {
+    this.url      = url;
+    this.options  = { ...options, useNewUrlParser : true, useUnifiedTopology : true, useFindAndModify : false};
+    this.database = null;
+    this.models   = [];
+  }
+}
+```
+
+### Second Step: Make a connect method
+
+After that you will need a connect method, called by our library when the dataModel is compiled.
+You should set `this.database` to its value (return by the connection call of the database you are using).
+
+### Third Step: Make an init method
+
+You will also need an init method, called by our library just after connect.
+Here the goal is to setup your database for the dataModel you have created before.
+That means if needed create:
+- tables
+- collection
+- schema
+- etc
+
+### Fourth Step: Create all CRUD actions
+
+The final step and the hardest, you will have to create each of the following callbacks.
+All are required (except for `observe` which handles the realTime).
+
+- `create(collection, data)`
+
+  Your create method is the one called on a POST request to your api.
+
+  You will need to get the model corresponding to the collection first.
+  Then verify that the data you received is according to your model (i.e type, options etc).
+  If all was validate you can then add it to your database.
+  If all went fine, you can return the JSON of the new entry added to your db.
+
+- `remove(collection, id)`
+
+  Your remove method is the one called on a DELETE request to your api.
+
+  You only need to request a deletion of the entry at the given `id` in the database.
+
+- `readOne(collection, id)`
+
+  Your readOne method is the one called on a GET request with an id to your api.
+
+  You need to return the entry at the given `id` in the database.
+
+- `readMany(collection, query)`
+
+  Your readMany method is the one called on a simple GET request or on GET with query request to your api.
+
+  You will first need to parse the query parameter. You will find different object.
+
+  `page` and `pageSize` are used for pagination, the number of page is determined by the number of elements in the db and the pageSize.
+
+  `sort` is a string looking like '`field`,`order`' or an array of those string.
+  The results returned by readMany should be sorted according to those strings,
+  by field and either in descending or ascending `order`(ascending by default).
+
+  `cursor` is used for pagination too, it is the last `id`
+  or a combination of the last `id` and the sorting method used at the previous GET request.
+
+  `q` is used for searching in the db all elements that have a field that match a value.
+  For example all elements that have at least one field starting with 'Tar'. We would get 'Tartine', 'Tarami' etc.
+  Note that you only have to search in the searchableFields, if the user wants to research an other fields he should
+  use the `f` parameter described after.
+
+  `f` allows to have all values between a min and a max, it's an array of a `fieldName`,
+  a `comparator` from this list 'lt, le, gt, ge' and a `val` that will be the bound.
+
+- `update(collection, id, data)`
+
+  Your update method is the one called on a PUT request.
+
+  You will need to get the model corresponding to the collection first.
+  Then verify that the data you received is according to your model (i.e type, options etc).
+  If all was validate, you will have to replace the existing element in the db with the new one.
+  Then return the newly created element.
+
+- `patch(collection, id, data)`
+
+  Your update method is the one called on a PATCH request.
+
+  You will need to get the model corresponding to the collection first.
+  Then verify that the data you received is according to your model (i.e type, options etc).
+  If all was validate, you will have to change the existing element in the db with only the fields in data.
+  Meaning that it should not raise an error if a required field is omit in data,
+  because this field will just keep its previous value
+  Then return the newly created element.
+
+- `observe(collection, query, params, socket, callback)`
+
+  This is the method use to put an observer to your db when you are using the realTime.
+  Note that all database are not compatible with that features.
+  In this method you will have to set up the way your realtime works (for example changefeeds in rethinkDB).
+  Then the callback you will use is here to pair the socket for realTime.
+
+  See observe in `Rethink` class for more information.
+
 
 # Tests
 
