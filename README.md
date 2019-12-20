@@ -110,7 +110,7 @@ Creates a new `Server` instance. In practice you will probably prefer to use `Ap
 ### Example
 
 ```js
-import { Server } from '@appunto/api-on-json';
+const { Server } = require('@appunto/api-on-json');
 
 const apiModel = new ApiModel(/* see ApiModel doc */);
 const environment = {
