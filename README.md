@@ -1,18 +1,19 @@
-# Api On Json
+# API On JSON
 
-# Installation
+Disclaimer : this library was build for and is used by [Appunto](https://www.appunto.io) for its own internal projets. It has bleeding edges. Use at you own risk.
 
-```
-npm install @appunto/api-on-json
-```
 
 # Introduction
 
-Create an API quickly
+*API on JSON* is a (poorly named) Node library that allows the creation of generic REST APIs from a simple JSON configuration file.
 
-## Structures
+The library was initially though to expose simple MongoDB data models through REST APIs. It was designed to use a descriptive rather than imperative approach: basically you describe your MongoDB data structure in a JSON file, the library does the rest.
 
-The idea behind API on JSON is to build an entire API service via a JSON configuration file. JSON files can be used to configure API endpoints and data model.
+It then evolved into a general purpose library that supports real time, custom callbacks, access control, etc.
+
+Disclaimer : JSON configuration files are technically JS files. We still call them JSON because at the beginning of the projets we only used JSON files.
+
+## Concepts
 
 The library is structured around three main classes: `Server`, `ApiModel` and `DataModel`.
 
@@ -20,11 +21,11 @@ The library is structured around three main classes: `Server`, `ApiModel` and `D
 
 `ApiModel` describes the structure of the API. This is passed to the `Server` to create API routes.
 
-`DataModel` is used for the particular (yet common) case where you need to create a API that access data stored in a DB.
+`DataModel` is used for the particular (yet common) case where you need to create a API that access data stored in a DB. This class delegates the actual DB access to an external class that implements the vendor specifics CRUD operations. Two DB classes are available : `MongoDB` and `RethinkDB` (for real time use cases).
 
-## Other libraries
 
-- Extensible
+## Sister libraries
+
 - upload-models
 - accounts-models
 - aoj-admin
@@ -43,23 +44,23 @@ const dataModels = {
         'model' : {type: 'String', 'default' : 'Default Model'},
         'speed' : {type: 'Number', 'min': 0, 'max': 300},
         'buyable' : {type: 'Boolean'},
-        'constructor_id' : {type : 'Id', collection : 'factories'}
+        'constructor_id' : {type : 'Id', collection : 'constructors'}
       },
       options: {
         searchableFields: ['brand']
       }
     },
-    'apples': {
+    'otherTable': {
       schema: {
         'color' : {type: 'String'},
-        'friends' : [{type : "String"}]
+        'whatever' : [{type : 'String'}]
       }
     },
-    'factories': {
+    'constructors': {
       schema: {
         'name': {type: "String"},
-        'cars_made': [
-          {'cars_id': {type: 'Id', collection: 'cars'}}
+        'models': [
+          {'car_id': {type: 'Id', collection: 'cars'}}
         ]
       }
     }
@@ -88,9 +89,18 @@ await server.listen(8081);
 ```
 
 
+# Installation
+
+```
+npm install @appunto/api-on-json
+```
+
+
 # Recipes
 
 ## Simple MongoDB Api
+
+To be documented
 
 ## Extending Api
 
@@ -165,7 +175,7 @@ const model = {
 };
 ```
 
-Each route should begin with a `'/'`.
+Each route shall begin with a `'/'`.
 
 Route can contain :
 

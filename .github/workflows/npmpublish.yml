@@ -18,11 +18,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+          registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: npm run test:mongo
-      - run: |
-          npm config set //registry.stage.appunto.io/:_authToken=$NPM_TOKEN
-          npm publish
+      - run: npm publish
         env:
-          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
-          npm_config_registry: http://registry.stage.appunto.io
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

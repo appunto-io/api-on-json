@@ -8,8 +8,7 @@ const { mergeModels }                        = require('../shared/merge.js')
 const { ApiModel }                           = require('../apimodel/apimodel.js');
 
 class DataModel {
-  constructor(...dataModels)
-  {
+  constructor(...dataModels) {
     this.models = [];
     dataModels.forEach(
       model => {
@@ -17,7 +16,7 @@ class DataModel {
           this.models = [...this.models, ...model.models];
         }
         else {
-          this.models.push(model)
+          this.models.push(model);
         }
       }
     );
