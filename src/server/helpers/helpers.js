@@ -41,7 +41,7 @@ const createAuthHandler = (method, model, environment) => async(request, respons
 
     await response.header('Allow', allowedMethods.join(','));
     await response.status(405).send('Method Not Allowed');
-    return next(false);
+    return;
   }
 
   const { requiresAuth, requiresRoles } = methodAuth;
@@ -76,12 +76,12 @@ const createAuthHandler = (method, model, environment) => async(request, respons
   if (requiresAuth !== false) {
     if (!isAuthenticated) {
       await response.status(401).send('Invalid token');
-      return next(false);
+      return;
     }
 
     if (!testRoles(requiresRoles || [], roles)) {
       await response.status(401).send('Missing required role');
-      return next(false);
+      return;
     }
   }
 
