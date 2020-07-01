@@ -1,0 +1,5 @@
+dev/
+src/
+.eslintrc
+.eslintignore
+.github/
