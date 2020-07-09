@@ -26,31 +26,6 @@ const _convertAPIFieldToMongo = field => {
   }
 };
 
-function findType(data, field) {
-  const value = data[field];
-
-  if (Array.isArray(value)) {
-    return findType(value, 0);
-  }
-
-  if (isNaN(value) === false) {
-    data[field] = data[field] - 0;
-    return 'number';
-  }
-  if (value === 'true' || data[field] === 'false') {
-    data[field] = data[field] === 'true';
-    return 'boolean';
-  }
-  if (value === 'null') {
-    data[field] = null;
-    return 'object';
-  }
-  if (value === 'undefined') {
-    data[field] = undefined;
-    return 'undefined';
-  }
-  return 'string';
-}
 
 class Mongo {
   constructor(url, options) {
@@ -108,7 +83,6 @@ class Mongo {
 
     Model.schema.eachPath(field => {
       if (field in data) {
-        findType(data, field);
         document.set(field, data[field]);
       }
     });
@@ -285,7 +259,6 @@ class Mongo {
 
     Model.schema.eachPath(field => {
       if (field in data) {
-        findType(data, field);
         document[field] = data[field];
       }
     });
@@ -308,7 +281,6 @@ class Mongo {
 
     Model.schema.eachPath(field => {
       if (field in data) {
-        findType(data, field);
         document[field] = data[field];
       }
     });

@@ -38,7 +38,7 @@ describe('api-on-json test suite mongoose', async function() {
       }
 
       this.server  = apiModel.toServer(env);
-      await this.server.listen(3000);
+      await this.server.listen(3003);
       done()});
   });
   after(async () => {

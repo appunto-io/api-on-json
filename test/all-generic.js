@@ -14,53 +14,53 @@ const token = 'Bearer ' + jwt.sign({ roles: ['admin'] }, jwtSecret);
   Generic HTTP requests based on chai HTTP
 */
 async function get(collection) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .get(`/${collection}`)
     .set('Authorization', token);
 }
 
 async function getId(collection, id) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .get(`/${collection}/` + id)
     .set('Authorization', token);
 }
 
 async function query(collection, query) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .get(`/${collection}`)
     .query(query)
     .set('Authorization', token);
 }
 
 async function post(collection, data) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .post(`/${collection}`)
     .set('Authorization', token)
     .send(data);
 }
 
 async function put(collection, id, data) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .put(`/${collection}/` + id)
     .set('Authorization', token)
     .send(data);
 }
 
 async function patch(collection, id, data) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .patch(`/${collection}/` + id)
     .set('Authorization', token)
     .send(data);
 }
 
 async function erase(collection, id) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .delete(`/${collection}/` + id)
     .set('Authorization', token);
 }
 
 async function options(collection) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:3003')
     .options(`/${collection}`)
     .set('Authorization', token);
 }
@@ -368,6 +368,12 @@ async function databaseTestSuite() {
         const response = await put('flowers', createdDocuments[1].id, {name: 'Sunflower', serial: createdDocuments[2].serial});
 
         expect(response).to.have.status(400);
+      });
+
+      it('Should handle null values (bug: null converted to "0")', async function() {
+        const response = await patch('flowers', createdDocuments[4].id, { age_in_days: null} );
+
+        expect(response.body.age_in_days).to.be.null;
       });
     });
 
