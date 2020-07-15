@@ -160,6 +160,21 @@ async function databaseTestSuite() {
 
         expect(response).to.have.status(400);
       });
+
+      it('Should be able to create nested fields', async function() {
+        const response = await post('nested', {
+          level1 : {
+            level1Value : 'val1',
+            level2 : {
+              level2Value : 'val2'
+            }
+          }
+        });
+
+        expect(response).to.have.status(200);
+        expect(response.body.level1.level1Value).to.be.equal('val1');
+        expect(response.body.level1.level2.level2Value).to.be.equal('val2');
+      });
     });
 
 
@@ -204,6 +219,26 @@ async function databaseTestSuite() {
 
         expect(response.body.pagination.itemsCount).to.be.equal(createdDocuments.length);
       });
+
+      it('Should be able to retireve nested fields', async function() {
+        let response = await post('nested', {
+          level1 : {
+            level1Value : 'val1a',
+            level2 : {
+              level2Value : 'val2a'
+            }
+          }
+        });
+
+        expect(response).to.have.status(200);
+
+        response = await getId('nested', response.body.id);
+
+        expect(response).to.have.status(200);
+        expect(response.body.level1.level1Value).to.be.equal('val1a');
+        expect(response.body.level1.level2.level2Value).to.be.equal('val2a');
+      });
+
 
 
       /*******
@@ -375,6 +410,46 @@ async function databaseTestSuite() {
 
         expect(response.body.age_in_days).to.be.null;
       });
+
+      it('Should be able to update nested fields', async function() {
+        let response = await post('nested', {
+          level1 : {
+            level1Value : 'val1b',
+            level2 : {
+              level2Value : 'val2b'
+            }
+          }
+        });
+
+        expect(response).to.have.status(200);
+
+        response = await patch('nested', response.body.id, {level1 : {level2 : { level2Value : 'modified' }}});
+
+        expect(response).to.have.status(200);
+        expect(response.body.level1.level2.level2Value).to.be.equal('modified');
+      });
+
+
+      it('Should be able to replace document with nested fields', async function() {
+        let response = await post('nested', {
+          level1 : {
+            level1Value : 'val1b',
+            level2 : {
+              level2Value : 'val2b'
+            }
+          }
+        });
+
+        expect(response).to.have.status(200);
+
+        const body = response.body;
+        body.level1.level2.level2Value = 'modifiedagain';
+
+        response = await put('nested', response.body.id, body);
+
+        expect(response).to.have.status(200);
+        expect(response.body.level1.level2.level2Value).to.be.equal('modifiedagain');
+      });
     });
 
 
@@ -511,6 +586,16 @@ const dataModels = {
       trim   : {type: 'String', 'trim': true},
       email  : {type: 'String', 'match': [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']},
       minmax : {type: 'String', 'minlength': 3, 'maxlength': 5}
+    }
+  },
+  'nested' : {
+    schema : {
+      level1 : {
+        level1Value : {type : 'String'},
+        level2 : {
+          level2Value : {type : 'String'},
+        }
+      }
     }
   }
 };

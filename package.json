@@ -32,10 +32,12 @@
     "express-query-parser": "^1.0.2",
     "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.1",
+    "lodash.get": "^4.4.2",
     "lodash.kebabcase": "^4.1.1",
     "lodash.mapvalues": "^4.6.0",
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0",
+    "lodash.set": "^4.3.2",
     "mongoose": "^5.7.1",
     "rethinkdbdash": "^2.3.31",
     "socket.io": "^2.3.0"

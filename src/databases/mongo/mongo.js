@@ -1,6 +1,7 @@
 const mongoose                       = require('mongoose');
+const get                            = require('lodash.get');
+const set                            = require('lodash.set');
 const { dataModelToMongoose }        = require('./mongoHelpers.js');
-
 
 /*
 Changes _id to id and removes __v from retrieved documents
@@ -82,8 +83,9 @@ class Mongo {
     const document = new Model();
 
     Model.schema.eachPath(field => {
-      if (field in data) {
-        document.set(field, data[field]);
+      const value = get(data, field);
+      if (typeof(value) !== 'undefined') {
+        document.set(field, value);
       }
     });
 
@@ -258,8 +260,9 @@ class Mongo {
     const document = {};
 
     Model.schema.eachPath(field => {
-      if (field in data) {
-        document[field] = data[field];
+      const value = get(data, field);
+      if (typeof(value) !== 'undefined') {
+        set(document, field, value);
       }
     });
 
@@ -280,8 +283,9 @@ class Mongo {
     const document = {};
 
     Model.schema.eachPath(field => {
-      if (field in data) {
-        document[field] = data[field];
+      const value = get(data, field);
+      if (typeof(value) !== 'undefined') {
+        set(document, field, value);
       }
     });
 
