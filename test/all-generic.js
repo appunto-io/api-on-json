@@ -182,16 +182,17 @@ async function databaseTestSuite() {
     READ
     */
     let createdDocuments;
-    const flowerNames = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
-    const ages        = [ 20,       21,     21,      21,      50,      25,        18,          23,           30];
-    const serials     = [ 'A',      'B',    'C',    'D',     'E',     'F',       'G',         'H',          'I'];
+    const flowerNames  = ['Daisy', 'Rose', 'Lily', 'Tulip', 'Tulip', 'Orchid', 'Carnation', 'Hyacinth', 'Chrysanthemum'];
+    const ages         = [ 20,       21,     21,      21,      50,      25,        18,          23,           30];
+    const serials      = [ 'A',      'B',    'C',    'D',     'E',     'F',       'G',         'H',          'I'];
+    const booleanValue = [ true,     false,  true,   false,   true,    false,     true,         false,       true];
 
     describe('Retrieve elements', async function() {
       before(async function() {
         const responses = [];
 
         for (let index = 0; index < flowerNames.length; index++) {
-          responses[index] = await post('flowers', {name: flowerNames[index], age_in_days: ages[index], serial: serials[index]});
+          responses[index] = await post('flowers', {name: flowerNames[index], age_in_days: ages[index], serial: serials[index], boolean_value : booleanValue[index]});
         }
 
         createdDocuments = responses.map(({body}) => body);
@@ -335,6 +336,61 @@ async function databaseTestSuite() {
         expect(response.body.data[1].name).to.be.equal('Tulip');
         expect(response.body.data[0].age_in_days).to.be.equal(21);
         expect(response.body.data[1].age_in_days).to.be.equal(50);
+      });
+
+      it('Should filter elements by field', async function() {
+        const response = await query('flowers', { name: 'Tulip' });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data.length).to.equal(2);
+        expect(response.body.data[0].name).to.be.equal('Tulip');
+        expect(response.body.data[1].name).to.be.equal('Tulip');
+      });
+
+      it('Should filter elements by fields, values specified in an array', async function() {
+        const response = await query('flowers', { name: 'Tulip,Lily' });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data.length).to.equal(3);
+        expect(response.body.data[0].name).to.be.equal('Lily');
+        expect(response.body.data[1].name).to.be.equal('Tulip');
+        expect(response.body.data[2].name).to.be.equal('Tulip');
+      });
+
+      it('Should filter elements by fields, numbers', async function() {
+        const response = await query('flowers', { age_in_days: 21 });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data.length).to.equal(3);
+        expect(response.body.data[0].name).to.be.equal('Rose');
+        expect(response.body.data[1].name).to.be.equal('Lily');
+        expect(response.body.data[2].name).to.be.equal('Tulip');
+      });
+
+      it('Should filter elements by fields, many numbers', async function() {
+        const response = await query('flowers', { age_in_days: '20,21' });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data.length).to.equal(4);
+        expect(response.body.data[0].name).to.be.equal('Daisy');
+        expect(response.body.data[1].name).to.be.equal('Rose');
+        expect(response.body.data[2].name).to.be.equal('Lily');
+        expect(response.body.data[3].name).to.be.equal('Tulip');
+      });
+
+      it('Should filter elements by fields, boolean', async function() {
+        const response = await query('flowers', { boolean_value: true });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data.length).to.equal(5);
+        expect(response.body.data[0].name).to.be.equal('Daisy');
+        expect(response.body.data[1].name).to.be.equal('Lily');
+        expect(response.body.data[2].name).to.be.equal('Tulip');
       });
 
 
@@ -588,7 +644,8 @@ const dataModels = {
     schema : {
       name : {type: 'String', 'required': true},
       age_in_days: 'Number',
-      serial : {type: 'String', 'unique': true}
+      serial : {type: 'String', 'unique': true},
+      boolean_value : {type : 'Boolean'},
     }
   },
   'types' : {

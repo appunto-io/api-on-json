@@ -165,11 +165,17 @@ class Mongo {
     }
     else {
       Object.entries(restOfQuery).forEach(([field, values]) => {
-          const valuesArray = values.split(',').map(val => decodeURIComponent(val));
-          const mongoValue  = valuesArray.length > 1 ?
-            {'$in' : valuesArray} :
-            decodeURIComponent(values);
-            mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
+          let mongoValue = decodeURIComponent(values);
+
+          if(typeof values === 'string') {
+            const valuesArray = values.split(',').map(val => decodeURIComponent(val));
+
+            if(valuesArray.length > 1) {
+              mongoValue = {'$in' : valuesArray};
+            }
+          }
+
+          mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
       });
     }
 
