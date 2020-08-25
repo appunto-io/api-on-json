@@ -225,6 +225,11 @@ class Mongo {
         });
       }
     }
+    else if((sort + '').includes(',')) {
+      var [ elem_sort, elem_order ] = sort.split(',');
+      elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
+      sortingBy.push([elem_sort, elem_order]);
+    }
     else {
       sortingBy.push([sort, order]);
     }

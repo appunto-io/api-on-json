@@ -300,7 +300,7 @@ async function databaseTestSuite() {
         expect(response.body.data[2].name).to.be.equal('Daisy');
       });
 
-      it('Should get the element in descandant order', async function() {
+      it('Should get the element in descending order', async function() {
         const response = await query('flowers', { sort: 'name', order: 'desc' });
 
         expect(response).to.have.status(200);
@@ -308,6 +308,19 @@ async function databaseTestSuite() {
         expect(response.body.data[0].name).to.be.equal('Tulip');
         expect(response.body.data[1].name).to.be.equal('Tulip');
         expect(response.body.data[2].name).to.be.equal('Rose');
+      });
+
+      it('Should sort element with syntax array event if only one sort value is specified', async function() {
+        const value1 = 'age_in_days,asc';
+
+        const response = await query('flowers', { sort: value1 });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data[0].name).to.be.equal('Carnation');
+        expect(response.body.data[1].name).to.be.equal('Daisy');
+        expect(response.body.data[0].age_in_days).to.be.equal(18);
+        expect(response.body.data[1].age_in_days).to.be.equal(20);
       });
 
       it('Should get the element with highest value1 but lower value2', async function() {
