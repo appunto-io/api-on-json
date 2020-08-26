@@ -338,6 +338,17 @@ async function databaseTestSuite() {
         expect(response.body.data[1].age_in_days).to.be.equal(50);
       });
 
+      it('Should not fail when sort specifications are wrong', async function() {
+        const response = await query('flowers', { sort: ',' });
+
+        expect(response).to.have.status(200);
+        expect(response.body.data).to.be.an('array');
+        expect(response.body.data[0].name).to.be.equal('Daisy');
+        expect(response.body.data[1].name).to.be.equal('Rose');
+        expect(response.body.data[2].name).to.be.equal('Lily');
+      });
+
+
       it('Should filter elements by field', async function() {
         const response = await query('flowers', { name: 'Tulip' });
 

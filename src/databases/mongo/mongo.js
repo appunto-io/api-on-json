@@ -223,7 +223,7 @@ class Mongo {
     if (Array.isArray(sort)) {
       for (let i = 0; i < sort.length; i = i + 1) {
         var [ elem_sort, elem_order ] = sort[i].split(',');
-        elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
+        elem_order = (elem_order + '').toLowerCase() === 'desc' ? '-1' : '1';
         Model.schema.eachPath(field => {
           if (elem_sort === field) {
             sortingBy.push([elem_sort, elem_order]);
@@ -231,14 +231,26 @@ class Mongo {
         });
       }
     }
-    else if((sort + '').includes(',')) {
-      var [ elem_sort, elem_order ] = sort.split(',');
-      elem_order = (elem_order + '').toLowerCase() === 'desc' ? 'desc' : 'asc';
-      sortingBy.push([elem_sort, elem_order]);
-    }
     else {
-      sortingBy.push([sort, order]);
+      let elem_sort, elem_order;
+
+      if((sort + '').includes(',')) {
+        elem_order = (elem_order + '').toLowerCase() === 'desc' ? '-1' : '1';
+        [ elem_sort, elem_order ] = sort.split(',');
+      }
+      else {
+        elem_sort  = sort;
+        elem_order = order;
+      }
+
+      Model.schema.eachPath(field => {
+        if (elem_sort === field) {
+          sortingBy.push([elem_sort, elem_order]);
+        }
+      });
     }
+
+    console.log(sortingBy);
 
     const documents = await Model.find(mongoQuery)
       .sort(sortingBy)
