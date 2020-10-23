@@ -44,7 +44,7 @@ const createAuthHandler = (method, model, environment) => async(request, respons
     return;
   }
 
-  const { requiresAuth, requiresRoles } = methodAuth;
+  const { requiresAuth, requiresRoles, policies = [] } = methodAuth;
 
   /*
   Take JWT token, validate it and extract payload
@@ -97,6 +97,65 @@ const createAuthHandler = (method, model, environment) => async(request, respons
     accountId,
     roles
   };
+
+
+  /*
+    It's now time to check if custom policies are satified
+  */
+
+  const policiesChain = policies.reduceRight(
+    (next, policy) => async (meta) => {
+      const flow = {
+        continue : () => next(meta),
+        stop     : (status, data) => {
+          meta.response.status = status;
+          return ({satisfied : false, reason : data});
+        }
+      };
+
+      try {
+        return await policy(flow, meta);
+      }
+      catch (error) {
+        console.error(
+          `createAuthHandler(): The following exception occurred during execution of custom policy: ${error}`
+        );
+
+        meta.response.status = 500;
+        return ({satisfied : false});
+      }
+    },
+    () => ({satisfied : true})
+  );
+
+  const req = {
+    params : request.params,
+    query  : request.query,
+    body   : request.body,
+    native : request
+  };
+
+  const res = {
+    status  : 200,
+    headers : {},
+    sendRaw : false,
+    native  : response
+  };
+
+  const policiesValidation = await policiesChain({
+    auth     : request.authorization,
+    request  : req,
+    response : res,
+    environment
+  });
+
+  if(!policiesValidation.satisfied) {
+    await response.set(res.headers);
+    console.log(policiesValidation.reason);
+    await response.status(res.status).send(policiesValidation.reason);
+    return;
+  }
+
   return next();
 };
 
@@ -203,7 +262,7 @@ const createHandlersChain = (method, model, environment) => {
       await response.sendRaw(res.status, data);
     }
     else {
-        await response.status(res.status).send(data);
+      await response.status(res.status).send(data);
     }
 
     return next();
@@ -355,5 +414,4 @@ const createServer = (apiModel, environment, serv) => {
 
 module.exports = {
   createServer,
-  createAuthHandler
 };

@@ -1,5 +1,4 @@
 const { keysMap, onUndefined } = require('./helpers');
-const { createAuthHandler }    = require('../../server/helpers/helpers.js');
 
 /*
 Methods list
@@ -8,7 +7,7 @@ const methods      = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'
 const readMethods  = ['GET', 'HEAD', 'OPTIONS', 'realTime'];
 const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
-const defaultRequirements = {requiresAuth : true, requiresRoles : false, policies : [createAuthHandler]};
+const defaultRequirements = {requiresAuth : true, requiresRoles : false, policies : []};
 const defaultAuth         = keysMap(methods, () => defaultRequirements);
 const defaultCors = {
   origin               : "*",
@@ -22,19 +21,13 @@ const compileRequestRequirements = (requirements) => {
     return false;
   }
   else if (requirements === true) {
-    return {requiresAuth : false, requiresRoles : false, policies : [createAuthHandler]};
+    return {requiresAuth : false, requiresRoles : false, policies : []};
   }
   else if (typeof requirements === 'object') {
-    var policies = [createAuthHandler];
-
-    if (requirements.policies) {
-      policies = requirements.policies.includes(createAuthHandler) ? requirements.policies : [createAuthHandler, ...requirements.policies];
-    }
-
     return {
       requiresAuth  : onUndefined(requirements.requiresAuth, true),
       requiresRoles : onUndefined(requirements.requiresRoles, false),
-      policies
+      policies      : onUndefined(requirements.policies, [])
     };
   }
 

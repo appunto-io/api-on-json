@@ -6,7 +6,7 @@ const { ApiModel } = require('../index.js');
 const expect = chai.expect;
 chai.use(chaiHTTP);
 
-
+const PORT = 8321;
 // TBD
 const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.1Yv6_KkkdfizAkirOLkPh_xnFGu8B_003xZvu_YxgFY';
 
@@ -14,40 +14,40 @@ const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3O
   Generic HTTP requests based on chai HTTP
 */
 async function get(collection) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:'+PORT)
     .get(`/${collection}`)
     .set('Authorization', token);
 }
 
 async function getId(collection, id) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:'+PORT)
     .get(`/${collection}/` + id)
     .set('Authorization', token);
 }
 
 async function post(collection, data) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:'+PORT)
     .post(`/${collection}`)
     .set('Authorization', token)
     .send(data);
 }
 
 async function put(collection, id, data) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:'+PORT)
     .put(`/${collection}/` + id)
     .set('Authorization', token)
     .send(data);
 }
 
 async function patch(collection, id, data) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:'+PORT)
     .patch(`/${collection}/` + id)
     .set('Authorization', token)
     .send(data);
 }
 
 async function erase(collection, id) {
-  return chai.request('http://localhost:3000')
+  return chai.request('http://localhost:'+PORT)
     .delete(`/${collection}/` + id)
     .set('Authorization', token);
 }
@@ -86,6 +86,14 @@ function disconnect() {
 
 function message(message) {
   return 'message: ' + message;
+}
+
+function failingPolicy(flow, meta) {
+  return flow.stop(401, {error : 'fail'});
+}
+
+function successfulPolicy(flow, meta) {
+  return flow.continue(meta);
 }
 
 const apiModel = {
@@ -154,6 +162,16 @@ const apiModel = {
       "fields": {}
     }
   },
+  "/policies": {
+    "handlers": {
+      "GET"    : [get_many],
+      "POST"   : [create],
+    },
+    "auth": {
+      "GET" : { "requiresAuth": true, "requiresRoles": false, policies : [successfulPolicy, failingPolicy, successfulPolicy] },
+      "POST" : { "requiresAuth": true, "requiresRoles": false, policies : [successfulPolicy, successfulPolicy] },
+    }
+  },
   "hasRealtime": true
 };
 
@@ -168,7 +186,7 @@ describe('realTime test suite', async function() {
 
 
     this.server  = api.toServer(env);
-    await this.server.listen(3000);
+    await this.server.listen(PORT);
   });
 
   after(async () => {
@@ -177,8 +195,8 @@ describe('realTime test suite', async function() {
 
   it('Testing get route', async function() {
     const response = await get('cars');
-    console.log(response);
     expect(response.body.data).to.be.equal('getMany');
+
   });
 
   it('Testing get id', async function() {
@@ -205,4 +223,15 @@ describe('realTime test suite', async function() {
     const response = await erase('id');
     expect(response.status).to.to.be.equal(404);
   });
+
+  it('Should stop on unsatisfied policy', async function() {
+    const response = await get('policies');
+    expect(response.status).to.be.equal(401);
+    expect(response.body.error).to.be.equal('fail');
+  })
+
+  it('Should not fail when policies are satisfied', async function() {
+    const response = await post('policies');
+    expect(response.status).to.be.equal(200);
+  })
 });
