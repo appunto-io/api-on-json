@@ -258,7 +258,7 @@ class Mongo {
       .limit(pageSize);
 
     const results = documents.map(document => _convertDocumentToObject(document));
-    const count = await Model.countDocuments();
+    const count = await Model.countDocuments(mongoQuery);
     var last = results.length > 0 ? results[results.length - 1].id : '';
 
     if (sort) {
