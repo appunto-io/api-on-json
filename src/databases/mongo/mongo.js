@@ -136,6 +136,46 @@ class Mongo {
 
     let mongoQuery = {};
 
+    if (q) {
+      const searchArray = [];
+      Object.entries(Model.schema.obj).forEach(([fieldName, fieldDef]) => {
+        if (fieldDef.type === 'String') {
+            searchArray.push({[fieldName]: {$regex: `.*${q}.*`, $options: 'i'}});
+          }
+      });
+      mongoQuery = {...mongoQuery, $or: searchArray};
+    }
+
+    if (f) {
+      const comparators = ['gt', 'ge', 'lt', 'le'];
+      const filterQuery = {};
+
+      f.forEach(elem => {
+        let [fieldName, comparator, val, ...restOfFilter] = elem.split(delimiter);
+
+        if (fieldName in Model.schema.obj) {
+          if (!filterQuery[fieldName]) {
+            filterQuery[fieldName] = {};
+          }
+          if (comparators.includes(comparator) && val) {
+            if (comparator === 'ge') {
+              comparator = 'gte';
+            }
+            if (comparator === 'le') {
+              comparator = 'lte'
+            }
+            comparator = '$' + comparator;
+            filterQuery[fieldName][comparator] = val;
+          }
+        }
+      });
+
+      mongoQuery = {...mongoQuery, ...filterQuery};
+    }
+
+    // Parameters used to count object, without cursor pagination
+    let countMongoQuery = {...mongoQuery};
+
     if (cursor) {
       if (cursor.includes(delimiter)) {
         const [ fieldSort_encoded, nextSort_encoded, nextId ] = cursor.split(delimiter);
@@ -177,44 +217,10 @@ class Mongo {
 
           mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
       });
+
+      countMongoQuery = {...mongoQuery};
     }
 
-    if (q) {
-      const searchArray = [];
-      Object.entries(Model.schema.obj).forEach(([fieldName, fieldDef]) => {
-        if (fieldDef.type === 'String') {
-            searchArray.push({[fieldName]: {$regex: `.*${q}.*`, $options: 'i'}});
-          }
-      });
-      mongoQuery = {...mongoQuery, $or: searchArray};
-    }
-
-    if (f) {
-      const comparators = ['gt', 'ge', 'lt', 'le'];
-      const filterQuery = {};
-
-      f.forEach(elem => {
-        let [fieldName, comparator, val, ...restOfFilter] = elem.split(delimiter);
-
-        if (fieldName in Model.schema.obj) {
-          if (!filterQuery[fieldName]) {
-            filterQuery[fieldName] = {};
-          }
-          if (comparators.includes(comparator) && val) {
-            if (comparator === 'ge') {
-              comparator = 'gte';
-            }
-            if (comparator === 'le') {
-              comparator = 'lte'
-            }
-            comparator = '$' + comparator;
-            filterQuery[fieldName][comparator] = val;
-          }
-        }
-      });
-
-      mongoQuery = {...mongoQuery, ...filterQuery};
-    }
 
     /*
       If sorting in the db the secondary sorting is always id_
@@ -250,15 +256,13 @@ class Mongo {
       });
     }
 
-    console.log(sortingBy);
-
     const documents = await Model.find(mongoQuery)
       .sort(sortingBy)
       .skip(page * pageSize)
       .limit(pageSize);
 
     const results = documents.map(document => _convertDocumentToObject(document));
-    const count = await Model.countDocuments(mongoQuery);
+    const count = await Model.countDocuments(countMongoQuery);
     var last = results.length > 0 ? results[results.length - 1].id : '';
 
     if (sort) {
