@@ -175,6 +175,26 @@ async function databaseTestSuite() {
         expect(response.body.level1.level1Value).to.be.equal('val1');
         expect(response.body.level1.level2.level2Value).to.be.equal('val2');
       });
+
+      it('Should be able to create nested arrays fields', async function() {
+        const response = await post('nested-array', {
+          field : [{
+            key : 'k1',
+            value : 'v1'
+          }, {
+            key : 'k2',
+            value : 'v2'
+          }]
+        });
+
+        expect(response).to.have.status(200);
+        expect(response.body.field.length).to.be.equal(2);
+        expect(response.body.field[0].key).to.be.equal('k1');
+        expect(response.body.field[0].value).to.be.equal('v1');
+        expect(response.body.field[1].key).to.be.equal('k2');
+        expect(response.body.field[1].value).to.be.equal('v2');
+      });
+
     });
 
 
@@ -677,6 +697,11 @@ const dataModels = {
           level2Value : {type : 'String'},
         }
       }
+    }
+  },
+  'nestedArray' : {
+    schema : {
+      field : [{key : 'String', value : 'String'}]
     }
   }
 };
