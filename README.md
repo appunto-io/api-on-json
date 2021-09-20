@@ -1,11 +1,11 @@
 # API On JSON
 
-Disclaimer : this library was build for and is used by [Appunto](https://www.appunto.io) for its own internal projets. It has bleeding edges. Use at you own risk.
+This library was build for and is used by [Appunto](https://www.appunto.io) for its own internal projets.
 
 
 # Introduction
 
-*API on JSON* is a (poorly named) Node library that allows the creation of generic REST APIs from a simple JSON configuration file.
+*API on JSON* is a Node library that allows the creation of generic REST APIs from a simple JSON configuration file.
 
 The library was initially though to expose simple MongoDB data models through REST APIs. It was designed to use a descriptive rather than imperative approach: basically you describe your MongoDB data structure in a JSON file, the library does the rest.
 
