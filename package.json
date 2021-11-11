@@ -1,6 +1,6 @@
 {
   "name": "@appunto/api-on-json",
-  "version": "0.2.3",
+  "version": "0.2.4-0",
   "description": "API generator",
   "main": "src/index.js",
   "types": "types/index.d.ts",
@@ -52,4 +52,3 @@
     "mongodb-memory-server": "^5.2.3"
   }
 }
-
