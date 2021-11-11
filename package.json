@@ -3,6 +3,7 @@
   "version": "0.2.3",
   "description": "API generator",
   "main": "src/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "test": "mocha './{,!(node_modules)/**/}*.test.js' --timeout 50000 --exit",
     "test:mongo": "mocha './**/*.mongo.test.js' --timeout 50000 --exit",
@@ -51,3 +52,4 @@
     "mongodb-memory-server": "^5.2.3"
   }
 }
+
