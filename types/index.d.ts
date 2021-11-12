@@ -1,37 +1,37 @@
 /*****************************************
  * Data model
  */
-export type DataModelDeclaration = {
+export declare type DataModelDeclaration = {
   [collectionName : string] : Collection
 }
 
-export type Collection = {
+export declare type Collection = {
   schema : CollectionSchema;
   options ?: CollectionOptions;
 }
 
-export type CollectionOptions = {
+export declare type CollectionOptions = {
   [optionName : string] : unknown;
 }
 
-export type CollectionSchema = {
+export declare type CollectionSchema = {
   [fieldName : string] : Field;
 };
 
-export type Field =
+export declare type Field =
   BasicFieldTypes |
   ExtendedFieldType |
   [Field] |
   {[subfield : string] : Field};
-export type BasicFieldTypes = 'String' | 'Number' | 'Boolean' | 'Date' | 'Id';
-export type ExtendedFieldType = {
+export declare type BasicFieldTypes = 'String' | 'Number' | 'Boolean' | 'Date' | 'Id';
+export declare type ExtendedFieldType = {
   type : BasicFieldTypes,
   required ?: boolean,
   unique ?: boolean,
   default ?: unknown
 }
 
-export class DataModel {
+export declare class DataModel {
   constructor(...dataModels : DataModel[] | DataModelDeclaration[]);
   get() : DataModelDeclaration;
   addModel(...dataModels : DataModel[] | DataModelDeclaration[]);
@@ -51,54 +51,54 @@ export class DataModel {
  * Api model
  */
 
-export type ApiModelDeclaration = {
+export declare type ApiModelDeclaration = {
   auth ?: Auth;
   handlers ?: HandlersDeclaration;
   filters ?: HandlersDeclaration;
   policies ?: PoliciesDeclaration;
 } | NestedApiModelDeclaration;
 
-export type NestedApiModelDeclaration = {
+export declare type NestedApiModelDeclaration = {
   [endpointName : Route]: ApiModelDeclaration;
 }
 
-export type Route = `/${string}`;
+export declare type Route = `/${string}`;
 
-export type Auth = {
+export declare type Auth = {
   [method in Method] : boolean | {requiresAuth ?: boolean, requiresRoles ?: string[]}
 };
 
-export type HandlersDeclaration = {
+export declare type HandlersDeclaration = {
   [method in Method] : Handler[]
 };
 
-export type PoliciesDeclaration = {
+export declare type PoliciesDeclaration = {
   [method in Method] : Policy[]
 }
 
-export type Method = 'GET' | 'OPTIONS' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'read' | 'write';
+export declare type Method = 'GET' | 'OPTIONS' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'read' | 'write';
 
-export type Handler = (data : unknown, flow : HandlerFlow, meta : Meta) => unknown;
-export type Policy = (flow : PolicyFlow, meta : Meta) => PolicyResult
+export declare type Handler = (data : unknown, flow : HandlerFlow, meta : Meta) => unknown;
+export declare type Policy = (flow : PolicyFlow, meta : Meta) => PolicyResult
 
-export type HandlerFlow = {
+export declare type HandlerFlow = {
   continue : (data : unknown) => unknown,
   stop  : (status : number, data : unknown) => unknown
 }
-export type PolicyFlow = {
+export declare type PolicyFlow = {
   continue : () => unknown,
   stop  : (status : number, data : unknown) => PolicyResult
 }
-export type PolicyResult = {
+export declare type PolicyResult = {
   satisfied : boolean,
   reason : unknown
 };
 
-export type Meta = {
+export declare type Meta = {
   [key : string] : any
 }
 
-export class ApiModel {
+export declare class ApiModel {
   constructor(...apiModels : ApiModel[] | ApiModelDeclaration[]);
   get() : ApiModelDeclaration;
   addModel(...apiModels : ApiModel[] | ApiModelDeclaration[]) : ApiModel;
@@ -116,14 +116,14 @@ export class ApiModel {
  * Server
  */
 
-export class Server {
+export declare class Server {
   server : unknown;
   constructor(apiModel : ApiModel, env : Environment);
   listen(port : number) : Promise<void>;
   close() : void;
 }
 
-export type Environment = {
+export declare type Environment = {
   [varName : string] : unknown;
 }
 
@@ -132,7 +132,7 @@ export type Environment = {
  * Databases
  */
 
-export class Database {
+export declare class Database {
   database : any;
 
   constructor(url : string, options ?: DatabaseOptions);
@@ -149,18 +149,18 @@ export class Database {
   observe() : Promise<Database>;
 }
 
-export type DatabaseOptions = {
+export declare type DatabaseOptions = {
   [key : string] : unknown
 };
 
-export type Record = {
+export declare type Record = {
   id ?: Identifier,
   [field : string] : unknown
 };
 
-export type Identifier = string;
+export declare type Identifier = string;
 
-export type Query = {
+export declare type Query = {
   page ?: number;
   pageSize ?: number;
   sort ?: string;
@@ -171,10 +171,10 @@ export type Query = {
   [field : string] : unknown;
 }
 
-export type QueryFilter = `${string};${'gt' | 'ge' | 'lt'| 'le'};${string}`;
+export declare type QueryFilter = `${string};${'gt' | 'ge' | 'lt'| 'le'};${string}`;
 
-export type SortOrder = 'ASC' | 'asc' | 'DESC' | 'desc' | 1 | '1' | -1 | '-1';
+export declare type SortOrder = 'ASC' | 'asc' | 'DESC' | 'desc' | 1 | '1' | -1 | '-1';
 
 
-export class Mongo extends Database {}
+export declare class Mongo extends Database {}
 
