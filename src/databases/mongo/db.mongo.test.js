@@ -17,7 +17,8 @@ const carSchema = new mongoose.Schema({
 
 const arrayFieldSchema = new mongoose.Schema({
   field1 : [{type : 'String'}],
-  field2 : {type : 'String'}
+  field2 : {type : 'String'},
+  field3 : {type : 'String'}
 });
 
 /**********************************************
@@ -46,11 +47,11 @@ describe('mongo database class test suite', async function() {
       await db.database.model('ArrayField', arrayFieldSchema);
     })
     .then(async () => {
-      const firstDoc = await db.database.models.ArrayField.create({field2 : '1'})
+      const firstDoc = await db.database.models.ArrayField.create({field2 : '1', field3 : '-'})
       await db.database.models.ArrayField.update({_id : firstDoc._id}, {$unset : {field1 : 1}})
-      await db.database.models.ArrayField.create({field1 : null, field2 : '2'})
-      await db.database.models.ArrayField.create({field1 : [], field2 : '3'})
-      await db.database.models.ArrayField.create({field1 : ['test1'], field2 : '4'})
+      await db.database.models.ArrayField.create({field1 : null, field2 : '2', field3 : null})
+      await db.database.models.ArrayField.create({field1 : [], field2 : '3', field3 : null})
+      await db.database.models.ArrayField.create({field1 : ['test1'], field2 : '4', field3 : '-'})
     })
     .then(async () => {
       done()
@@ -417,8 +418,26 @@ describe('mongo database class test suite', async function() {
       expect(!!documents.find(({field2}) => field2 === '2')).to.be.true;
       expect(!!documents.find(({field2}) => field2 === '3')).to.be.true;
     })
-
   })
+
+  describe('Use low level MongoDB queries', async function() {
+    it.only('readMany should accept complex queries', async function() {
+
+      // Require all elements where both field1 and field3 are both null or empty arrays
+      const response  = await db.readMany('ArrayField', {
+        $and : [
+          {$or : [{field1 : null}, {field1 : []}]},
+          {$or : [{field3 : null}, {field3 : []}]}
+        ]
+      });
+      const documents = response.documents;
+
+      expect(documents.length).to.equal(2);
+      expect(!!documents.find(({field2}) => field2 === '2')).to.be.true;
+      expect(!!documents.find(({field2}) => field2 === '3')).to.be.true;
+    })
+  })
+
 
   /********
   UPDATE

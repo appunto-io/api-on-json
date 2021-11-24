@@ -219,14 +219,21 @@ class Mongo {
     }
     else {
       Object.entries(restOfQuery).forEach(([field, values]) => {
-          let mongoValue = decodeURIComponent(values);
+          let mongoValue;
 
           if(typeof values === 'string') {
-            const valuesArray = values.split(',').map(val => decodeURIComponent(val));
+            const valuesArray = values.split(',');
 
             if(valuesArray.length > 1) {
-              mongoValue = {'$in' : valuesArray};
+              mongoValue = {'$in' : valuesArray.map(val => decodeURIComponent(val))};
             }
+            else {
+              mongoValue = decodeURIComponent(values);
+            }
+          }
+          // query provided by backend call, not  from URL
+          else {
+            mongoValue = values;
           }
 
           mongoQuery[_convertAPIFieldToMongo(field)] = mongoValue;
