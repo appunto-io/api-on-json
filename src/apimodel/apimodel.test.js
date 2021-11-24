@@ -9,14 +9,14 @@ const carsApiModel = {
   security: false,
   '/cars': {
     auth : {
-      "GET"     : {requiresAuth:true, requiresRoles:false},
-      "HEAD"    : {requiresAuth:true, requiresRoles:false},
-      "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-      "POST"    : {requiresAuth:true, requiresRoles:false},
-      "PUT"     : {requiresAuth:true, requiresRoles:false},
-      "PATCH"   : {requiresAuth:true, requiresRoles:false},
-      "DELETE"  : {requiresAuth:true, requiresRoles:false},
-      realTime  : {requiresAuth:true, requiresRoles:false}
+      "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
     },
     fields : {},
     filters : {},
@@ -30,14 +30,14 @@ const carsApiModel = {
     }
   },
   auth : {
-    "GET"     : {requiresAuth:true, requiresRoles:false},
-    "HEAD"    : {requiresAuth:true, requiresRoles:false},
-    "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-    "POST"    : {requiresAuth:true, requiresRoles:false},
-    "PUT"     : {requiresAuth:true, requiresRoles:false},
-    "PATCH"   : {requiresAuth:true, requiresRoles:false},
-    "DELETE"  : {requiresAuth:true, requiresRoles:false},
-    realTime  : {requiresAuth:true, requiresRoles:false}
+    "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+    realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
   },
   fields : {},
   filters : {},
@@ -57,14 +57,14 @@ const appleApiModel = {
   security: false,
   '/apple': {
     auth : {
-      "GET"     : {requiresAuth:true, requiresRoles:false},
-      "HEAD"    : {requiresAuth:true, requiresRoles:false},
-      "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-      "POST"    : {requiresAuth:true, requiresRoles:false},
-      "PUT"     : {requiresAuth:true, requiresRoles:false},
-      "PATCH"   : {requiresAuth:true, requiresRoles:false},
-      "DELETE"  : {requiresAuth:true, requiresRoles:false},
-      realTime  : {requiresAuth:true, requiresRoles:false}
+      "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
     },
     fields : {},
     filters : {},
@@ -78,14 +78,14 @@ const appleApiModel = {
     }
   },
   auth : {
-    "GET"     : {requiresAuth:true, requiresRoles:false},
-    "HEAD"    : {requiresAuth:true, requiresRoles:false},
-    "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-    "POST"    : {requiresAuth:true, requiresRoles:false},
-    "PUT"     : {requiresAuth:true, requiresRoles:false},
-    "PATCH"   : {requiresAuth:true, requiresRoles:false},
-    "DELETE"  : {requiresAuth:true, requiresRoles:false},
-    realTime  : {requiresAuth:true, requiresRoles:false}
+    "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+    realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
   },
   fields : {},
   filters : {},
@@ -104,25 +104,25 @@ const usersApiModel = {
   hasRealtime: false,
   security: false,
   auth : {
-    "GET"     : {requiresAuth:true, requiresRoles:false},
-    "HEAD"    : {requiresAuth:true, requiresRoles:false},
-    "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-    "POST"    : {requiresAuth:true, requiresRoles:false},
-    "PUT"     : {requiresAuth:true, requiresRoles:false},
-    "PATCH"   : {requiresAuth:true, requiresRoles:false},
-    "DELETE"  : {requiresAuth:true, requiresRoles:false},
-    realTime  : {requiresAuth:true, requiresRoles:false}
+    "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+    "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+    realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
   },
   '/cars': {
     auth : {
-      "GET"     : {requiresAuth:true, requiresRoles:false},
-      "HEAD"    : {requiresAuth:true, requiresRoles:false},
-      "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-      "POST"    : {requiresAuth:true, requiresRoles:false},
-      "PUT"     : {requiresAuth:true, requiresRoles:false},
-      "PATCH"   : {requiresAuth:true, requiresRoles:false},
-      "DELETE"  : {requiresAuth:true, requiresRoles:false},
-      realTime  : {requiresAuth:true, requiresRoles:false}
+      "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+      "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+      realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
     },
     fields : {},
     filters : {},
@@ -136,14 +136,14 @@ const usersApiModel = {
     },
     '/users': {
       auth : {
-        "GET"     : {requiresAuth:true, requiresRoles:false},
-        "HEAD"    : {requiresAuth:true, requiresRoles:false},
-        "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-        "POST"    : {requiresAuth:true, requiresRoles:false},
-        "PUT"     : {requiresAuth:true, requiresRoles:false},
-        "PATCH"   : {requiresAuth:true, requiresRoles:false},
-        "DELETE"  : {requiresAuth:true, requiresRoles:false},
-        realTime  : {requiresAuth:true, requiresRoles:false}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
       },
       fields : {},
       filters : {},
@@ -179,14 +179,14 @@ describe('ApiModel test suite', () => {
       hasRealtime: false,
       security: false,
       auth : {
-        "GET"     : {requiresAuth:true, requiresRoles:false},
-        "HEAD"    : {requiresAuth:true, requiresRoles:false},
-        "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-        "POST"    : {requiresAuth:true, requiresRoles:false},
-        "PUT"     : {requiresAuth:true, requiresRoles:false},
-        "PATCH"   : {requiresAuth:true, requiresRoles:false},
-        "DELETE"  : {requiresAuth:true, requiresRoles:false},
-        realTime  : {requiresAuth:true, requiresRoles:false}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
       },
       fields : {},
       filters : {},
@@ -240,14 +240,14 @@ describe('ApiModel test suite', () => {
       hasRealtime: false,
       security: false,
       auth : {
-        "GET"     : {requiresAuth:true, requiresRoles:false},
-        "HEAD"    : {requiresAuth:true, requiresRoles:false},
-        "OPTIONS" : {requiresAuth:true, requiresRoles:false},
-        "POST"    : {requiresAuth:true, requiresRoles:false},
-        "PUT"     : {requiresAuth:true, requiresRoles:false},
-        "PATCH"   : {requiresAuth:true, requiresRoles:false},
-        "DELETE"  : {requiresAuth:true, requiresRoles:false},
-        realTime  : {requiresAuth:true, requiresRoles:false}
+        "GET"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "HEAD"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "OPTIONS" : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "POST"    : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "PUT"     : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "PATCH"   : {requiresAuth:true, requiresRoles:false, policies:[]},
+        "DELETE"  : {requiresAuth:true, requiresRoles:false, policies:[]},
+        realTime  : {requiresAuth:true, requiresRoles:false, policies:[]}
       },
       fields : {},
       filters : {},
@@ -315,14 +315,14 @@ describe('ApiModel test suite', () => {
 
     const compiled = apiModel.get();
     expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
-        "GET"     : {requiresAuth: true, requiresRoles: ['admin']},
-        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin']},
-        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin']},
-        "POST"    : {requiresAuth: true, requiresRoles: ['admin']},
-        "PUT"     : {requiresAuth: true, requiresRoles: ['admin']},
-        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin']},
-        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin']},
-        realTime  : {requiresAuth: true, requiresRoles: ['admin']}
+        "GET"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "POST"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "PUT"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        realTime  : {requiresAuth: true, requiresRoles: ['admin'], policies:[]}
     });
   });
 
@@ -351,14 +351,14 @@ describe('ApiModel test suite', () => {
 
     const compiled = apiModel.get();
     expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
-        "GET"     : {requiresAuth: true, requiresRoles: ['admin']},
-        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin']},
-        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin']},
-        "POST"    : {requiresAuth: true, requiresRoles: ['admin']},
-        "PUT"     : {requiresAuth: true, requiresRoles: ['admin']},
-        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin']},
-        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin']},
-        realTime  : {requiresAuth: true, requiresRoles: ['admin']}
+        "GET"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "POST"    : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "PUT"     : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin'], policies:[]},
+        realTime  : {requiresAuth: true, requiresRoles: ['admin'], policies:[]}
     });
   });
 
@@ -369,14 +369,14 @@ describe('ApiModel test suite', () => {
 
     const compiled = apiModel.get();
     expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
-        "GET"     : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        "POST"    : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        "PUT"     : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin', 'user']},
-        realTime  : {requiresAuth: true, requiresRoles: ['admin', 'user']}
+        "GET"     : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        "POST"    : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        "PUT"     : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]},
+        realTime  : {requiresAuth: true, requiresRoles: ['admin', 'user'], policies:[]}
     });
   });
 
@@ -387,14 +387,14 @@ describe('ApiModel test suite', () => {
 
     const compiled = apiModel.get();
     expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
-        "GET"     : {requiresAuth: true, requiresRoles: false},
-        "HEAD"    : {requiresAuth: true, requiresRoles: false},
-        "OPTIONS" : {requiresAuth: true, requiresRoles: false},
-        "POST"    : {requiresAuth: true, requiresRoles: false},
-        "PUT"     : {requiresAuth: true, requiresRoles: false},
-        "PATCH"   : {requiresAuth: true, requiresRoles: false},
-        "DELETE"  : {requiresAuth: true, requiresRoles: false},
-        realTime  : {requiresAuth: true, requiresRoles: false}
+        "GET"     : {requiresAuth: true, requiresRoles: false, policies:[]},
+        "HEAD"    : {requiresAuth: true, requiresRoles: false, policies:[]},
+        "OPTIONS" : {requiresAuth: true, requiresRoles: false, policies:[]},
+        "POST"    : {requiresAuth: true, requiresRoles: false, policies:[]},
+        "PUT"     : {requiresAuth: true, requiresRoles: false, policies:[]},
+        "PATCH"   : {requiresAuth: true, requiresRoles: false, policies:[]},
+        "DELETE"  : {requiresAuth: true, requiresRoles: false, policies:[]},
+        realTime  : {requiresAuth: true, requiresRoles: false, policies:[]}
     });
   });
 
@@ -405,14 +405,14 @@ describe('ApiModel test suite', () => {
 
     const compiled = apiModel.get();
     expect(compiled['/cars']['/user']['auth']).to.be.deep.equal({
-        "GET"     : {requiresAuth: false, requiresRoles: false},
-        "HEAD"    : {requiresAuth: false, requiresRoles: false},
-        "OPTIONS" : {requiresAuth: false, requiresRoles: false},
-        "POST"    : {requiresAuth: false, requiresRoles: false},
-        "PUT"     : {requiresAuth: false, requiresRoles: false},
-        "PATCH"   : {requiresAuth: false, requiresRoles: false},
-        "DELETE"  : {requiresAuth: false, requiresRoles: false},
-        realTime  : {requiresAuth: false, requiresRoles: false}
+        "GET"     : {requiresAuth: false, requiresRoles: false, policies:[]},
+        "HEAD"    : {requiresAuth: false, requiresRoles: false, policies:[]},
+        "OPTIONS" : {requiresAuth: false, requiresRoles: false, policies:[]},
+        "POST"    : {requiresAuth: false, requiresRoles: false, policies:[]},
+        "PUT"     : {requiresAuth: false, requiresRoles: false, policies:[]},
+        "PATCH"   : {requiresAuth: false, requiresRoles: false, policies:[]},
+        "DELETE"  : {requiresAuth: false, requiresRoles: false, policies:[]},
+        realTime  : {requiresAuth: false, requiresRoles: false, policies:[]}
     });
   });
 
