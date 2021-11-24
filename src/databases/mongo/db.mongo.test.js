@@ -15,6 +15,11 @@ const carSchema = new mongoose.Schema({
   'serial': {type: 'String', 'unique': true}
 });
 
+const arrayFieldSchema = new mongoose.Schema({
+  field1 : [{type : 'String'}],
+  field2 : {type : 'String'}
+});
+
 /**********************************************
 Initialization of an in-memory MongoDB server
 that backs the API to be tested
@@ -38,8 +43,18 @@ describe('mongo database class test suite', async function() {
     })
     .then(async() => {
       await db.database.model('Car', carSchema);
+      await db.database.model('ArrayField', arrayFieldSchema);
+    })
+    .then(async () => {
+      const firstDoc = await db.database.models.ArrayField.create({field2 : '1'})
+      await db.database.models.ArrayField.update({_id : firstDoc._id}, {$unset : {field1 : 1}})
+      await db.database.models.ArrayField.create({field1 : null, field2 : '2'})
+      await db.database.models.ArrayField.create({field1 : [], field2 : '3'})
+      await db.database.models.ArrayField.create({field1 : ['test1'], field2 : '4'})
+    })
+    .then(async () => {
       done()
-    });
+    })
   });
 
   after(async () => {
@@ -361,6 +376,49 @@ describe('mongo database class test suite', async function() {
       expect(result.documents[3].serial).to.be.equal('C');
     });
   });
+
+  /********
+  FILTER
+  */
+  describe('Filter elements', async function() {
+    it('Should retrieve document where a specified field exists', async function() {
+      const response  = await db.readMany('ArrayField', {f : 'field1;ex'});
+      const documents = response.documents;
+
+      expect(documents.length).to.equal(3);
+      expect(!!documents.find(({field2}) => field2 === '2')).to.be.true;
+      expect(!!documents.find(({field2}) => field2 === '3')).to.be.true;
+      expect(!!documents.find(({field2}) => field2 === '4')).to.be.true;
+    })
+
+    it('Should retrieve document where a specified field does not exist', async function() {
+      const response  = await db.readMany('ArrayField', {f : 'field1;nex'});
+      const documents = response.documents;
+
+      expect(documents.length).to.equal(1);
+      expect(!!documents.find(({field2}) => field2 === '1')).to.be.true;
+    })
+
+    it('Should retrieve document where a specified field does not exist or is null', async function() {
+      const response  = await db.readMany('ArrayField', {f : 'field1;null'});
+      const documents = response.documents;
+
+      expect(documents.length).to.equal(2);
+      expect(!!documents.find(({field2}) => field2 === '1')).to.be.true;
+      expect(!!documents.find(({field2}) => field2 === '2')).to.be.true;
+    })
+
+    it('Should retrieve document where a specified field does not exist, is null or an empty array', async function() {
+      const response  = await db.readMany('ArrayField', {f : 'field1;empty'});
+      const documents = response.documents;
+
+      expect(documents.length).to.equal(3);
+      expect(!!documents.find(({field2}) => field2 === '1')).to.be.true;
+      expect(!!documents.find(({field2}) => field2 === '2')).to.be.true;
+      expect(!!documents.find(({field2}) => field2 === '3')).to.be.true;
+    })
+
+  })
 
   /********
   UPDATE

@@ -154,9 +154,22 @@ class Mongo {
         let [fieldName, comparator, val, ...restOfFilter] = elem.split(delimiter);
 
         if (fieldName in Model.schema.obj) {
-          if (!filterQuery[fieldName]) {
+          if (comparator === 'ex') {
+            mongoQuery = {...mongoQuery, [fieldName] : {"$exists" : true}}
+          }
+          else if (comparator === 'nex') {
+            mongoQuery = {...mongoQuery, [fieldName] : {"$exists" : false}}
+          }
+          else if (comparator === 'null') {
+            mongoQuery = {...mongoQuery, [fieldName] : null}
+          }
+          else if (comparator === 'empty') {
+            mongoQuery = {...mongoQuery, $or : [{[fieldName] : null}, {[fieldName] : []}]}
+          }
+          else if (!filterQuery[fieldName]) {
             filterQuery[fieldName] = {};
           }
+
           if (comparators.includes(comparator) && val) {
             if (comparator === 'ge') {
               comparator = 'gte';
@@ -186,6 +199,7 @@ class Mongo {
         mongoQuery = {
           ...mongoQuery,
           $or: [
+            ...(mongoQuery.$or || []),
             {
               [fieldSort]: { [comp] : nextSort }
             },
