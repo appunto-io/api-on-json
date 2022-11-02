@@ -1,3 +1,5 @@
+import {Request, Response, NextFunction} from 'express';
+
 /*****************************************
  * Data model
  */
@@ -108,9 +110,11 @@ export declare class ApiModel {
   addFilter(route : string, method : Method, filter : Handler) : ApiModel;
   setAuth(route: string, auth : Auth)
   addPolicies(route : string, policies : Policy | Policy[]) : ApiModel;
+  addMiddleware(middleware : Middleware, route ?: string);
   toServer(env : Environment) : Server;
 }
 
+declare type Middleware = (req: Request, res: Response, next: NextFunction) => void;
 
 /*****************************************
  * Server
