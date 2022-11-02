@@ -8,19 +8,9 @@ on:
       - '*version*'
 
 jobs:
-  test:
-    name: Test mongo suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run testsuite
-        run: |
-          npm install
-          npm run test:mongo
   publish-npm:
     name: Publish NPM
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Checkout code
         uses: actions/checkout@master
@@ -30,7 +20,6 @@ jobs:
           node-version: 12
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
-      - run: npm run test:mongo
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
