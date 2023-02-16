@@ -925,7 +925,7 @@ You will need 3 things:
 class YourDB {
   constructor(url, options) {
     this.url      = url;
-    this.options  = { ...options, useNewUrlParser : true, useUnifiedTopology : true, useFindAndModify : false};
+    this.options  = { ...options};
     this.database = null;
     this.models   = [];
   }

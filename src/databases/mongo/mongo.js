@@ -31,7 +31,7 @@ const _convertAPIFieldToMongo = field => {
 class Mongo {
   constructor(url, options) {
     this.url      = url;
-    this.options  = { ...options, useNewUrlParser : true, useUnifiedTopology : true, useFindAndModify : false};
+    this.options  = { ...options};
     this.database = null;
     this.models   = null;
   }

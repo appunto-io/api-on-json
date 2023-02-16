@@ -30,9 +30,7 @@ describe('mongo database class test suite', async function() {
   var db;
   let mongoServer;
 
-  const options = { useNewUrlParser : true,
-                    useUnifiedTopology: true,
-                    useFindAndModify: false};
+  const options = { };
 
   before((done) => {
     mongoServer = new MongoMemoryServer();
