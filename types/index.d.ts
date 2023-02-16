@@ -81,7 +81,7 @@ export declare type PoliciesDeclaration = {
 export declare type Method = 'GET' | 'OPTIONS' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'read' | 'write';
 
 export declare type Handler = (data : unknown, flow : HandlerFlow, meta : Meta) => unknown;
-export declare type Policy = (flow : PolicyFlow, meta : Meta) => PolicyResult
+export declare type Policy = (flow : PolicyFlow, meta : Meta) => PolicyResult | Promise<PolicyResult>;
 
 export declare type HandlerFlow = {
   continue : (data : unknown) => unknown,

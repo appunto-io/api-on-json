@@ -1,6 +1,6 @@
 {
   "name": "@appunto/api-on-json",
-  "version": "0.2.7",
+  "version": "0.3.0-3",
   "description": "API generator",
   "main": "src/index.js",
   "types": "types/index.d.ts",
@@ -39,16 +39,16 @@
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0",
     "lodash.set": "^4.3.2",
-    "mongoose": "^5.7.1",
+    "mongoose": "^6.9.1",
     "rethinkdbdash": "^2.3.31",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "dotenv": "^8.1.0",
     "eslint": "^6.5.1",
     "mocha": "^6.2.0",
-    "chai": "^4.2.0",
-    "chai-http": "^4.3.0",
     "mongodb-memory-server": "^5.2.3"
   }
 }
