@@ -32,7 +32,7 @@
     "express": "^4.17.1",
     "express-query-parser": "1.0.2",
     "helmet": "^3.21.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash.get": "^4.4.2",
     "lodash.kebabcase": "^4.1.1",
     "lodash.mapvalues": "^4.6.0",
