@@ -2,8 +2,6 @@ name: Appunto Publish
 
 on:
   push:
-    branches:
-      # - master
     tags:
       - '*version*'
 
