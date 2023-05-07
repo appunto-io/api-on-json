@@ -10,16 +10,8 @@ const { ApiModel }                           = require('../apimodel/apimodel.js'
 class DataModel {
   constructor(...dataModels) {
     this.models = [];
-    dataModels.forEach(
-      model => {
-        if (model instanceof DataModel) {
-          this.models = [...this.models, ...model.models];
-        }
-        else {
-          this.models.push(model);
-        }
-      }
-    );
+
+    this.addModel(...dataModels);
   }
 
   get() {
@@ -32,7 +24,7 @@ class DataModel {
   addModel(...dataModels) {
     dataModels.forEach(
       model => {
-        if (model instanceof DataModel) {
+        if (Array.isArray(model.models)) {
           this.models = [...this.models, ...model.models];
         }
         else {

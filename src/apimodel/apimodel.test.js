@@ -201,7 +201,7 @@ describe('ApiModel test suite', () => {
     })
   });
 
-  it('addModel', () => {
+  it('addModel with empty models', () => {
     const apiModel = new ApiModel({'/cars' : {}});
 
     expect(apiModel.get()).to.be.deep.equal(carsApiModel);
@@ -210,6 +210,19 @@ describe('ApiModel test suite', () => {
 
     expect(apiModel.get()).to.be.deep.equal({...carsApiModel, ...appleApiModel});
   });
+
+  it('addModel', () => {
+    const nop = () => {};
+    const apiModel = new ApiModel();
+    const model1 = new ApiModel({'/cars' : {handlers : {GET : [nop]}}});
+
+    apiModel.addModel(model1);
+    apiModel.addModel({'/apple' : {handlers : {GET : [nop]}}});
+
+    expect(apiModel.get()['/cars'].handlers['GET']).to.exist;
+    expect(apiModel.get()['/apple'].handlers['GET']).to.exist;
+  });
+
 
   it('addRoute', () => {
     const apiModel = new ApiModel({'/cars' : {}});

@@ -419,7 +419,7 @@ describe('mongo database class test suite', async function() {
   })
 
   describe('Use low level MongoDB queries', async function() {
-    it.only('readMany should accept complex queries', async function() {
+    it('readMany should accept complex queries', async function() {
 
       // Require all elements where both field1 and field3 are both null or empty arrays
       const response  = await db.readMany('ArrayField', {

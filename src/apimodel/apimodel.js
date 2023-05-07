@@ -21,7 +21,7 @@ class ApiModel {
   addModel(...apiModels) {
     apiModels.forEach(
       model => {
-        if (model instanceof ApiModel) {
+        if (model.models && model.middlewares) {
           this.models = [...this.models, ...model.models];
           this.middlewares = [...this.middlewares , ...model.middlewares]
         }
