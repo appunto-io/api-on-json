@@ -138,11 +138,22 @@ class Mongo {
 
     if (q) {
       const searchArray = [];
-      Object.entries(Model.schema.obj).forEach(([fieldName, fieldDef]) => {
-        if (fieldDef.type === 'String') {
-            searchArray.push({[fieldName]: {$regex: `.*${q}.*`, $options: 'i'}});
-          }
-      });
+      const [expression, queryFields] = q.split(delimiter);
+
+      // Handle queries that spcified fields q=Paris;city,address,name
+      if(queryFields) {
+        queryFields.split(',').forEach(queryField => {
+          searchArray.push({[queryField]: {$regex: `.*${expression}.*`, $options: 'i'}});
+        })
+      }
+      // Handle queries with simple text to be searched on all strings
+      else {
+        Object.entries(Model.schema.obj).forEach(([fieldName, fieldDef]) => {
+          if (fieldDef.type === 'String') {
+              searchArray.push({[fieldName]: {$regex: `.*${q}.*`, $options: 'i'}});
+            }
+        });
+      }
       mongoQuery = {...mongoQuery, $or: searchArray};
     }
 
