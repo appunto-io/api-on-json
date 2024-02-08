@@ -354,8 +354,8 @@ const createServer = (apiModel, environment, serv) => {
   /*
   Setting up parsing middleware for request and response
   */
-  apiModel.addMiddleware(bodyParser.json());
-  apiModel.addMiddleware(bodyParser.urlencoded({ extended: true }));
+  apiModel.addMiddleware(bodyParser.json(environment.jsonLimit ? { limit : environment.jsonLimit} : {}));
+  apiModel.addMiddleware(bodyParser.urlencoded({ ...(environment.urlencodedLimit ? { limit : environment.urlencodedLimit} : {}), extended: true }));
   apiModel.addMiddleware(queryParser({ parseNull: true, parseBoolean: true }));
 
   /*
