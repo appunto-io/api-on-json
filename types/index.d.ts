@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction} from 'express';
+import {Request, Response, NextFunction, Application} from 'express';
 
 /*****************************************
  * Data model
@@ -122,6 +122,7 @@ declare type Middleware = (req: Request, res: Response, next: NextFunction) => v
 
 export declare class Server {
   server : unknown;
+  app : Application;
   constructor(apiModel : ApiModel, env : Environment);
   listen(port : number) : Promise<void>;
   close() : void;
