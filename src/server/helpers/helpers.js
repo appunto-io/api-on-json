@@ -246,6 +246,7 @@ const createHandlersChain = (method, model, environment) => {
       status  : 200,
       headers : {},
       sendRaw : false,
+      preventSend : false,
       native  : response
     };
 
@@ -256,13 +257,15 @@ const createHandlersChain = (method, model, environment) => {
       environment
     });
 
-    await response.set(res.headers);
+    if(!res.preventSend) {
+      await response.set(res.headers);
 
-    if (res.sendRaw) {
-      await response.sendRaw(res.status, data);
-    }
-    else {
-      await response.status(res.status).send(data);
+      if (res.sendRaw) {
+        await response.sendRaw(res.status, data);
+      }
+      else {
+        await response.status(res.status).send(data);
+      }
     }
 
     return next();
