@@ -4,6 +4,7 @@ const bodyParser            = require('body-parser');
 const queryParser           = require('express-query-parser')
 const jwt                   = require('jsonwebtoken');
 const cors                  = require('cors');
+const get                   = require('lodash.get');
 
 const { getAllowedMethods } = require('./methods.js');
 const { testRoles }         = require('../../shared/roles.js');
@@ -52,6 +53,8 @@ const createAuthHandler = (method, model, environment) => async(request, respons
   const secret     = environment.jwtSecret || '-- Unknown token - verification side --';
   const authHeader = request.header('Authorization', '') || '';
   const token      = authHeader.startsWith('Bearer ') && authHeader.split(' ')[1] || '';
+  const rolesField = environment.rolesField || 'roles';
+  const accountIdField = environment.accountIdField || 'accountId';
   let payload      = null;
   let accountId    = null;
   let roles        = [];
@@ -59,8 +62,8 @@ const createAuthHandler = (method, model, environment) => async(request, respons
 
   try {
     payload   = jwt.verify(token, secret);
-    accountId = payload.accountId || null;
-    roles     = payload.roles || [];
+    accountId = get(payload, accountIdField, null);
+    roles     = get(payload, rolesField, []);
     isAuthenticated = true;
   }
   catch (error) {
